@@ -1,4 +1,4 @@
-# 🚚 LogistiKita - Documentation Web Service API (V1.0)
+# LogistiKita - Documentation Web Service API (V1.0)
 
 LogistiKita adalah platform logistik modern yang menyediakan layanan backend berbasis RESTful API untuk pengelolaan pengiriman barang, perhitungan biaya otomatis, pelacakan paket secara real-time, dan integrasi sistem pembayaran perbankan (SmartBank).
 
