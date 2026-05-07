@@ -26,13 +26,13 @@ if (loginForm) {
                     Swal.fire({
                         icon: 'success',
                         title: 'Login Berhasil',
-                        text: 'Selamat datang kembali di LogistiKita!',
+                        text: 'Selamat datang kembali di EcoRecycle!',
                         timer: 1500,
                         showConfirmButton: false
                     }).then(() => {
                         // Redirect based on role
                         if (data.data.role === 'admin') window.location.href = 'admin';
-                        else if (data.data.role === 'kurir') window.location.href = 'kurir';
+                        else if (data.data.role === 'kurir') window.location.href = 'collector';
                         else window.location.href = 'dashboard';
                     });
                 } else {

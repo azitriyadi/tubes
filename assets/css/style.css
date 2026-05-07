@@ -2,12 +2,12 @@
 
 :root {
     /* Brand Colors - Premium Corporate Palette */
-    --brand-primary: #C0262D;
-    /* Refined Crimson */
-    --brand-dark: #0F172A;
-    /* Deep Slate Navy */
-    --brand-secondary: #0284C7;
-    /* Professional Sky Blue */
+    --brand-primary: #10B981;
+    /* Emerald Green */
+    --brand-dark: #064E3B;
+    /* Deep Forest Green */
+    --brand-secondary: #0D9488;
+    /* Professional Teal */
 
     /* Neutrals */
     --white: #FFFFFF;
@@ -104,9 +104,9 @@ h5 {
 }
 
 .btn-primary:hover {
-    background-color: #a01f25;
+    background-color: #059669;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(192, 38, 45, 0.3);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
     color: var(--white) !important;
 }
 
@@ -169,11 +169,11 @@ nav .container {
     color: var(--brand-primary);
     font-size: 1.7rem;
     transition: var(--transition-base);
-    background: linear-gradient(135deg, var(--brand-primary), #e63946);
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 2px 4px rgba(192, 38, 45, 0.2));
+    filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.2));
 }
 
 .logo span {
@@ -228,10 +228,11 @@ nav .container {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=2000');
+    background-image: linear-gradient(rgba(6, 78, 59, 0.8), rgba(6, 78, 59, 0.9)), url('../img/ecorecycle_hero.png');
     background-size: cover;
     background-position: center;
     z-index: 0;
+    filter: saturate(1.2);
 }
 
 .hero .container {
@@ -300,13 +301,20 @@ nav .container {
 }
 
 .tool-card {
-    background-color: var(--white);
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
     padding: 40px;
-    border-radius: 16px;
-    box-shadow: var(--shadow-premium);
-    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     display: flex;
     flex-direction: column;
+    transition: var(--transition-base);
+}
+
+.tool-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.15);
 }
 
 .tool-card h3 {
@@ -396,7 +404,7 @@ nav .container {
     outline: none;
     border-color: var(--brand-primary);
     background-color: var(--white);
-    box-shadow: 0 0 0 4px rgba(192, 38, 45, 0.1);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
 }
 
 /* Feature Section */

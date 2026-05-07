@@ -3,7 +3,7 @@
     --sidebar-bg: #0f172a;
     --sidebar-text: #94a3b8;
     --sidebar-hover: #1e293b;
-    --sidebar-active: #e11d48;
+    --sidebar-active: #10b981;
     --bg-body: #f8fafc;
 }
 
@@ -43,7 +43,7 @@ body.portal-page {
 }
 
 .sidebar-logo i {
-    color: var(--brand-red, #e11d48);
+    color: var(--sidebar-active);
     font-size: 2rem;
 }
 
@@ -86,7 +86,7 @@ body.portal-page {
 .sidebar-item.active {
     background: var(--sidebar-active);
     color: white;
-    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .sidebar-footer {
@@ -111,7 +111,7 @@ body.portal-page {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #e11d48, #991b1b);
+    background: linear-gradient(135deg, #10b981, #064e3b);
     color: white;
     font-weight: 900;
 }
@@ -188,3 +188,101 @@ body.portal-page {
     }
 }
 .mobile-header { display: none; }
+.hero-portal-impact {
+    background: linear-gradient(rgba(6, 78, 59, 0.85), rgba(6, 78, 59, 0.95)), url('../img/ecorecycle_bg.png');
+    background-size: cover;
+    background-position: center;
+    padding: 80px 0 120px;
+    color: white;
+}
+
+.hero-portal-impact h1 {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin-bottom: 16px;
+}
+
+.hero-portal-impact p {
+    font-size: 1.1rem;
+    max-width: 600px;
+    opacity: 0.9;
+}
+
+.tab-pane {
+    display: none;
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.impact-badge-floating {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: white;
+    padding: 12px 20px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    z-index: 1100;
+    border: 1px solid var(--gray-100);
+    animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.impact-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--sidebar-active);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.impact-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.impact-text span {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-gray);
+    letter-spacing: 0.5px;
+}
+
+.impact-text strong {
+    font-size: 1.1rem;
+    color: var(--sidebar-bg);
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    .impact-badge-floating {
+        bottom: 100px;
+        right: 20px;
+    }
+}

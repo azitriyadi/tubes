@@ -140,11 +140,11 @@ function loadKurirData() {
     if (profileName) profileName.innerText = user.name;
 
     const mobAvatar = document.getElementById('mobile-avatar');
-    if (mobAvatar) mobAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=e11d48&color=ffffff&bold=true`;
+    if (mobAvatar) mobAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=10b981&color=ffffff&bold=true`;
     const profAvatar = document.getElementById('profile-avatar-large');
-    if (profAvatar) profAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0f172a&color=ffffff&bold=true&size=150`;
+    if (profAvatar) profAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=064e3b&color=ffffff&bold=true&size=150`;
 
-    fetch('api/logistikita/daftar_pengiriman?type=kurir')
+    fetch('api/ecorecycle/list_pickups?type=kurir')
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {
@@ -282,10 +282,10 @@ function updateStatus(resi, newStatus) {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch('api/logistikita/tracking_status', {
+            fetch('api/ecorecycle/pickup_status', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ resi: resi, status: newStatus, lokasi: 'Kurir App', keterangan: 'Updated by Courier' })
+                body: JSON.stringify({ tracking_number: resi, status: newStatus, location: 'Collector App', notes: 'Updated by Collector' })
             })
                 .then(res => res.json())
                 .then(data => {

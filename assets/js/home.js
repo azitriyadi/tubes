@@ -5,10 +5,12 @@ function trackShipment() {
         Swal.fire({
             icon: 'warning',
             title: 'Oops...',
-            text: 'Mohon masukkan nomor resi yang valid.'
+            text: 'Mohon masukkan nomor tracking yang valid.'
         });
         return;
     }
+    
+    // In actual app, this would call API, here we just show simulation
     resultMin.style.display = 'block';
 }
 
@@ -22,20 +24,19 @@ function calculateOngkir() {
         Swal.fire({
             icon: 'warning',
             title: 'Oops...',
-            text: 'Mohon masukkan berat paket yang valid.'
+            text: 'Mohon masukkan berat e-waste yang valid.'
         });
         return;
     }
 
-    const basePrice = parseInt(serviceSelect.value);
-    const totalPrice = weight * basePrice;
+    const baseReward = parseInt(serviceSelect.value);
+    const totalReward = weight * baseReward;
 
-    const serviceName = serviceSelect.options[serviceSelect.selectedIndex].text.split(' (')[0];
-    const eta = serviceSelect.options[serviceSelect.selectedIndex].text.split('(')[1].replace(')', '');
+    const categoryName = serviceSelect.options[serviceSelect.selectedIndex].text.split(' (')[0];
 
-    document.getElementById('result-service-name').innerText = serviceName;
-    document.getElementById('result-price').innerText = "Rp " + totalPrice.toLocaleString('id-ID');
-    document.getElementById('result-eta').innerText = eta;
+    document.getElementById('result-service-name').innerText = categoryName;
+    document.getElementById('result-price').innerText = "Rp " + totalReward.toLocaleString('id-ID');
+    document.getElementById('result-eta').innerText = weight > 5 ? "High Contribution" : "Eco-Friend";
 
     resultCard.style.display = 'block';
 }

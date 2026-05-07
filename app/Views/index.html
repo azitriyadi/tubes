@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LogistiKita | Premier Logistics Solutions</title>
+    <title>EcoRecycle | Turning E-Waste into Eco-Wealth</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -15,8 +15,8 @@
     <nav>
         <div class="container">
             <a href="home" class="logo">
-                <i class="fas fa-cube"></i>
-                <span>Logisti<b>Kita</b></span>
+                <i class="fas fa-leaf"></i>
+                <span>Eco<b>Recycle</b></span>
             </a>
 
             <input type="checkbox" id="menu-btn">
@@ -28,11 +28,11 @@
 
             <div class="nav-links">
                 <a href="#home">Beranda</a>
-                <a href="#cek-tarif">Cek Tarif</a>
-                <a href="#tracking">Lacak Resi</a>
-                <a href="#layanan">Layanan</a>
-                <a href="#tentang">Tentang</a>
-                <a href="auth" class="btn btn-primary">Mulai Pengiriman</a>
+                <a href="#cek-reward">Cek Reward</a>
+                <a href="#tracking">Lacak Pickup</a>
+                <a href="#layanan">Kategori</a>
+                <a href="#tentang">Visi</a>
+                <a href="login" class="btn btn-primary">Setor Sampah</a>
             </div>
         </div>
     </nav>
@@ -40,12 +40,11 @@
     <!-- Hero Section -->
     <section class="hero" id="home">
         <div class="container">
-            <h1>Solusi Logistik Terpadu <br>Untuk Bisnis Masa Depan</h1>
-            <p>Menghubungkan ekosistem bisnis Anda dengan jaringan pengiriman terluas, tercepat, dan paling andal di
-                Indonesia.</p>
+            <h1>Berikan Nyawa Baru <br>Untuk Gadget Bekas Anda</h1>
+            <p>Ubah sampah elektronik menjadi imbalan digital. Bergabunglah dengan ribuan Eco Warriors untuk menciptakan bumi yang lebih hijau dan bebas limbah beracun.</p>
             <div class="hero-actions">
-                <a href="auth" class="btn btn-primary">Mulai Pengiriman</a>
-                <a href="#cek-tarif" class="btn btn-outline" style="color: white; border-color: white;">Cek Tarif</a>
+                <a href="login" class="btn btn-primary">Mulai Sekarang</a>
+                <a href="#cek-reward" class="btn btn-outline" style="color: white; border-color: white;">Cek Potensi Reward</a>
             </div>
         </div>
     </section>
@@ -56,78 +55,61 @@
             <div class="tools-grid">
                 <!-- Tracking Box -->
                 <div class="tool-card" id="tracking">
-                    <h3><i class="fas fa-search-location"></i> Lacak Kiriman</h3>
+                    <h3><i class="fas fa-truck-pickup"></i> Lacak Penjemputan</h3>
                     <div class="input-field">
-                        <label>Nomor Resi / AWB</label>
+                        <label>Nomor Tracking / ID Pickup</label>
                         <div class="input-wrapper">
                             <i class="fas fa-barcode"></i>
-                            <input type="text" id="track-input" placeholder="LKT-XXXXXXXXX">
+                            <input type="text" id="track-input" placeholder="ECR-XXXXXXXXX">
                         </div>
                     </div>
                     <button class="btn btn-primary" style="width: 100%; margin-top: 12px;"
-                        onclick="trackShipment()">Cari Paket</button>
+                        onclick="trackShipment()">Pantau Status</button>
 
                     <div id="track-result-mini" class="result-display" style="display: none;">
                         <div class="result-row">
                             <div>
-                                <p style="font-weight: 700; color: var(--brand-primary);">SEDANG TRANSIT</p>
-                                <p style="font-size: 0.85rem; color: var(--text-secondary);">Paket Anda sedang diproses
-                                    di Hub Jakarta Selatan.</p>
+                                <p style="font-weight: 700; color: var(--brand-primary);">DALAM PENJEMPUTAN</p>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary);">Kolektor kami sedang menuju lokasi Anda di Area Bandung.</p>
                             </div>
-                            <i class="fas fa-truck-loading"
+                            <i class="fas fa-recycle"
                                 style="font-size: 1.5rem; color: var(--text-secondary);"></i>
                         </div>
                     </div>
                 </div>
 
                 <!-- Price Checker Box -->
-                <div class="tool-card" id="cek-tarif">
-                    <h3><i class="fas fa-calculator"></i> Estimasi Tarif</h3>
+                <div class="tool-card" id="cek-reward">
+                    <h3><i class="fas fa-coins"></i> Estimasi Eco-Reward</h3>
                     <div class="input-row">
                         <div class="input-field">
-                            <label>Dari Kota</label>
+                            <label>Kategori Sampah</label>
                             <div class="input-wrapper">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <input type="text" placeholder="Asal">
+                                <i class="fas fa-laptop"></i>
+                                <select id="ongkir-service">
+                                    <option value="5000">Small Gadgets (HP, Tablet)</option>
+                                    <option value="7000">Computers (Laptop, CPU)</option>
+                                    <option value="10000">Large Appliances (Kulkas, AC)</option>
+                                    <option value="3000">Batteries (Lithium, Lead)</option>
+                                </select>
                             </div>
                         </div>
                         <div class="input-field">
-                            <label>Ke Kota</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-location-arrow"></i>
-                                <input type="text" placeholder="Tujuan">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="input-row">
-                        <div class="input-field">
-                            <label>Berat (KG)</label>
+                            <label>Estimasi Berat (KG)</label>
                             <div class="input-wrapper">
                                 <i class="fas fa-weight-hanging"></i>
                                 <input type="number" id="ongkir-weight" placeholder="1.0">
                             </div>
                         </div>
-                        <div class="input-field">
-                            <label>Layanan</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-box"></i>
-                                <select id="ongkir-service">
-                                    <option value="9000">Logisti-Reguler (2-3 Hari)</option>
-                                    <option value="15000">Logisti-Express (1 Hari)</option>
-                                    <option value="25000">Logisti-Priority (6-8 Jam)</option>
-                                </select>
-                            </div>
-                        </div>
                     </div>
-                    <button class="btn btn-secondary" style="width: 100%;" onclick="calculateOngkir()">Hitung
-                        Biaya</button>
+                    <button class="btn btn-secondary" style="width: 100%;" onclick="calculateOngkir()">Cek Poin Reward</button>
 
                     <div id="ongkir-result-card" class="result-display" style="display: none;">
                         <div class="result-row">
                             <div>
                                 <p id="result-service-name" style="font-weight: 700;"></p>
-                                <p style="font-size: 0.85rem; color: var(--text-secondary);">Estimasi Tiba: <span
-                                        id="result-eta"></span></p>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary);">Potensi Kontribusi Karbon: <span
+                                        id="result-eta">Low Emission</span></p>
                             </div>
                             <div class="price-tag" id="result-price"></div>
                         </div>
@@ -141,26 +123,25 @@
     <section class="section-padding">
         <div class="container">
             <div class="section-header">
-                <h2>Keunggulan LogistiKita</h2>
-                <p>Kami mendefinisikan ulang standar pengiriman dengan integrasi teknologi dan jaringan operasional yang
-                    mumpuni.</p>
+                <h2>Mengapa EcoRecycle?</h2>
+                <p>Kami menjamin sampah elektronik Anda diolah secara profesional tanpa mencemari lingkungan.</p>
             </div>
             <div class="features-grid">
                 <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-bolt"></i></div>
-                    <h4>Kecepatan Instan</h4>
-                    <p>Optimasi rute berbasis AI memastikan paket Anda tiba lebih cepat dari estimasi standar industri.
+                    <div class="feature-icon"><i class="fas fa-seedling"></i></div>
+                    <h4>Daur Ulang Tersertifikasi</h4>
+                    <p>Logistik terbalik kami terhubung langsung dengan pabrik daur ulang bersertifikat ISO 14001.
                     </p>
                 </div>
                 <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
-                    <h4>Keamanan Berlapis</h4>
-                    <p>Setiap pengiriman dilengkapi dengan asuransi komprehensif dan pelacakan real-time 24/7.</p>
+                    <div class="feature-icon"><i class="fas fa-wallet"></i></div>
+                    <h4>Imbalan Instan</h4>
+                    <p>Setelah sampah diverifikasi, Eco-Reward langsung masuk ke dompet digital Anda via SmartBank.</p>
                 </div>
                 <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-hand-holding-usd"></i></div>
-                    <h4>Nilai Ekonomis</h4>
-                    <p>Tarif yang sangat kompetitif tanpa mengorbankan kualitas layanan dan kecepatan pengiriman.</p>
+                    <div class="feature-icon"><i class="fas fa-map-marked-alt"></i></div>
+                    <h4>Lacak Transparan</h4>
+                    <p>Lihat setiap langkah perjalanan sampah Anda, dari penjemputan hingga menjadi bahan baku murni.</p>
                 </div>
             </div>
         </div>
@@ -170,29 +151,29 @@
     <section class="section-padding workflow">
         <div class="container">
             <div class="section-header">
-                <h2>Alur Kerja Profesional</h2>
-                <p>Proses pengiriman yang transparan dan sistematis untuk memastikan kepuasan pelanggan.</p>
+                <h2>Alur Penyelamatan Bumi</h2>
+                <p>Proses sederhana untuk memberikan dampak besar bagi lingkungan.</p>
             </div>
             <div class="workflow-grid">
                 <div class="workflow-step">
                     <div class="step-num">1</div>
-                    <h5>Pemesanan</h5>
-                    <p>Input data melalui aplikasi atau website.</p>
+                    <h5>Request Pickup</h5>
+                    <p>Pilih kategori dan tentukan lokasi penjemputan.</p>
                 </div>
                 <div class="workflow-step">
                     <div class="step-num">2</div>
-                    <h5>Penjemputan</h5>
-                    <p>Kurir mengambil paket sesuai jadwal.</p>
+                    <h5>Koleksi Sampah</h5>
+                    <p>Kolektor kami akan datang mengambil barang Anda.</p>
                 </div>
                 <div class="workflow-step">
                     <div class="step-num">3</div>
-                    <h5>Sortir & Hub</h5>
-                    <p>Paket diproses di hub pusat kami.</p>
+                    <h5>Verifikasi & Sortir</h5>
+                    <p>Berat dan jenis sampah divalidasi di hub kami.</p>
                 </div>
                 <div class="workflow-step">
                     <div class="step-num">4</div>
-                    <h5>Pengantaran</h5>
-                    <p>Paket sampai di tujuan akhir.</p>
+                    <h5>Payout Reward</h5>
+                    <p>Terima imbalan hasil kontribusi lingkungan Anda.</p>
                 </div>
             </div>
         </div>
@@ -202,41 +183,41 @@
     <section class="section-padding" id="layanan">
         <div class="container">
             <div class="section-header">
-                <h2>Pilihan Layanan Kami</h2>
-                <p>Sesuaikan kebutuhan logistik Anda dengan berbagai opsi pengiriman premium kami.</p>
+                <h2>Kategori Sampah Elektronik</h2>
+                <p>Kami menerima berbagai jenis limbah elektronik untuk diolah kembali.</p>
             </div>
             <div class="services-grid">
                 <div class="service-card">
                     <div class="service-image"
-                        style="background-image: url('https://images.unsplash.com/photo-1566576721346-d4a3b4eaad55?auto=format&fit=crop&q=80&w=600');">
+                        style="background-image: url('https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&q=80&w=600');">
                     </div>
                     <div class="service-body">
-                        <span class="service-badge">Standar</span>
-                        <h4>Logisti-Reguler</h4>
-                        <p>Layanan andalan dengan jangkauan nasional yang luas dan biaya sangat ekonomis.</p>
-                        <a href="#" class="btn btn-outline" style="width: 100%;">Selengkapnya</a>
+                        <span class="service-badge" style="background: rgba(16, 185, 129, 0.1); color: #059669;">Eco-Friendly</span>
+                        <h4>Gadgets & Wearables</h4>
+                        <p>Smartphone, Tablet, Smartwatch, dan kamera digital yang sudah tidak terpakai.</p>
+                        <a href="login" class="btn btn-outline" style="width: 100%; border-radius: 12px;">Setor Sekarang</a>
                     </div>
                 </div>
                 <div class="service-card">
                     <div class="service-image"
-                        style="background-image: url('https://images.unsplash.com/photo-1512418490979-92798cec1380?auto=format&fit=crop&q=80&w=600');">
+                        style="background-image: url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=600');">
                     </div>
                     <div class="service-body">
-                        <span class="service-badge">Prioritas</span>
-                        <h4>Logisti-Express</h4>
-                        <p>Kirim hari ini, tiba besok. Solusi tepat untuk kebutuhan kiriman yang mendesak.</p>
-                        <a href="#" class="btn btn-outline" style="width: 100%;">Selengkapnya</a>
+                        <span class="service-badge" style="background: rgba(13, 148, 136, 0.1); color: #0f766e;">Premium Reward</span>
+                        <h4>Computer Parts</h4>
+                        <p>Laptop, Monitor, Motherboard, dan unit CPU yang mengandung komponen logam berharga.</p>
+                        <a href="login" class="btn btn-outline" style="width: 100%; border-radius: 12px;">Setor Sekarang</a>
                     </div>
                 </div>
                 <div class="service-card">
                     <div class="service-image"
-                        style="background-image: url('https://images.unsplash.com/photo-1606185542453-619f7e53ef9c?auto=format&fit=crop&q=80&w=600');">
+                        style="background-image: url('https://images.unsplash.com/photo-1617469165786-8007eda3caa7?auto=format&fit=crop&q=80&w=600');">
                     </div>
                     <div class="service-body">
-                        <span class="service-badge">Eksklusif</span>
-                        <h4>Logisti-Priority</h4>
-                        <p>Layanan tercepat kami dengan jaminan sampai di hari yang sama untuk area tertentu.</p>
-                        <a href="#" class="btn btn-outline" style="width: 100%;">Selengkapnya</a>
+                        <span class="service-badge" style="background: rgba(239, 68, 68, 0.1); color: #b91c1c;">Hazardous</span>
+                        <h4>Power & Batteries</h4>
+                        <p>Baterai Lithium-Ion, Lead-Acid, dan UPS yang memerlukan penanganan khusus.</p>
+                        <a href="login" class="btn btn-outline" style="width: 100%; border-radius: 12px;">Setor Sekarang</a>
                     </div>
                 </div>
             </div>
@@ -249,10 +230,10 @@
             <div class="footer-grid">
                 <div class="footer-info">
                     <a href="home" class="footer-logo logo" style="color: white;">
-                        <i class="fas fa-cube"></i>
-                        <span>Logisti<b>Kita</b></span>
+                        <i class="fas fa-leaf"></i>
+                        <span>Eco<b>Recycle</b></span>
                     </a>
-                    <p class="footer-desc">Solusi logistik terpadu untuk efisiensi bisnis masa depan Anda.</p>
+                    <p class="footer-desc">Mengubah limbah elektronik menjadi sumber daya berharga untuk masa depan berkelanjutan.</p>
                     <div class="social-icons">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
                         <a href="#"><i class="fab fa-linkedin-in"></i></a>
@@ -262,31 +243,31 @@
                 <div class="footer-col">
                     <h5>Layanan</h5>
                     <ul>
-                        <li><a href="#">Lacak Paket</a></li>
-                        <li><a href="#">Estimasi Tarif</a></li>
-                        <li><a href="#">Keagenan</a></li>
-                        <li><a href="#">Cargo Solution</a></li>
+                        <li><a href="#">Lacak Sampah</a></li>
+                        <li><a href="#">Estimasi Reward</a></li>
+                        <li><a href="#">Keagenan Kolektor</a></li>
+                        <li><a href="#">Eco-Credit Shop</a></li>
                     </ul>
                 </div>
                 <div class="footer-col" id="tentang">
                     <h5>Perusahaan</h5>
                     <ul>
-                        <li><a href="#">Tentang Kami</a></li>
-                        <li><a href="#">Karir</a></li>
-                        <li><a href="#">Pusat Media</a></li>
-                        <li><a href="#">ESG Commitment</a></li>
+                        <li><a href="#">Tentang EcoRecycle</a></li>
+                        <li><a href="#">Mitra Daur Ulang</a></li>
+                        <li><a href="#">Dampak Lingkungan</a></li>
+                        <li><a href="#">Kontak CS</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
                     <h5>Hubungi Kami</h5>
                     <ul>
-                        <li><a href="#"><i class="fas fa-phone-alt"></i> +62 21 500 123</a></li>
-                        <li><a href="#"><i class="fas fa-envelope"></i> care@logistikita.id</a></li>
+                        <li><a href="#"><i class="fas fa-phone-alt"></i> +62 21 800 123</a></li>
+                        <li><a href="#"><i class="fas fa-envelope"></i> help@ecorecycle.id</a></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 PT Logistikita Indonesia Tbk. All Rights Reserved.</p>
+                <p>&copy; 2026 EcoRecycle Indonesia. All Rights Reserved.</p>
             </div>
         </div>
     </footer>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise Portal | LogistiKita Admin</title>
+    <title>Eco Control Center | EcoRecycle Admin</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
@@ -17,181 +17,35 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="assets/css/admin.css">
-        .batch-info {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .batch-count {
-            background: var(--brand-red);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-weight: 800;
-            font-size: 0.85rem;
-        }
-
-        .batch-buttons {
-            display: flex;
-            gap: 12px;
-        }
-
-        .btn-batch-approve {
-            background: var(--brand-green);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-batch-approve:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
-        }
-
-        .btn-batch-reject {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .btn-batch-reject:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .urgency-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
-        }
-
-        .urgency-high {
-            background: #ef4444;
-            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
-        }
-
-        .urgency-standard {
-            background: #3b82f6;
-        }
-
-        .urgency-vip {
-            background: #f59e0b;
-            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
-        }
-
-        .elapsed-timer {
-            font-size: 0.75rem;
-            color: var(--text-gray);
-            font-weight: 600;
-        }
-
-        /* Checkbox Styling */
-        .check-col {
-            width: 40px;
-            text-align: center;
-        }
-
-        .custom-checkbox {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: var(--brand-red);
-        }
-
-        /* -----------------------
-           4. STATUS TABS & GROUPING
-           ----------------------- */
-        .status-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 24px;
-            border-bottom: 1px solid var(--card-border);
-            padding-bottom: 1px;
-        }
-
-        .status-tab {
-            padding: 12px 20px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: var(--text-gray);
-            cursor: pointer;
-            position: relative;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status-tab:hover {
-            color: var(--text-dark);
-        }
-
-        .status-tab.active {
-            color: var(--brand-red);
-        }
-
-        .status-tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--brand-red);
-            border-radius: 3px 3px 0 0;
-        }
-
-        .tab-count {
-            background: #f1f5f9;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.75rem;
-            color: #475569;
-        }
-
-        .status-tab.active .tab-count {
-            background: var(--brand-red);
-            color: white;
-        }
-    </style>
 </head>
 
 <body>
     <!-- Sidebar Navigation -->
     <aside class="sidebar" id="sidebar">
         <a href="home" class="sidebar-logo">
-            <i class="fas fa-cube"></i> LogistiKita
+            <i class="fas fa-leaf"></i> EcoRecycle
         </a>
 
         <div class="sidebar-nav">
-            <div class="nav-group-label">Menu Utama</div>
+            <div class="nav-group-label">Eco Control</div>
             <div id="sidebar-menu-content">
                 <div class="sidebar-item active" data-target="admin-view">
                     <i class="fas fa-chart-line"></i> Dashboard
                 </div>
                 <div class="sidebar-item" data-target="shipments-view">
-                    <i class="fas fa-box"></i> Pengiriman
+                    <i class="fas fa-recycle"></i> E-Waste Pickups
                 </div>
                 <div class="sidebar-item" data-target="fleet-view">
-                    <i class="fas fa-truck"></i> Armada
+                    <i class="fas fa-truck"></i> Collection Fleet
                 </div>
                 <div class="sidebar-item" data-target="couriers-view">
-                    <i class="fas fa-id-card"></i> Kurir
+                    <i class="fas fa-id-card"></i> Collectors
                 </div>
                 <div class="sidebar-item" data-target="customers-view">
-                    <i class="fas fa-users"></i> Pelanggan
+                    <i class="fas fa-users"></i> Eco Warriors
                 </div>
                 <div class="sidebar-item" data-target="reports-view">
-                    <i class="fas fa-file-invoice"></i> Laporan
+                    <i class="fas fa-file-invoice"></i> Impact Reports
                 </div>
             </div>
         </div>
@@ -202,12 +56,12 @@
                     <i class="fas fa-shield-halved"></i> Admin
                 </button>
                 <button class="role-btn-side finance" id="btnFinanceSide">
-                    <i class="fas fa-wallet"></i> Keuangan
+                    <i class="fas fa-wallet"></i> Finance
                 </button>
             </div>
 
             <div class="user-profile-side">
-                <img src="https://ui-avatars.com/api/?name=Administrator&background=e11d48&color=ffffff&bold=true"
+                <img src="https://ui-avatars.com/api/?name=Eco+Admin&background=10b981&color=ffffff&bold=true"
                     alt="Admin">
                 <div class="user-info">
                     <span class="user-name">Fiqry F.</span>
@@ -226,7 +80,7 @@
             <i class="fas fa-bars"></i>
         </button>
         <a href="home" class="mobile-logo">
-            <i class="fas fa-cube"></i> LogistiKita
+            <i class="fas fa-leaf"></i> EcoRecycle
         </a>
         <div style="width: 32px;"></div> <!-- Spacer -->
     </header>
@@ -242,9 +96,8 @@
         <div id="admin-view" class="view-section active">
             <div class="page-header">
                 <div>
-                    <h1 class="page-title">Operational HQ Overview</h1>
-                    <p class="page-subtitle">Pusat monitoring siklus logistik, pergerakan armada, dan persetujuan
-                        pengiriman harian.</p>
+                    <h1 class="page-title">Eco Control Center Overview</h1>
+                    <p class="page-subtitle">Pusat monitoring penjemputan sampah elektronik, pergerakan armada kolektor, dan verifikasi muatan.</p>
                 </div>
             </div>
 
@@ -253,10 +106,10 @@
                 <div class="kpi-card">
                     <div class="kpi-card-header">
                         <div>
-                            <h3 class="kpi-title">Total Paket Aktif</h3>
+                            <h3 class="kpi-title">Active Pickups</h3>
                             <p class="kpi-value" id="kpi-total">0</p>
                         </div>
-                        <div class="kpi-icon-wrapper blue"><i class="fas fa-box-open"></i></div>
+                        <div class="kpi-icon-wrapper blue"><i class="fas fa-recycle"></i></div>
                     </div>
                     <div class="kpi-trend up"><i class="fas fa-sync"></i> Real-time sync</div>
                 </div>
@@ -264,34 +117,34 @@
                 <div class="kpi-card">
                     <div class="kpi-card-header">
                         <div>
-                            <h3 class="kpi-title">Menunggu Approval</h3>
+                            <h3 class="kpi-title">Pending Verification</h3>
                             <p class="kpi-value" id="kpi-pending">0</p>
                         </div>
                         <div class="kpi-icon-wrapper red"><i class="fas fa-clipboard-check"></i></div>
                     </div>
-                    <div class="kpi-trend neutral"><i class="fas fa-clock"></i> Memerlukan tindak lanjut</div>
+                    <div class="kpi-trend neutral"><i class="fas fa-clock"></i> Membutuhkan tindak lanjut</div>
                 </div>
 
                 <div class="kpi-card">
                     <div class="kpi-card-header">
                         <div>
-                            <h3 class="kpi-title">Armada Mengaspal</h3>
+                            <h3 class="kpi-title">Collectors Online</h3>
                             <p class="kpi-value" id="kpi-armada">0</p>
                         </div>
-                        <div class="kpi-icon-wrapper green"><i class="fas fa-truck-fast"></i></div>
+                        <div class="kpi-icon-wrapper green"><i class="fas fa-truck-pickup"></i></div>
                     </div>
-                    <div class="kpi-trend up"><i class="fas fa-truck"></i> Kurir Aktif</div>
+                    <div class="kpi-trend up"><i class="fas fa-users"></i> Expert Collectors</div>
                 </div>
 
                 <div class="kpi-card">
                     <div class="kpi-card-header">
                         <div>
-                            <h3 class="kpi-title">Terkirim</h3>
+                            <h3 class="kpi-title">E-Waste Recycled</h3>
                             <p class="kpi-value" id="kpi-delivered">0</p>
                         </div>
                         <div class="kpi-icon-wrapper purple"><i class="fas fa-check-circle"></i></div>
                     </div>
-                    <div class="kpi-trend down"><i class="fas fa-check"></i> Pengiriman Sukses</div>
+                    <div class="kpi-trend up"><i class="fas fa-leaf"></i> Impact Milestone</div>
                 </div>
             </div>
 
@@ -300,19 +153,16 @@
                 <div class="panel-card">
                     <div class="panel-header" style="border-bottom: none; padding-bottom: 0;">
                         <div>
-                            <h3>Permohonan Pengiriman Baru</h3>
-                            <p>Kelola permohonan pengiriman berdasarkan kategori status tracking.</p>
+                            <h3>Permohonan Pickup Baru</h3>
+                            <p>Kelola verifikasi kategori sampah dan penjadwalan kolektor.</p>
                         </div>
                     </div>
 
                     <div style="padding: 0 24px;">
                         <div class="status-tabs">
-                            <div class="status-tab active" data-filter="all">Semua <span class="tab-count" id="tab-count-all">0</span>
-                            </div>
-                            <div class="status-tab" data-filter="pending">Menunggu Verifikasi <span
-                                    class="tab-count" id="tab-count-pending">0</span></div>
-                            <div class="status-tab" data-filter="delivered">Terkirim <span class="tab-count" id="tab-count-delivered">0</span>
-                            </div>
+                            <div class="status-tab active" data-filter="all">Semua <span class="tab-count" id="tab-count-all">0</span></div>
+                            <div class="status-tab" data-filter="pending">Menunggu Verifikasi <span class="tab-count" id="tab-count-pending">0</span></div>
+                            <div class="status-tab" data-filter="completed">Selesai Diproses <span class="tab-count" id="tab-count-delivered">0</span></div>
                         </div>
                     </div>
 
@@ -320,10 +170,9 @@
                         <table class="enterprise-table" id="approvalTable">
                             <thead>
                                 <tr>
-                                    <th class="check-col"><input type="checkbox" class="custom-checkbox"
-                                            id="selectAllRequests"></th>
-                                    <th>Detail Pengiriman</th>
-                                    <th>Layanan & Tujuan</th>
+                                    <th class="check-col"><input type="checkbox" class="custom-checkbox" id="selectAllRequests"></th>
+                                    <th>Detail E-Waste</th>
+                                    <th>Kategori & Berat</th>
                                     <th>Status Tracking</th>
                                     <th style="text-align: center;">Tindakan</th>
                                 </tr>
@@ -335,24 +184,12 @@
                     </div>
                 </div>
 
-                <!-- Batch Action Bar -->
-                <div class="batch-action-bar" id="batchBar">
-                    <div class="batch-info">
-                        <span class="batch-count" id="batchCount">0</span>
-                        <span>Permohonan Terpilih</span>
-                    </div>
-                    <div class="batch-buttons">
-                        <button class="btn-batch-reject">Tolak Masal</button>
-                        <button class="btn-batch-approve"><i class="fas fa-check-double"></i> Setujui Masal</button>
-                    </div>
-                </div>
-
-                <!-- Map Placeholder Panel -->
+                <!-- Map Panel -->
                 <div class="panel-card">
                     <div class="panel-header" style="border-bottom: none; padding-bottom: 0;">
                         <div>
-                            <h3>Live Tracking Grid</h3>
-                            <p>Sistem Satelit LogistiKita</p>
+                            <h3>Live Collector Grid</h3>
+                            <p>Sistem Satelit EcoRecycle</p>
                         </div>
                     </div>
                     <div class="map-container"
@@ -362,560 +199,87 @@
                     <div class="active-fleet-summary"
                         style="display: flex; justify-content: space-between; padding: 20px 24px; background: #f8fafc; border-top: 1px solid var(--card-border);">
                         <div class="fleet-stat">
-                            <span class="fleet-label">Active Trucks</span>
+                            <span class="fleet-label">Active Collectors</span>
                             <span class="fleet-val" id="fleet-active">0</span>
                         </div>
                         <div class="fleet-stat">
-                            <span class="fleet-label">In Transit</span>
+                            <span class="fleet-label">On Route</span>
                             <span class="fleet-val" id="fleet-transit">0</span>
                         </div>
                         <div class="fleet-stat">
-                            <span class="fleet-label">Arriving</span>
+                            <span class="fleet-label">Verified</span>
                             <span class="fleet-val" id="fleet-arriving">0</span>
                         </div>
-                    </div>
-                    <div class="mini-grid-wrapper">
-                        <table class="mini-grid">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Destinasi</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="mini-grid-body">
-                                <tr><td colspan="3" style="text-align:center;">Memuat data armada...</td></tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ===========================
-             VIEW 2: FINANCE (KEUANGAN)
-             =========================== -->
+        <!-- VIEW 2: FINANCE (KEUANGAN) -->
         <div id="finance-view" class="view-section">
             <div class="page-header">
                 <div>
-                    <h1 class="page-title" style="color: #064e3b;">SmartBank Settlement Center</h1>
-                    <p class="page-subtitle">Dashboard khusus tim Keuangan. Validasi aliran dana logistik, clearing, dan
-                        pencairan settlement.</p>
+                    <h1 class="page-title" style="color: #064e3b;">Eco-Reward Payout Center</h1>
+                    <p class="page-subtitle">Dashboard Keuangan. Validasi pencairan reward dan monitoring biaya handling operasional.</p>
                 </div>
             </div>
 
             <!-- KPI Finance -->
             <div class="kpi-grid">
-                <div class="kpi-card" style="border-top: 4px solid var(--brand-green);">
+                <div class="kpi-card" style="border-top: 4px solid var(--brand-primary);">
                     <div class="kpi-card-header">
                         <div>
-                            <h3 class="kpi-title">Total Pendapatan Layanan</h3>
+                            <h3 class="kpi-title">Total Reward Dibayarkan</h3>
                             <p class="kpi-value" id="finance-total-fee" style="font-size: 1.8rem;">Rp 0</p>
                         </div>
-                        <div class="kpi-icon-wrapper green"><i class="fas fa-vault"></i></div>
+                        <div class="kpi-icon-wrapper green"><i class="fas fa-coins"></i></div>
                     </div>
-                    <div class="kpi-trend neutral"><i class="fas fa-lock"></i> Tersinkron API</div>
+                    <div class="kpi-trend up"><i class="fas fa-check-circle"></i> Payout Verified</div>
                 </div>
 
                 <div class="kpi-card">
                     <div class="kpi-card-header">
                         <div>
-                            <h3 class="kpi-title">Nilai Settlement Tertunda</h3>
+                            <h3 class="kpi-title">Antrean Pencairan</h3>
                             <p class="kpi-value" id="finance-settlement" style="font-size: 1.8rem;">Rp 0</p>
                         </div>
-                        <div class="kpi-icon-wrapper red"><i class="fas fa-file-invoice-dollar"></i></div>
+                        <div class="kpi-icon-wrapper red"><i class="fas fa-clock"></i> Pending Approval</div>
                     </div>
-                    <div class="kpi-trend down"><i class="fas fa-exclamation-circle"></i> Membutuhkan otorisasi</div>
-                </div>
-
-                <div class="kpi-card">
-                    <div class="kpi-card-header">
-                        <div>
-                            <h3 class="kpi-title">Gross Revenue (Harian)</h3>
-                            <p class="kpi-value" id="finance-gross" style="font-size: 1.8rem;">Rp 0</p>
-                        </div>
-                        <div class="kpi-icon-wrapper blue"><i class="fas fa-coins"></i></div>
-                    </div>
-                    <div class="kpi-trend up"><i class="fas fa-arrow-up"></i> On Target</div>
-                </div>
-
-                <div class="kpi-card">
-                    <div class="kpi-card-header">
-                        <div>
-                            <h3 class="kpi-title">Operating Edge Margin</h3>
-                            <p class="kpi-value" id="finance-margin" style="font-size: 1.8rem;">100%</p>
-                        </div>
-                        <div class="kpi-icon-wrapper purple"><i class="fas fa-chart-pie"></i></div>
-                    </div>
-                    <div class="kpi-trend up"><i class="fas fa-arrow-up"></i> Efisiensi biaya tercapai</div>
-                </div>
-            </div>
-
-            <!-- Financial Chart Section -->
-            <div class="panel-card" style="margin-bottom: 32px; margin-top: 24px;">
-                <div class="panel-header">
-                    <div>
-                        <h3>Arus Kas & Settlement (7 Hari Terakhir)</h3>
-                        <p>Monitoring perbandingan revenue harian vs dana yang telah dicairkan.</p>
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn-ghost"><i class="fas fa-calendar-day"></i> Mingguan</button>
-                    </div>
-                </div>
-                <div style="padding: 24px; height: 350px; position: relative;">
-                    <canvas id="financeChart"></canvas>
+                    <div class="kpi-trend neutral"><i class="fas fa-shield-halved"></i> Secure Link</div>
                 </div>
             </div>
 
             <div class="panel-card">
                 <div class="panel-header">
                     <div>
-                        <h3>Clearing House Antrean Pembayaran</h3>
-                        <p style="color: #10b981; font-weight: 600;"><i class="fas fa-shield-halved"></i> Akses Keamanan
-                            Lapis 2 Terverifikasi</p>
+                        <h3>Reward Ledger (SmartBank Integration)</h3>
+                        <p style="color: #10b981; font-weight: 600;"><i class="fas fa-lock"></i> Digital Payout Secured via SmartBank API</p>
                     </div>
                 </div>
                 <div class="table-wrapper">
                     <table class="enterprise-table">
                         <thead>
                             <tr>
-                                <th>ID Transaksi</th>
-                                <th>Tujuan Disbursement</th>
-                                <th>Nominal Validasi</th>
-                                <th>Jenis Jalur</th>
-                                <th>Catatan Sistem</th>
-                                <th style="text-align: right;">Otorisasi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td colspan="6" style="text-align:center; padding: 20px;">Tidak ada antrean clearance pada sesi ini.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="finance-banner">
-                <div style="position: relative; z-index: 10;">
-                    <h2 style="margin: 0 0 8px 0; font-size: 1.8rem; font-weight: 800;">SmartBank API Connection</h2>
-                    <p style="margin: 0 0 24px 0; color: #94a3b8; font-size: 1rem; max-width: 600px;">Jalur distribusi
-                        uang telah terenkripsi end-to-end. Dilarang meninggalkan terminal ini saat sesi keuangan
-                        terbuka.</p>
-                    <div class="fb-status"><i class="fas fa-lock"></i> GATEWAY SECURED & SYNCHRONIZED</div>
-                </div>
-                <div style="position: relative; z-index: 10;">
-                    <button class="btn-action-secondary"
-                        style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white;">Audit
-                        Logs</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===========================
-             VIEW 3: SHIPMENTS (PENGIRIMAN)
-             =========================== -->
-        <div id="shipments-view" class="view-section">
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">Shipment Management</h1>
-                    <p class="page-subtitle">Kelola dan lacak seluruh paket dalam jaringan LogistiKita.</p>
-                </div>
-                <button class="btn-action-primary"><i class="fas fa-plus"></i> Tambah Pengiriman</button>
-            </div>
-
-            <div class="panel-card">
-                <div class="panel-header">
-                    <h3>Manifest Pengiriman Global</h3>
-                    <div style="display: flex; gap: 12px;">
-                        <input type="text" placeholder="Cari Resi..."
-                            style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--card-border);">
-                        <button class="btn-ghost"><i class="fas fa-download"></i> Export CSV</button>
-                    </div>
-                </div>
-                <div class="table-wrapper">
-                    <table class="enterprise-table">
-                        <thead>
-                            <tr>
-                                <th>No. Resi</th>
-                                <th>Pengirim</th>
-                                <th>Penerima</th>
-                                <th>Layanan</th>
-                                <th>Status</th>
-                                <th>Estimasi</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="shipments-table-body">
-                            <tr><td colspan="7" style="text-align:center; padding: 20px;">Memuat data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===========================
-             VIEW 4: FLEET (ARMADA)
-             =========================== -->
-        <div id="fleet-view" class="view-section">
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">Fleet & Driver Analytics</h1>
-                    <p class="page-subtitle">Monitoring status kendaraan dan performa driver secara real-time.</p>
-                </div>
-            </div>
-
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <h3 class="kpi-title">Total Armada</h3>
-                    <p class="kpi-value">520</p>
-                    <div class="kpi-trend up">98% Beroperasi</div>
-                </div>
-                <div class="kpi-card">
-                    <h3 class="kpi-title">Konsumsi BBM (Bulan ini)</h3>
-                    <p class="kpi-value">12.4K L</p>
-                    <div class="kpi-trend down">-5% Efisiensi</div>
-                </div>
-                <div class="kpi-card">
-                    <h3 class="kpi-title">Maintenance Record</h3>
-                    <p class="kpi-value">12</p>
-                    <div class="kpi-trend neutral">Perlu Servis</div>
-                </div>
-            </div>
-
-            <div class="panel-card">
-                <div class="panel-header">
-                    <h3>Status Kendaraan Aktif</h3>
-                </div>
-                <div class="table-wrapper">
-                    <table class="enterprise-table">
-                        <thead>
-                            <tr>
-                                <th>ID Unit</th>
-                                <th>Jenis</th>
-                                <th>Driver</th>
-                                <th>Lokasi Terakhir</th>
-                                <th>Kapasitas</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="fleet-table-body">
-                            <tr><td colspan="6" style="text-align:center; padding: 20px;">Memuat armada aktif...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===========================
-             VIEW 4: COURIERS (KURIR)
-             =========================== -->
-        <div id="couriers-view" class="view-section">
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">Courier Hub</h1>
-                    <p class="page-subtitle">Monitoring status kurir yang sedang bertugas dan performa pengiriman
-                        lapangan.</p>
-                </div>
-            </div>
-
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <h3 class="kpi-title">Kurir Bertugas</h3>
-                    <p class="kpi-value">128</p>
-                    <div class="kpi-trend up"><i class="fas fa-circle" style="color: #10b981; font-size: 8px;"></i>
-                        Online & Active</div>
-                </div>
-                <div class="kpi-card">
-                    <h3 class="kpi-title">Rata-rata Waktu Kirim</h3>
-                    <p class="kpi-value">22m</p>
-                    <div class="kpi-trend up">Sangat Cepat</div>
-                </div>
-                <div class="kpi-card">
-                    <h3 class="kpi-title">Kurir Istirahat</h3>
-                    <p class="kpi-value">14</p>
-                    <div class="kpi-trend neutral">Normal Break</div>
-                </div>
-            </div>
-
-            <div class="panel-card">
-                <div class="panel-header">
-                    <h3>Kurir yang Sedang Bertugas (Live)</h3>
-                    <button class="btn-ghost"><i class="fas fa-map-marked-alt"></i> Lihat di Peta</button>
-                </div>
-                <div class="table-wrapper">
-                    <table class="enterprise-table">
-                        <thead>
-                            <tr>
-                                <th>Nama Kurir</th>
-                                <th>ID Pegawai</th>
-                                <th>Zona Tugas</th>
-                                <th>Paket Aktif</th>
-                                <th>Status</th>
-                                <th style="text-align: right;">Opsi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td colspan="6" style="text-align:center; padding: 20px;">Semua data kurir tersinkronisasi via LogistiKita Backend.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===========================
-             VIEW 4.5: ACCOUNTS (MANAJEMEN AKUN)
-             =========================== -->
-        <div id="accounts-view" class="view-section">
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">Identity & Access Management</h1>
-                    <p class="page-subtitle">Kelola otentikasi kurir, admin, dan hak akses sistem LogistiKita.</p>
-                </div>
-                <button class="btn-action-primary" onclick="toggleAccountOverlay()"><i class="fas fa-user-plus"></i> Tambah Akun Baru</button>
-            </div>
-
-            <div class="panel-card">
-                <div class="panel-header">
-                    <h3>Daftar Pengguna Sistem</h3>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" class="form-control" placeholder="Cari akun..." style="padding: 6px 12px; font-size: 0.8rem; width: 200px;">
-                    </div>
-                </div>
-                <div class="table-wrapper">
-                    <table class="enterprise-table">
-                        <thead>
-                            <tr>
-                                <th>User ID</th>
-                                <th>Nama Lengkap</th>
-                                <th>Email / Username</th>
-                                <th>Role</th>
+                                <th>Ref Payout</th>
+                                <th>Eco Warrior</th>
+                                <th>Nominal Reward</th>
+                                <th>Metode</th>
                                 <th>Status</th>
                                 <th style="text-align: right;">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr><td colspan="6" style="text-align:center; padding: 20px;">Daftar akun pengguna terpusat pada sistem autentikasi utama.</td></tr>
+                        <tbody id="finance-table-body">
+                            <tr><td colspan="6" style="text-align:center; padding: 20px;">Data transaksi tersinkronisasi via EcoRecycle Finance Module.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- ===========================
-             VIEW 5: CUSTOMERS (PELANGGAN)
-             =========================== -->
-        <div id="customers-view" class="view-section">
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">Client Relations</h1>
-                    <p class="page-subtitle">Manajemen database pelanggan korporat dan retail LogistiKita.</p>
-                </div>
-            </div>
-
-            <div class="panel-card">
-                <div class="panel-header">
-                    <h3>Daftar Pelanggan VIP & Korporat</h3>
-                </div>
-                <div class="table-wrapper">
-                    <table class="enterprise-table">
-                        <thead>
-                            <tr>
-                                <th>Instansi / Nama</th>
-                                <th>Kategori</th>
-                                <th>Total Order</th>
-                                <th>Last Order</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td colspan="5" style="text-align:center; padding: 20px;">Data klien korporat ditarik secara otomatis dari API terintegrasi.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===========================
-             VIEW 6: REPORTS (LAPORAN)
-             =========================== -->
-        <div id="reports-view" class="view-section">
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">Analytical Reports</h1>
-                    <p class="page-subtitle">Laporan performa operasional dan efisiensi pengiriman.</p>
-                </div>
-                <button class="btn-action-primary"><i class="fas fa-file-export"></i> Generate PDF</button>
-            </div>
-
-            <div class="layout-grid">
-                <div class="panel-card">
-                    <div class="panel-header">
-                        <h3>Delivery Success Rate</h3>
-                    </div>
-                    <div style="padding: 40px; text-align: center;">
-                        <h2 style="font-size: 3rem; margin: 0; color: var(--brand-green);">99.4%</h2>
-                        <p style="color: var(--text-gray);">Success rate bulan ini</p>
-                        <div
-                            style="height: 10px; background: #f1f5f9; border-radius: 5px; margin-top: 20px; overflow: hidden;">
-                            <div style="width: 99.4%; height: 100%; background: var(--brand-green);"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="panel-card">
-                    <div class="panel-header">
-                        <h3>Analisis Keterlambatan</h3>
-                    </div>
-                    <div style="padding: 24px;">
-                        <ul
-                            style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
-                            <li style="display: flex; justify-content: space-between;">
-                                <span>Faktor Cuaca</span>
-                                <span class="text-bold">65%</span>
-                            </li>
-                            <li style="display: flex; justify-content: space-between;">
-                                <span>Masalah Armada</span>
-                                <span class="text-bold">20%</span>
-                            </li>
-                            <li style="display: flex; justify-content: space-between;">
-                                <span>Alamat Salah</span>
-                                <span class="text-bold">15%</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===========================
-             VIEW 7: SETTLEMENT
-             =========================== -->
-        <div id="settlement-view" class="view-section">
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">Settlement Ledger</h1>
-                    <p class="page-subtitle">Rekapitulasi pencairan dana dan riwayat transaksi keuangan.</p>
-                </div>
-            </div>
-
-            <div class="panel-card">
-                <div class="panel-header">
-                    <h3>Riwayat Settlement Selesai</h3>
-                </div>
-                <div class="table-wrapper">
-                    <table class="enterprise-table">
-                        <thead>
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>Reference</th>
-                                <th>Metode</th>
-                                <th>Jumlah</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td colspan="5" style="text-align:center; padding: 20px;">Catatan pencairan settlement tersinkronisasi via Gateway SmartBank.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===========================
-             VIEW 8: API GATEWAY
-             =========================== -->
-        <div id="api-view" class="view-section">
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">API Gateway Monitor</h1>
-                    <p class="page-subtitle">Monitoring integritas data dan performa endpoint SmartBank.</p>
-                </div>
-            </div>
-
-            <div class="layout-grid">
-                <div class="panel-card">
-                    <div class="panel-header">
-                        <h3>Endpoint Performance</h3>
-                    </div>
-                    <div style="padding: 24px;">
-                        <div style="display: flex; flex-direction: column; gap: 20px;">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                    <span class="text-bold">/v1/auth/token</span>
-                                    <span style="color: var(--brand-green);">99.9% Uptime</span>
-                                </div>
-                                <div style="height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden;">
-                                    <div style="width: 99.9%; height: 100%; background: var(--brand-green);"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                    <span class="text-bold">/v1/settlement/create</span>
-                                    <span style="color: var(--brand-green);">98.5% Uptime</span>
-                                </div>
-                                <div style="height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden;">
-                                    <div style="width: 98.5%; height: 100%; background: var(--brand-green);"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="panel-card" style="background: #0f172a; color: white;">
-                    <div class="panel-header" style="background: transparent; border-color: rgba(255,255,255,0.1);">
-                        <h3 style="color: white;">Real-time Log Console</h3>
-                    </div>
-                    <div
-                        style="padding: 20px; font-family: monospace; font-size: 0.8rem; color: #10b981; line-height: 1.6;">
-                        <div>[22:25:01] POST /v1/auth/token - 200 OK (45ms)</div>
-                        <div>[22:25:04] GET /v1/balance - 200 OK (32ms)</div>
-                        <div>[22:25:10] POST /v1/shipment/update - 200 OK (89ms)</div>
-                        <div style="color: #64748b;">[22:25:15] Waiting for upstream...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        <!-- Other views are hidden by default and handled by JS -->
     </main>
-
-    <!-- Account Management Overlay -->
-    <div class="overlay-panel" id="accountOverlay">
-        <div class="overlay-header">
-            <h2 id="overlayTitle" style="margin: 0; font-size: 1.5rem; font-weight: 800;">Tambah Akun Baru</h2>
-            <button class="btn-ghost" onclick="toggleAccountOverlay()" style="border: none; font-size: 1.2rem;"><i class="fas fa-times"></i></button>
-        </div>
-        <p class="page-subtitle" style="margin-top: -20px; margin-bottom: 32px;">Pastikan data yang dimasukkan sesuai dengan identitas pegawai.</p>
-
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div class="form-group">
-                <label>Nama Lengkap</label>
-                <input type="text" id="userName" class="form-control" placeholder="Contoh: Budi Santoso">
-            </div>
-            <div class="form-group">
-                <label>Email Perusahaan</label>
-                <input type="email" id="userEmail" class="form-control" placeholder="budi.s@logistikita.com">
-            </div>
-            <div class="form-group">
-                <label>Role / Jabatan</label>
-                <select id="userRole" class="form-control">
-                    <option value="kurir">Kurir Lapangan</option>
-                    <option value="admin">System Admin</option>
-                    <option value="finance">Finance Manager</option>
-                    <option value="cs">Customer Service</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Username</label>
-                <input type="text" id="userUsername" class="form-control" placeholder="Contoh: budi_lkt">
-            </div>
-            <div class="form-group">
-                <label>Password Baru</label>
-                <input type="password" class="form-control" placeholder="••••••••">
-            </div>
-        </div>
-
-        <button class="btn-primary-full" onclick="saveUser()">Simpan Data Pengguna</button>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="assets/js/admin.js"></script>
 </body>
-
 </html>

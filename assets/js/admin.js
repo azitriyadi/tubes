@@ -15,12 +15,12 @@ const accountOverlay = document.getElementById('accountOverlay');
 // Nav Links Data
 const adminLinks = `
     <div class="sidebar-item active" data-target="admin-view"><i class="fas fa-chart-line"></i> Dashboard</div>
-    <div class="sidebar-item" data-target="shipments-view"><i class="fas fa-box"></i> Pengiriman</div>
-    <div class="sidebar-item" data-target="fleet-view"><i class="fas fa-truck"></i> Armada</div>
-    <div class="sidebar-item" data-target="couriers-view"><i class="fas fa-id-card"></i> Kurir</div>
-    <div class="sidebar-item" data-target="accounts-view"><i class="fas fa-user-shield"></i> Manajemen Akun</div>
-    <div class="sidebar-item" data-target="customers-view"><i class="fas fa-users"></i> Pelanggan</div>
-    <div class="sidebar-item" data-target="reports-view"><i class="fas fa-file-invoice"></i> Laporan</div>
+    <div class="sidebar-item" data-target="shipments-view"><i class="fas fa-recycle"></i> E-Waste Pickups</div>
+    <div class="sidebar-item" data-target="fleet-view"><i class="fas fa-truck"></i> Collection Fleet</div>
+    <div class="sidebar-item" data-target="couriers-view"><i class="fas fa-id-card"></i> Collectors</div>
+    <div class="sidebar-item" data-target="accounts-view"><i class="fas fa-user-shield"></i> User Accounts</div>
+    <div class="sidebar-item" data-target="customers-view"><i class="fas fa-users"></i> Eco Warriors</div>
+    <div class="sidebar-item" data-target="reports-view"><i class="fas fa-file-invoice"></i> Impact Reports</div>
 `;
 
 const financeLinks = `
@@ -318,7 +318,7 @@ function loadAdminData() {
     const userNameEl = document.querySelector('.user-name');
     if (userNameEl) userNameEl.innerText = user.name;
 
-    fetch('api/logistikita/daftar_pengiriman?type=all')
+    fetch('api/ecorecycle/list_pickups?type=all')
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {
@@ -343,12 +343,13 @@ function loadAdminData() {
 
                     let dateObj = new Date(item.created_at || Date.now());
                     let dateStr = `${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
+                    let tracking_number = item.tracking_number || item.resi;
 
                     let statusHtml = '';
                     if (item.status === 'pending') {
-                        statusHtml = '<span class="status-pill status-pending">Menunggu Verifikasi</span>';
-                    } else if (item.status === 'delivered') {
-                        statusHtml = '<span class="status-pill status-success">Terkirim</span>';
+                        statusHtml = '<span class="status-pill status-pending">Pending Verifikasi</span>';
+                    } else if (item.status === 'completed') {
+                        statusHtml = '<span class="status-pill status-success">Verified</span>';
                     } else {
                         statusHtml = `<span class="status-pill status-processing">${item.status.toUpperCase()}</span>`;
                     }
@@ -480,7 +481,7 @@ function loadAdminData() {
             }
         });
 
-    fetch('api/logistikita/biaya_layanan_logistik')
+    fetch('api/ecorecycle/pickup_status?type=stats')
         .then(r => r.json())
         .then(d => {
             if (d.status === 'success') {
@@ -505,10 +506,10 @@ function updateStatus(resi, newStatus) {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch('api/logistikita/tracking_status', {
+            fetch('api/ecorecycle/pickup_status', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ resi: resi, status: newStatus, lokasi: 'Admin HQ', keterangan: 'Pesanan diverifikasi' })
+                body: JSON.stringify({ tracking_number: resi, status: newStatus, location: 'Eco HQ', notes: 'Waste verified by Admin' })
             })
                 .then(res => res.json())
                 .then(data => {

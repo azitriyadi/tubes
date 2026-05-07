@@ -75,10 +75,10 @@ if (btnHitung) {
 
         btnHitung.innerText = 'Menghitung...';
 
-        fetch('api/logistikita/biaya_pengiriman', {
+        fetch('api/ecorecycle/estimate_reward', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ asal, tujuan, berat, layanan })
+            body: JSON.stringify({ category: layanan, weight_kg: berat })
         })
             .then(res => res.json())
             .then(data => {
@@ -122,7 +122,7 @@ if (btnTrack) {
 
         btnTrack.innerText = 'Mencari...';
 
-        fetch('api/logistikita/tracking_status?resi=' + resi, {
+        fetch('api/ecorecycle/pickup_status?tracking_number=' + resi, {
             method: 'GET'
         })
             .then(res => res.json())
@@ -250,7 +250,7 @@ if (bookingForm) {
             nilai_barang: nilaiBarang
         };
 
-        fetch('api/logistikita/request_pengiriman', {
+        fetch('api/ecorecycle/request_pickup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -261,10 +261,10 @@ if (bookingForm) {
                 if (data.status === 'success') {
                     // Jika SmartBank terpilih, otomatis bayar
                     if (paymentSelect === 'smartbank') {
-                        fetch('api/logistikita/pembayaran_logistik', {
+                        fetch('api/ecorecycle/process_payout', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ pengiriman_id: data.data.pengiriman_id })
+                            body: JSON.stringify({ pickup_id: data.data.pickup_id })
                         })
                             .then(r => r.json())
                             .then(payData => {
@@ -341,7 +341,7 @@ function loadUserData() {
     if (pengirimNama) pengirimNama.value = user.name;
 
     // Fetch History
-    fetch(`api/logistikita/daftar_pengiriman?type=user&user_id=${user.id}`)
+    fetch(`api/ecorecycle/list_pickups?type=user&user_id=${user.id}`)
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {

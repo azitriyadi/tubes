@@ -1,6 +1,6 @@
 :root {
-    --brand-red: #e11d48;
-    --brand-red-hover: #be123c;
+    --brand-red: #10b981;
+    --brand-red-hover: #059669;
     --brand-green: #10b981;
     --text-dark: #1e293b;
     --text-gray: #64748b;
@@ -26,7 +26,7 @@ body {
     --sidebar-bg: #0f172a;
     --sidebar-text: #94a3b8;
     --sidebar-hover: #1e293b;
-    --sidebar-active: #e11d48;
+    --sidebar-active: #10b981;
 }
 
 .sidebar {
@@ -102,7 +102,7 @@ body {
 .sidebar-item.active {
     background: var(--sidebar-active);
     color: white;
-    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .sidebar-item.finance-active.active {
@@ -573,7 +573,7 @@ body {
 .btn-primary-full:hover {
     background: var(--brand-red-hover);
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(225, 29, 72, 0.3);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
 .enterprise-table tr {

@@ -1,183 +1,156 @@
-# LogistiKita - Documentation Web Service API (V1.0)
+# ♻️ EcoRecycle - Smart E-Waste Reverse Logistics (V1.0)
 
-LogistiKita adalah platform logistik modern yang menyediakan layanan backend berbasis RESTful API untuk pengelolaan pengiriman barang, perhitungan biaya otomatis, pelacakan paket secara real-time, dan integrasi sistem pembayaran perbankan (SmartBank).
-
----
-
-## Arsitektur Sistem
-Aplikasi ini dibangun menggunakan arsitektur **MVC (Model-View-Controller)** murni dengan PHP Native:
-- **Routing**: Ditangani oleh `index.php` dan `.htaccess`.
-- **Controllers**: Berada di `app/Controllers/`, menangani logika bisnis dan response JSON.
-- **Models**: Berada di `app/Models/`, menangani interaksi langsung dengan database MySQL.
-- **Views**: Berada di `app/Views/` (HTML/JS) yang bertindak sebagai client yang mengonsumsi API ini.
+EcoRecycle adalah platform inovatif yang dirancang untuk mengelola rantai pasok terbalik (reverse logistics) khusus sampah elektronik (e-waste). Platform ini memfasilitasi siklus hidup produk elektronik mulai dari akhir penggunaan (end-of-life) hingga proses daur ulang yang bertanggung jawab, sambil memberikan insentif ekonomi kepada pengguna.
 
 ---
 
-##  Memulai (Setup)
-
-### Prasyarat
-- XAMPP / Laragon (PHP >= 7.4)
-- MySQL Database
-
-### Instalasi
-1. Clone atau copy folder project ke `htdocs`.
-2. Jalankan Apache dan MySQL.
-3. Akses `http://localhost/progress_tubes/logistikita_tubes/setup.php` untuk menginisialisasi database dan tabel secara otomatis.
-4. Base URL API: `http://localhost/progress_tubes/logistikita_tubes/api/`
+## 📖 Deskripsi Proyek
+Masalah sampah elektronik (e-waste) global terus meningkat. EcoRecycle hadir sebagai jembatan antara konsumen (Eco Warriors) dan fasilitas pengolahan sampah (Collectors). Dengan sistem pelacakan berbasis tracking number unik dan integrasi reward otomatis, kita dapat memastikan e-waste tidak berakhir di TPA, melainkan didaur ulang secara efisien.
 
 ---
 
-##  Standar Komunikasi API
+## 🏗️ Arsitektur & Teknologi
 
-### Headers
-Setiap request `POST` **Wajib** menyertakan header:
-```http
-Content-Type: application/json
-```
+### Tech Stack
+- **Backend**: PHP 7.4/8.x (Native MVC Architecture)
+- **Database**: MySQL / MariaDB
+- **Frontend**: HTML5, Vanilla CSS3 (Modern Tech Design), JavaScript (Vanilla ES6)
+- **Libraries**: SweetAlert2 (Notifications), Leaflet.js (Mapping), Chart.js (Analytics), FontAwesome 6 (Icons)
 
-### Struktur Response Global
-Response selalu dikembalikan dalam format JSON:
-```json
-{
-  "status": "success", // atau "error"
-  "message": "Deskripsi hasil operasi",
-  "data": { ... } // Berisi data object atau array (opsional)
-}
+### Struktur Folder
+```text
+/logistikita_tubes
+├── app/
+│   ├── Config/         # Konfigurasi Database & Global
+│   ├── Controllers/    # Handler API & Logika Bisnis (MVC)
+│   ├── Models/         # Abstraksi Data & Query SQL (MVC)
+│   └── Views/          # Template HTML (Landing, Dashboard, Admin, Collector)
+├── assets/
+│   ├── css/            # UI Styling (style.css, admin.css, kurir.css)
+│   ├── js/             # Frontend Logic (home.js, dashboard.js, admin.js)
+│   └── images/         # Aset Gambar & Media
+├── index.php           # Front Controller & API Router
+├── setup.php           # Database Auto-Installer
+└── README.md           # Dokumentasi Teknis
 ```
 
 ---
 
-##  1. Modul Autentikasi (`/auth`)
+## 🗄️ Skema Database (Smart Schema)
+Aplikasi ini menggunakan database `ecorecycle` dengan tabel-tabel berikut:
 
-### 1.1 Registrasi Akun
-Mendaftarkan user baru ke sistem.
-- **Endpoint**: `POST /auth/register`
+1.  **`users`**: Menyimpan data Eco Warriors, Collectors, dan Admin.
+2.  **`waste_categories`**: Master data kategori sampah (Gadget, Battery, Laptop) beserta rate reward per Kg.
+3.  **`pickups`**: Tabel utama transaksi penjemputan sampah.
+4.  **`pickup_history`**: Log pelacakan status penjemputan (Timeline).
+5.  **`transactions`**: Integrasi keuangan (Payouts) hasil reward.
+
+---
+
+## 🚀 Panduan Instalasi (Step-by-Step)
+
+### 1. Persiapan Environment
+- Pastikan Anda menggunakan **XAMPP** atau server PHP lainnya.
+- Clone/Copy folder ini ke dalam direktori `C:/xampp/htdocs/progress_tubes/logistikita_tubes/`.
+
+### 2. Konfigurasi Database Otomatis
+Buka browser dan akses alamat berikut:
+`http://localhost/progress_tubes/logistikita_tubes/setup.php`
+> [!IMPORTANT]
+> Script ini akan secara otomatis membuat database `ecorecycle`, membuat semua tabel yang diperlukan, dan mengisi data awal (seeding) termasuk kategori sampah dan akun demo.
+
+### 3. Akses Aplikasi
+- **Landing Page**: `http://localhost/progress_tubes/logistikita_tubes/`
+- **Login**: `http://localhost/progress_tubes/logistikita_tubes/login`
+
+---
+
+## 🛠️ Dokumentasi API (Web Service)
+
+### 1. Autentikasi
+#### **Register Akun Baru**
+- **Endpoint**: `POST /api/auth/register`
 - **Payload**:
-  | Field | Tipe | Deskripsi |
-  | :--- | :--- | :--- |
-  | `name` | String | Nama lengkap pengguna |
-  | `email` | String | Email unik untuk login |
-  | `password` | String | Password akun |
-  | `role` | String | `user` (default), `kurir`, atau `admin` |
+  ```json
+  {
+    "name": "Fiqry F",
+    "email": "fiqry@eco.com",
+    "password": "password123",
+    "role": "user"
+  }
+  ```
 
-### 1.2 Login
-Autentikasi dan pengambilan token.
-- **Endpoint**: `POST /auth/login`
-- **Payload**: `email`, `password`
-- **Response Data**: Mengembalikan object user beserta `token` (Base64 Encoded JSON berisi ID & Role).
+#### **Login System**
+- **Endpoint**: `POST /api/auth/login`
+- **Response**: Mengembalikan token profil user.
 
 ---
 
-##  2. Modul Pengiriman (`/logistikita`)
+### 2. Pengelolaan E-Waste
+#### **Estimasi Reward**
+Menghitung perkiraan rupiah yang akan diterima pengguna.
+- **Endpoint**: `POST /api/ecorecycle/estimate_reward`
+- **Payload**: `{"category": "Computers", "weight_kg": 5.5}`
+- **Logic**: `Reward = (Weight * Category_Rate) - (5% Processing Fee)`
 
-### 2.1 Kalkulasi Biaya (Cek Ongkir)
-Menghitung estimasi biaya sebelum melakukan order.
-- **Endpoint**: `POST /logistikita/biaya_pengiriman`
+#### **Request Pickup**
+Mengajukan penjemputan sampah ke alamat pengguna.
+- **Endpoint**: `POST /api/ecorecycle/request_pickup`
 - **Payload**:
-  | Field | Tipe | Deskripsi |
-  | :--- | :--- | :--- |
-  | `asal` | String | Kota asal |
-  | `tujuan` | String | Kota tujuan |
-  | `berat` | Float | Berat barang dalam KG |
-  | `layanan` | String | `Reguler`, `Express`, atau `Priority` |
-  | `asuransi` | Boolean | (Optional) `true` / `false` |
-  | `nilai_barang`| Int | (Required jika asuransi true) Nilai barang untuk hitung premi |
-
-### 2.2 Membuat Request Pengiriman
-Input data order pengiriman ke database.
-- **Endpoint**: `POST /logistikita/request_pengiriman`
-- **Payload**: `user_id`, `penerima_nama`, `penerima_telp`, `penerima_alamat`, `berat`, `layanan`, `biaya_ongkir`.
-- **Logic**: Sistem otomatis memberikan nomor resi (Format: `LKT-YYYYMMDD-XXXXX`) dan menghitung **Biaya Layanan (5%)**.
-
-### 2.3 Daftar Pengiriman
-Mengambil riwayat data pengiriman.
-- **Endpoint**: `GET /logistikita/daftar_pengiriman`
-- **Query Params**:
-  - `type`: `all` (Admin), `user` (Pelanggan), `kurir` (Kurir).
-  - `user_id`: Diperlukan jika type adalah `user`.
+  ```json
+  {
+    "user_id": 1,
+    "item_description": "Laptop rusak & charger",
+    "pickup_address": "Jl. Ganesha No. 10, Bandung",
+    "contact_phone": "08123456789",
+    "weight_kg": 3.2,
+    "category": "Computers"
+  }
+  ```
+- **Response**: Mengembalikan `tracking_number` (Contoh: `ECR-20240507-X12A`).
 
 ---
 
-##  3. Modul Pelacakan (`/tracking`)
-
-### 3.1 Cek Status (Pelacakan)
-- **Endpoint**: `GET /logistikita/tracking_status?resi=NOMOR_RESI`
-- **Response**: Mengembalikan detail pengiriman lengkap beserta **Riwayat Status (Timeline)** dari yang terbaru.
-
-### 3.2 Update Status (Khusus Kurir/Admin)
-- **Endpoint**: `POST /logistikita/tracking_status`
+### 3. Pelacakan & Logistik
+#### **Update Status (Oleh Kolektor)**
+- **Endpoint**: `POST /api/ecorecycle/pickup_status`
 - **Payload**:
-  | Field | Tipe | Deskripsi |
-  | :--- | :--- | :--- |
-  | `resi` | String | Nomor resi paket |
-  | `status` | String | `pickup`, `transit`, `delivery`, atau `delivered` |
-  | `lokasi` | String | Lokasi saat ini (Contoh: "Hub Jakarta") |
-  | `keterangan`| String | Catatan tambahan status |
+  ```json
+  {
+    "tracking_number": "ECR-20240507-X12A",
+    "status": "transit",
+    "location": "Gudang Transit Bandung Tengah",
+    "notes": "Sampah telah dijemput dan diverifikasi"
+  }
+  ```
+
+#### **Cek Riwayat Pickup**
+- **Endpoint**: `GET /api/ecorecycle/list_pickups?type=user&user_id=1`
 
 ---
 
-##  4. Integrasi Pembayaran SmartBank
+## 🔄 Alur Kerja Sistem (Full Workflow)
 
-Sistem ini terintegrasi dengan simulasi API SmartBank untuk menangani transaksi keuangan secara aman.
-
-### 4.1 Pembayaran Pengiriman
-- **Endpoint**: `POST /logistikita/pembayaran_logistik`
-- **Payload**: `{"pengiriman_id": 123}`
-- **Alur Kerja**:
-  1. API memvalidasi keberadaan ID pengiriman.
-  2. API memanggil `SmartBank::processTransaction`.
-  3. Jika sukses, status pengiriman berubah menjadi `menunggu_pickup` dan `is_paid = TRUE`.
-  4. Data transaksi dicatat di tabel `pembayaran`.
+1.  **Donasi**: User melakukan `request_pickup` melalui dashboard.
+2.  **Verifikasi**: Admin melihat permohonan di Control Center dan menugaskan Kolektor.
+3.  **Pickup**: Kolektor menuju lokasi, memverifikasi berat sampah, dan mengupdate status menjadi `transit` atau `completed`.
+4.  **Reward**: Setelah status `completed`, sistem secara otomatis memproses Payout melalui integrasi `SmartBank`.
+5.  **Selesai**: User menerima dana di saldo digital mereka.
 
 ---
 
-##  5. Skema Data (Database)
-
-| Tabel | Fungsi Utama |
-| :--- | :--- |
-| `users` | Menyimpan data kredensial dan role pengguna. |
-| `pengiriman` | Tabel utama data paket, biaya, dan status pembayaran. |
-| `layanan` | Master data tipe layanan (Reguler, Express, dll). |
-| `riwayat_status`| Log setiap perubahan posisi/status paket (Timeline). |
-| `pembayaran` | Record referensi bank dan nominal transaksi sukses. |
+## 📊 Dashboard Roles
+- **Eco Warrior (User)**: Request pickup, cek estimasi reward, lacak status e-waste.
+- **Expert Collector (Kurir)**: Terima tugas pickup, navigasi ke lokasi, update status barang.
+- **Eco Admin**: Monitoring semua transaksi, manajemen armada, validasi pembayaran reward.
 
 ---
 
-##  Workflow Integrasi
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant API
-    participant DB
-    participant SmartBank
-
-    User->>API: POST /biaya_pengiriman (Cek Harga)
-    API-->>User: Success (Return Total)
-    
-    User->>API: POST /request_pengiriman (Buat Order)
-    API->>DB: Insert Data (Status: Pending)
-    API-->>User: Return Order ID & Resi
-    
-    User->>API: POST /pembayaran_logistik (Bayar)
-    API->>SmartBank: Request Payment Integration
-    SmartBank-->>API: Status: Success (Ref ID)
-    API->>DB: Update is_paid = TRUE & Status: Menunggu Pickup
-    API-->>User: Pembayaran Berhasil
-```
+## 🛠️ Pemecahan Masalah (Troubleshooting)
+- **Database tidak terdeteksi**: Jalankan kembali `setup.php`.
+- **Gagal Login**: Pastikan role yang dipilih saat login sesuai dengan data di tabel `users`.
+- **API Error 404**: Pastikan file `.htaccess` aktif (jika menggunakan Apache) atau routing di `index.php` tidak terhapus.
 
 ---
-
-##  Testing dengan Postman
-1. **Import Collection**: Anda dapat memasukkan Base URL ke Postman.
-2. **Body**: Pilih tab `Body` -> `raw` -> `JSON`.
-3. **Contoh Error Handling**: Jika Anda mengirim field yang kurang, API akan merespon:
-   ```json
-   {
-     "status": "error",
-     "message": "Field penerima_nama is required."
-   }
-   ```
-
----
-**LogistiKita API v1.0** - *Built for Speed and Reliability.*
+**EcoRecycle Project** - *Smart Logistics for a Greener Future.*
+Dibuat dengan ❤️ untuk lingkungan yang lebih bersih.

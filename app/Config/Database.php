@@ -3,7 +3,7 @@ class Database {
     private $host = "localhost";
     private $user = "root";
     private $pass = "";
-    private $db_name = "logistikita";
+    private $db_name = "ecorecycle";
     public $conn;
 
     public function getConnection() {
