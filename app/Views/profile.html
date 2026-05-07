@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akun Profil - LogistiKita</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        /* Sidebar & Layout Styles */
+        :root {
+            --sidebar-width: 280px;
+            --sidebar-bg: #0f172a;
+            --sidebar-text: #94a3b8;
+            --sidebar-hover: #1e293b;
+            --sidebar-active: #e11d48;
+        }
+
+        body.portal-page {
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--gray-50);
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 32px 0;
+            z-index: 1001;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-logo {
+            padding: 0 32px;
+            margin-bottom: 48px;
+            font-size: 1.6rem;
+            font-weight: 900;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-logo i {
+            color: var(--brand-red, #e11d48);
+            font-size: 2rem;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 0 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-group-label {
+            padding: 16px 16px 8px 16px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #475569;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .sidebar-item:hover {
+            background: var(--sidebar-hover);
+            color: white;
+        }
+
+        .sidebar-item.active {
+            background: var(--sidebar-active);
+            color: white;
+            box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+        }
+
+        .sidebar-footer {
+            padding: 24px 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .user-profile-side {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+        }
+
+        .user-profile-side .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #e11d48, #991b1b);
+            color: white;
+            font-weight: 900;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name-side {
+            display: block;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: white;
+        }
+
+        .user-role-side {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--sidebar-text);
+        }
+
+        .portal-content {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            transition: margin-left 0.3s, width 0.3s;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .mobile-header {
+            display: none;
+        }
+
+        /* Profile Tabs */
+        .profile-tabs-wrapper {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .header-tab {
+            font-weight: 700;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+        }
+
+        .header-tab:hover {
+            color: var(--brand-dark);
+            border-color: var(--gray-300);
+        }
+
+        .header-tab.active {
+            color: var(--brand-primary);
+            border-color: var(--brand-primary);
+            background: rgba(225, 29, 72, 0.05);
+        }
+
+        /* Main Content Grid */
+        .profile-dashboard {
+            flex: 1;
+            padding: 40px 20px 80px 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Centered User Info */
+        .profile-header-centered {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .avatar-glow {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 16px auto;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--brand-primary), #991b1b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: white;
+            box-shadow: 0 10px 25px rgba(225, 29, 72, 0.2);
+            border: 4px solid var(--white);
+        }
+
+        .user-name {
+            font-size: 1.6rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+            color: var(--brand-dark);
+        }
+
+        .premium-badge {
+            display: inline-block;
+            background: rgba(225, 29, 72, 0.1);
+            color: var(--brand-primary);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(225, 29, 72, 0.2);
+        }
+
+        /* Right Content Area */
+        .content-area {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 24px;
+            padding: 50px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+        }
+
+        .pane {
+            display: none;
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .pane.active {
+            display: block;
+        }
+
+        .pane-header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--gray-100);
+            padding-bottom: 20px;
+        }
+
+        .pane-header h2 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--brand-dark);
+            margin-bottom: 8px;
+        }
+
+        .pane-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Forms & Data Displays */
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .data-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .data-group label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-input {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            padding: 16px;
+            border-radius: 12px;
+            color: var(--brand-dark);
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            transition: border-color 0.3s, background 0.3s;
+            width: 100%;
+        }
+
+        .data-input:focus {
+            outline: none;
+            border-color: var(--brand-primary);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.1);
+        }
+
+        .data-input[readonly] {
+            opacity: 0.7;
+            cursor: not-allowed;
+            color: var(--text-secondary);
+        }
+
+        .action-btn {
+            background: var(--brand-primary);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(225, 29, 72, 0.2);
+            width: 100%;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(225, 29, 72, 0.3);
+            background: #be123c;
+        }
+
+        /* Toggle Switch */
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .setting-info h4 {
+            font-size: 1.1rem;
+            color: var(--brand-dark);
+            margin-bottom: 4px;
+        }
+
+        .setting-info p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--gray-300);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        input:checked+.slider {
+            background-color: var(--brand-primary);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Responsive Improvements */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .portal-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .mobile-header {
+                display: flex;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 64px;
+                background: white;
+                border-bottom: 1px solid #e2e8f0;
+                padding: 0 20px;
+                align-items: center;
+                justify-content: space-between;
+                z-index: 1000;
+            }
+            .profile-dashboard {
+                padding-top: 100px;
+            }
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(15, 23, 42, 0.5);
+                backdrop-filter: blur(4px);
+                z-index: 1000;
+                display: none;
+            }
+
+            .data-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .content-area {
+                padding: 30px 20px;
+            }
+
+            .pane-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .avatar-glow {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
+            }
+
+            .user-name {
+                font-size: 1.4rem;
+            }
+
+            .setting-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .toggle {
+                align-self: flex-start;
+            }
+
+            .desk-text {
+                display: none;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="portal-page">
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <a href="#" class="mobile-logo" style="font-weight: 900; text-decoration: none; color: #1e293b; display: flex; align-items: center; gap: 8px; font-size: 1.2rem;">
+            <i class="fas fa-cube" style="color: #e11d48;"></i> LogistiKita
+        </a>
+        <button class="hamburger-btn" id="mobileMenuToggle" style="background: none; border: none; font-size: 1.5rem; color: #1e293b; cursor: pointer;">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <a href="" class="sidebar-logo">
+            <i class="fas fa-cube"></i> LogistiKita
+        </a>
+
+        <div class="sidebar-nav">
+            <div class="nav-group-label">Menu Pengguna</div>
+            <div id="sidebar-menu-content">
+                <a href="dashboard" class="sidebar-item" style="text-decoration:none;">
+                    <i class="fas fa-home"></i> Beranda
+                </a>
+                <a href="dashboard" class="sidebar-item" style="text-decoration:none;">
+                    <i class="fas fa-box"></i> Pemesanan Pengiriman
+                </a>
+                <a href="dashboard" class="sidebar-item" style="text-decoration:none;">
+                    <i class="fas fa-truck-fast"></i> Status Pengiriman
+                </a>
+                <a href="dashboard" class="sidebar-item" style="text-decoration:none;">
+                    <i class="fas fa-history"></i> Riwayat Pengiriman
+                </a>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="user-profile-side">
+                <div class="avatar" id="nav-user-avatar">U</div>
+                <div class="user-info">
+                    <span class="user-name-side" id="nav-user-name">Pengguna</span>
+                    <span class="user-role-side" id="nav-user-role">MEMBER</span>
+                </div>
+            </div>
+            <div style="padding: 0 16px; margin-top: 8px;">
+                <a href="auth" style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #f87171; text-decoration: none; padding: 12px; border-radius: 12px; transition: background 0.3s;">
+                    <i class="fas fa-sign-out-alt"></i> Log Out
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <div class="portal-content">
+    <!-- Main Content -->
+    <main class="profile-dashboard">
+        
+        <!-- Center Profile Tabs -->
+        <div class="profile-tabs-wrapper">
+            <div class="header-tab active" data-target="pane-data"><i class="fas fa-user"></i> Data Profil</div>
+            <div class="header-tab" data-target="pane-settings"><i class="fas fa-sliders-h"></i> Pengaturan</div>
+            <div class="header-tab" data-target="pane-policy"><i class="fas fa-shield-alt"></i> Persyaratan & Privasi</div>
+        </div>
+
+        <!-- Centered User Card -->
+        <div class="profile-header-centered">
+            <div class="avatar-glow" id="profile-avatar-glow">FF</div>
+            <h1 class="user-name" id="profile-user-name">Memuat...</h1>
+            <div class="premium-badge" id="profile-user-role"><i class="fas fa-crown"></i> MEMBER</div>
+        </div>
+
+        <section class="content-area">
+
+            <!-- PANE 1: Data Diri -->
+            <div id="pane-data" class="pane active">
+                <div class="pane-header">
+                    <h2>Data Diri</h2>
+                    <p>Kelola informasi identitas dan alamat untuk pengiriman.</p>
+                </div>
+                <form>
+                    <div class="data-grid">
+                        <div class="data-group">
+                            <label>Nama Lengkap</label>
+                            <input type="text" class="data-input" id="profile-input-name" value="">
+                        </div>
+                        <div class="data-group">
+                            <label>Nomor HP / WhatsApp</label>
+                            <input type="tel" class="data-input" id="profile-input-phone" value="" placeholder="Masukkan Nomor HP">
+                        </div>
+                        <div class="data-group" style="grid-column: 1 / -1;">
+                            <label>Alamat Email</label>
+                            <input type="email" class="data-input" id="profile-input-email" value="" readonly>
+                        </div>
+                        <div class="data-group" style="grid-column: 1 / -1;">
+                            <label>Alamat Utama (Rumah / Kantor)</label>
+                            <textarea class="data-input"
+                                rows="4">Jl. Telekomunikasi No. 1, Terusan Buahbatu, Bandung, Jawa Barat</textarea>
+                        </div>
+                    </div>
+                    <!-- Moved standard action button inside for cleaner mobile view -->
+                    <button type="button" class="action-btn"><i class="fas fa-save"></i> Simpan Perubahan</button>
+                </form>
+            </div>
+
+            <!-- PANE 2: Pengaturan -->
+            <div id="pane-settings" class="pane">
+                <div class="pane-header">
+                    <h2>Pengaturan Akun</h2>
+                    <p>Sesuaikan preferensi notifikasi dan keamanan akun Anda.</p>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h4>Notifikasi Pengiriman</h4>
+                        <p>Terima update resi via WhatsApp & Email.</p>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h4>Autentikasi Dua Faktor</h4>
+                        <p>Tingkatkan lapisan keamanan saat login baru.</p>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-row" style="border-bottom: none;">
+                    <div class="setting-info">
+                        <h4>Ganti Kata Sandi</h4>
+                        <p>Perbarui keamanan akun berkala.</p>
+                    </div>
+                    <button type="button" class="action-btn"
+                        style="margin-top:0; width: auto; background: var(--gray-800); box-shadow:none; padding: 12px 24px;"><i
+                            class="fas fa-key"></i> Ubah Password</button>
+                </div>
+            </div>
+
+            <!-- PANE 3: Kebijakan -->
+            <div id="pane-policy" class="pane">
+                <div class="pane-header">
+                    <h2>Persyaratan & Privasi</h2>
+                    <p>Aturan perlindungan privasi data pribadi Anda.</p>
+                </div>
+                <div
+                    style="background: var(--gray-50); padding: 30px; border-radius: 16px; border: 1px solid var(--gray-200); color: var(--text-secondary); line-height: 1.8; max-height: 400px; overflow-y: auto;">
+                    <h4 style="color: var(--brand-dark); margin-bottom: 10px; font-size: 1.1rem;">1. Syarat Penggunaan
+                        Layanan</h4>
+                    <p style="margin-bottom: 20px;">Dengan mengakses portal LogistiKita, Anda menyetujui seluruh
+                        ketentuan standar logistik, mencakup batas maksimum beban, larangan jenis barang tertentu
+                        (seperti barang mudah meledak), serta ketentuan asuransi pengiriman.</p>
+
+                    <h4 style="color: var(--brand-dark); margin-bottom: 10px; font-size: 1.1rem;">2. Pengumpulan Data
+                    </h4>
+                    <p style="margin-bottom: 20px;">LogistiKita mengumpulkan informasi dasar seperti Nama, Alamat, dan
+                        Nomor HP murni untuk kebutuhan pengiriman fisik. Data ini dilindungi enkripsi standar industri
+                        tingkat bank.</p>
+
+                    <h4 style="color: var(--brand-dark); margin-bottom: 10px; font-size: 1.1rem;">3. Hak Penghapusan
+                        (Right to be Forgotten)</h4>
+                    <p>Sebagai pengguna, Anda berhak penuh untuk meminta pembersihan seluruh jejak digital kami
+                        (History, Order, Data Akun). Silakan hubungi pusat bantuan kami kapan saja.</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="portal-footer" style="background-color: var(--brand-dark); padding: 60px 0 30px 0; color: white;">
+        <div class="container" style="text-align: center;">
+            <a href="home" class="logo" style="color: white; justify-content: center; margin-bottom: 24px;">
+                <i class="fas fa-cube"
+                    style="background: white; -webkit-text-fill-color: var(--brand-primary); padding: 5px; border-radius: 8px;"></i>
+                <span>Logisti<b>Kita</b></span>
+            </a>
+            <p style="color: rgba(255,255,255,0.6); max-width: 600px; margin: 0 auto 30px auto; font-size:0.9rem;">
+                Solusi logistik premium untuk bisnis dan personal. Tercepat, terpercaya, dan tersebar di seluruh
+                Indonesia.</p>
+        </div>
+    </div> <!-- End of portal-content -->
+
+    <script>
+        // Interactive Tab Switching Logic for Profile Tabs
+        const headerTabs = document.querySelectorAll('.header-tab');
+        const panes = document.querySelectorAll('.pane');
+
+        // Mobile Sidebar Logic
+        const hamburgerBtn = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function openSidebar() {
+            sidebar.classList.add('active');
+            sidebarOverlay.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('active');
+            sidebarOverlay.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        if (hamburgerBtn) hamburgerBtn.addEventListener('click', openSidebar);
+        if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+
+        // Tab Switching
+        headerTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Determine target pane
+                const targetPaneId = tab.getAttribute('data-target');
+
+                // Synchronize active state across *all* instances of the tab (desktop & mobile)
+                headerTabs.forEach(t => {
+                    if (t.getAttribute('data-target') === targetPaneId) {
+                        t.classList.add('active');
+                    } else {
+                        t.classList.remove('active');
+                    }
+                });
+
+                // Switch panes
+                panes.forEach(p => p.classList.remove('active'));
+                document.getElementById(targetPaneId).classList.add('active');
+
+                // Close sidebar automatically if open
+                closeSidebar();
+            });
+        });
+
+        // Initialize User Data from LocalStorage
+        function loadUserData() {
+            const userSession = localStorage.getItem('user');
+            if(!userSession) {
+                window.location.href = 'auth';
+                return;
+            }
+            
+            const user = JSON.parse(userSession);
+            
+            // Sidebar Data
+            const navUserName = document.getElementById('nav-user-name');
+            const navUserRole = document.getElementById('nav-user-role');
+            const navUserAvatar = document.getElementById('nav-user-avatar');
+            
+            if(navUserName) navUserName.innerText = user.name;
+            if(navUserRole) navUserRole.innerText = user.role === 'user' ? 'PREMIUM MEMBER' : user.role.toUpperCase();
+            if(navUserAvatar) navUserAvatar.innerText = user.name.substring(0, 2).toUpperCase();
+            
+            // Profile Header Data
+            const profileName = document.getElementById('profile-user-name');
+            const profileRole = document.getElementById('profile-user-role');
+            const profileAvatar = document.getElementById('profile-avatar-glow');
+            
+            if(profileName) profileName.innerText = user.name;
+            if(profileRole) profileRole.innerHTML = user.role === 'user' ? '<i class="fas fa-crown"></i> PREMIUM MEMBER' : '<i class="fas fa-shield-halved"></i> ' + user.role.toUpperCase();
+            if(profileAvatar) profileAvatar.innerText = user.name.substring(0, 2).toUpperCase();
+
+            // Profile Form Data
+            const inputName = document.getElementById('profile-input-name');
+            const inputEmail = document.getElementById('profile-input-email');
+            
+            if(inputName) inputName.value = user.name;
+            if(inputEmail) {
+                // Generate a mockup email based on username if email doesn't exist
+                inputEmail.value = user.email || (user.name.toLowerCase().replace(/\s+/g, '.') + '@logistikita.com');
+            }
+        }
+
+        // Run on load
+        loadUserData();
+    </script>
+</body>
+
+</html>

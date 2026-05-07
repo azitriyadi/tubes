@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Portal | LogistiKita</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+</head>
+
+<body class="portal-page">
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <a href="#" class="mobile-logo" style="font-weight: 900; text-decoration: none; color: #1e293b; display: flex; align-items: center; gap: 8px; font-size: 1.2rem;">
+            <i class="fas fa-cube" style="color: #e11d48;"></i> LogistiKita
+        </a>
+        <button class="hamburger-btn" id="mobileMenuToggle" style="background: none; border: none; font-size: 1.5rem; color: #1e293b; cursor: pointer;">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" style="background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; display: none;"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <a href="" class="sidebar-logo">
+            <i class="fas fa-cube"></i> LogistiKita
+        </a>
+
+        <div class="sidebar-nav">
+            <div class="nav-group-label">Menu Pengguna</div>
+            <div id="sidebar-menu-content">
+                <div class="sidebar-item hub-tab active" data-target="beranda">
+                    <i class="fas fa-home"></i> Beranda
+                </div>
+                <div class="sidebar-item hub-tab" data-target="booking">
+                    <i class="fas fa-box"></i> Pemesanan Pengiriman
+                </div>
+                <div class="sidebar-item hub-tab" data-target="status">
+                    <i class="fas fa-truck-fast"></i> Status Pengiriman
+                </div>
+                <div class="sidebar-item hub-tab" data-target="history">
+                    <i class="fas fa-history"></i> Riwayat Pengiriman
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="profile" style="text-decoration: none;">
+                <div class="user-profile-side">
+                    <div class="avatar" id="nav-user-avatar">U</div>
+                    <div class="user-info">
+                        <span class="user-name" id="nav-user-name">Pengguna</span>
+                        <span class="user-role" id="nav-user-role">MEMBER</span>
+                    </div>
+                </div>
+            </a>
+            <div style="padding: 0 16px; margin-top: 8px;">
+                <a href="auth" style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #f87171; text-decoration: none; padding: 12px; border-radius: 12px; transition: background 0.3s;">
+                    <i class="fas fa-sign-out-alt"></i> Log Out
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <div class="portal-content">
+        <!-- Impact Hero -->
+        <section class="hero-portal-impact" style="padding-bottom: 100px;">
+            <div class="container">
+                <h1 id="hero-welcome">Selamat Datang,<br>Pengguna</h1>
+                <p>Pusat kendali logistik Anda. Pantau status pengiriman secara real-time, buat pesanan baru, dan kelola
+                    riwayat pengiriman Anda dengan mudah.</p>
+            </div>
+        </section>
+
+        <!-- Overview Content -->
+        <div class="container">
+            <!-- TAB: BERANDA (HOME) -->
+            <div id="beranda" class="tab-pane active">
+                <div class="tools-grid" style="margin-top: -60px; position: relative; z-index: 20;">
+                    <!-- Tracking Box -->
+                    <div class="tool-card" id="lacak-paket">
+                        <h3><i class="fas fa-search-location"></i> Lacak Kiriman</h3>
+                        <div class="input-field">
+                            <label>Nomor Resi / AWB</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-barcode"></i>
+                                <input type="text" id="track-input" placeholder="LKT-XXXXXXXXX">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" id="btn-track-paket" style="width: 100%; margin-top: 12px;">Cari Paket</button>
+                    </div>
+
+                    <!-- Price Checker Box -->
+                    <div class="tool-card" id="cek-tarif">
+                        <h3><i class="fas fa-calculator"></i> Estimasi Tarif</h3>
+                        <div class="input-row">
+                            <div class="input-field">
+                                <label>Dari Kota</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <input type="text" id="ongkir-asal" placeholder="Asal">
+                                </div>
+                            </div>
+                            <div class="input-field">
+                                <label>Ke Kota</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-location-arrow"></i>
+                                    <input type="text" id="ongkir-tujuan" placeholder="Tujuan">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-row">
+                            <div class="input-field">
+                                <label>Berat (KG)</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-weight-hanging"></i>
+                                    <input type="number" id="ongkir-weight" placeholder="1.0">
+                                </div>
+                            </div>
+                            <div class="input-field">
+                                <label>Layanan</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-box"></i>
+                                    <select id="ongkir-service">
+                                        <option value="9000">Logisti-Reguler (2-3 Hari)</option>
+                                        <option value="15000">Logisti-Express (1 Hari)</option>
+                                        <option value="25000">Logisti-Priority (6-8 Jam)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" id="btn-hitung-biaya" style="width: 100%;">Hitung Biaya</button>
+                        <div id="hasil-ongkir" style="margin-top:15px; font-weight:bold; color:var(--brand-primary); text-align:center;"></div>
+                    </div>
+                </div>
+
+                <!-- Logistics Insights -->
+                <div class="insight-header">
+                    <h2>Wawasan LogistiKita</h2>
+                    <p style="max-width: 600px; margin: 16px auto 0; color: var(--text-secondary);">Informasi terkini
+                        mengenai keamanan, kecepatan, dan inovasi layanan kami.</p>
+                </div>
+
+                <div class="insight-grid">
+                    <div class="insight-card">
+                        <i class="fas fa-shield-alt insight-icon"></i>
+                        <h4 style="font-weight: 800; margin-bottom: 12px;">Keamanan Terjamin</h4>
+                        <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">Sistem proteksi
+                            ganda dan asuransi penuh untuk setiap pengiriman.</p>
+                    </div>
+                    <div class="insight-card">
+                        <i class="fas fa-shipping-fast insight-icon"></i>
+                        <h4 style="font-weight: 800; margin-bottom: 12px;">Kecepatan Prioritas</h4>
+                        <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">Paket Anda
+                            dipastikan tiba dalam waktu kurang dari 24 jam untuk area kota besar.</p>
+                    </div>
+                    <div class="insight-card">
+                        <i class="fas fa-leaf insight-icon"></i>
+                        <h4 style="font-weight: 800; margin-bottom: 12px;">Eco-Friendly Delivery</h4>
+                        <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">Kami berkomitmen
+                            mengurangi emisi karbon melalui armada ramah lingkungan.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: BOOKING -->
+            <div id="booking" class="tab-pane">
+                <div class="booking-panel" style="margin-top: -60px; position: relative; z-index: 20;">
+                    <div class="booking-hero">
+                        <p
+                            style="text-transform: uppercase; letter-spacing: 2px; font-weight: 700; font-size: 0.8rem; margin-bottom: 8px; opacity: 0.7;">
+                            Formulir Pemesanan Lengkap</p>
+                        <h2 style="font-weight: 800; font-size: 2.2rem;">Kirim Paket Baru</h2>
+                    </div>
+                    <form id="booking-form" class="booking-form-body">
+
+                        <h4 class="form-section-title"><i class="fas fa-user-circle"></i> Detail Pengirim</h4>
+                        <div class="booking-row">
+                            <div class="form-group-lite">
+                                <label>Nama Lengkap</label>
+                                <input type="text" id="booking-pengirim-nama" value="" readonly
+                                    style="background-color: var(--gray-50);">
+                            </div>
+                            <div class="form-group-lite">
+                                <label>Nomor Telepon</label>
+                                <input type="text" id="booking-pengirim-telp" value="" placeholder="Isi nomor telepon" 
+                                    style="background-color: var(--white);">
+                            </div>
+                        </div>
+                        <div class="booking-row">
+                            <div class="form-group-lite">
+                                <label>Alamat Lengkap Penjemputan</label>
+                                <textarea id="booking-pengirim-alamat" rows="2" placeholder="Masukkan alamat lengkap penjemputan"></textarea>
+                            </div>
+                            <div class="form-group-lite">
+                                <label>Kode Pos</label>
+                                <input type="text" value="40257">
+                            </div>
+                        </div>
+
+                        <h4 class="form-section-title" style="margin-top: 20px;"><i class="fas fa-map-marker-alt"
+                                style="color: var(--accent-blue);"></i> Detail Penerima</h4>
+                        <div class="booking-row">
+                            <div class="form-group-lite">
+                                <label>Nama Lengkap Penerima</label>
+                                <input type="text" id="booking-penerima-nama" placeholder="Masukkan Nama Lengkap Penerima" required>
+                            </div>
+                            <div class="form-group-lite">
+                                <label>Nomor Telepon Penerima</label>
+                                <input type="text" id="booking-penerima-telp" placeholder="08XXXXXXXXXX" required>
+                            </div>
+                        </div>
+                        <div class="booking-row">
+                            <div class="form-group-lite" style="grid-column: span 2;">
+                                <label>Alamat Lengkap Tujuan</label>
+                                <textarea id="booking-penerima-alamat" rows="2" placeholder="Nama Jalan, Gedung, No. Rumah, RT/RW" required></textarea>
+                            </div>
+                        </div>
+                        <div class="booking-row">
+                            <div class="form-group-lite">
+                                <label>Provinsi</label>
+                                <select>
+                                    <option>DKI Jakarta</option>
+                                    <option>Jawa Barat</option>
+                                    <option>Banten</option>
+                                </select>
+                            </div>
+                            <div class="form-group-lite">
+                                <label>Kota/Kabupaten</label>
+                                <select>
+                                    <option>Jakarta Selatan</option>
+                                    <option>Bandung</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="booking-row">
+                            <div class="form-group-lite">
+                                <label>Kecamatan</label>
+                                <input type="text" placeholder="Kecamatan">
+                            </div>
+                            <div class="form-group-lite">
+                                <label>Kode Pos</label>
+                                <input type="text" placeholder="Kode Pos">
+                            </div>
+                        </div>
+
+                        <h4 class="form-section-title" style="margin-top: 20px;"><i class="fas fa-box"
+                                style="color: #22c55e;"></i> Informasi Paket</h4>
+                        <div class="booking-row">
+                            <div class="form-group-lite">
+                                <label>Isi Paket</label>
+                                <input type="text" placeholder="Contoh: Pakaian, Dokumen, dll">
+                            </div>
+                            <div class="form-group-lite">
+                                <label>Kategori Barang</label>
+                                <select>
+                                    <option>Dokumen</option>
+                                    <option>Pakaian / Fashion</option>
+                                    <option>Elektronik</option>
+                                    <option>Makanan Kering</option>
+                                    <option>Lainnya</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="booking-row">
+                            <div class="form-group-lite">
+                                <label>Berat Actual (kg)</label>
+                                <input type="number" id="booking-berat" value="1" min="1" required>
+                            </div>
+                            <div class="form-group-lite">
+                                <label>Dimensi (P x L x T) cm *Opsional</label>
+                                <input type="text" placeholder="Contoh: 10x10x10">
+                            </div>
+                        </div>
+                        <div class="booking-row">
+                            <div class="form-group-lite" style="display: flex; align-items: center; gap: 12px;">
+                                <input type="checkbox" id="asuransi"
+                                    style="width: 24px; height: 24px; cursor: pointer;">
+                                <label for="asuransi" style="margin: 0; cursor: pointer; padding-top: 3px;">Gunakan
+                                    Asuransi Pengiriman</label>
+                            </div>
+                            <div class="form-group-lite">
+                                <label>Nilai Barang (Rp)</label>
+                                <input type="number" id="booking-nilai-barang" placeholder="0">
+                            </div>
+                        </div>
+
+                        <div style="border-top: 1px solid var(--gray-100); padding-top: 40px;">
+                            <h4 class="form-section-title"><i class="fas fa-truck-fast"></i> Layanan & Pembayaran</h4>
+                            <div class="booking-row">
+                                <div class="form-group-lite">
+                                    <label>Pilihan Layanan</label>
+                                    <select id="booking-layanan">
+                                        <option value="15000">Logisti-Express (H+1 sampai)</option>
+                                        <option value="10000">Logisti-Reguler (2-3 hari sampai)</option>
+                                        <option value="25000">Logisti-Priority (Sameday delivery)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group-lite">
+                                    <label>Metode Pembayaran</label>
+                                    <select id="booking-pembayaran">
+                                        <option value="smartbank">SmartBank Direct Debit (Otomatis)</option>
+                                        <option value="saldo">Saldo LogistiKita</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="summary-elite" style="display: flex; flex-direction: column; gap: 16px;">
+                            <div style="background: var(--white); border-radius: 12px; padding: 16px; border: 1px solid var(--gray-100);">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">
+                                    <span>Estimasi Ongkos Kirim:</span>
+                                    <span id="summary-ongkir">Rp 15.000</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">
+                                    <span>Biaya Layanan (5% via SmartBank):</span>
+                                    <span id="summary-fee">Rp 750</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: 600; color: var(--text-secondary);">
+                                    <span>Biaya Asuransi (0.5%):</span>
+                                    <span id="summary-asuransi">Rp 0</span>
+                                </div>
+                                <hr style="border: none; border-top: 1px dashed #cbd5e1; margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                    <p style="font-size: 0.9rem; font-weight: 700; color: var(--brand-red); text-transform: uppercase; margin: 0;">Total Keseluruhan</p>
+                                    <p style="font-size: 2.2rem; font-weight: 900; color: var(--brand-dark); margin: 0;" id="summary-total">Rp 15.750</p>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="btn-submit-booking"
+                                style="height: 64px; border-radius: 16px; font-weight: 800; font-size: 1.1rem; width: 100%;">
+                                <i class="fas fa-check-circle" style="margin-right: 8px;"></i> KONFIRMASI PENGIRIMAN
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TAB: STATUS PENGIRIMAN (ACTIVE) -->
+            <div id="status" class="tab-pane">
+                <div class="history-panel" style="margin-top: -60px; position: relative; z-index: 20;">
+                    <div class="history-panel-header">
+                        <h3>Status Pengiriman Berlangsung</h3>
+                        <p style="color: var(--text-secondary); font-weight: 600;">Paket yang saat ini masih dalam
+                            proses pengiriman</p>
+                    </div>
+
+                    <!-- Active Status Cards -->
+                    <div id="active-status-container">
+                        <p style="text-align:center; padding: 20px; color: var(--text-secondary);">Memuat data pengiriman aktif...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: HISTORY (ALL) -->
+            <div id="history" class="tab-pane">
+                <div class="history-panel" style="margin-top: -60px; position: relative; z-index: 20;">
+                    <div class="history-panel-header">
+                        <h3>Riwayat Pengiriman</h3>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>No. Resi</th>
+                                    <th>Penerima</th>
+                                    <th>Tujuan</th>
+                                    <th>Layanan</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                <tr><td colspan="6" style="text-align:center;">Memuat riwayat...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Footer -->
+        <footer style="background-color: var(--brand-dark); color: var(--white); padding: 60px 0 30px; margin-top: 80px;">
+            <div class="container">
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-bottom: 40px;">
+                    <div>
+                        <h3 style="font-weight: 800; font-size: 1.5rem; margin-bottom: 20px;">Logisti<span
+                                style="color: var(--brand-primary);">Kita</span></h3>
+                        <p style="color: rgba(255,255,255,0.6); line-height: 1.6; margin-bottom: 20px;">Platform logistik
+                            modern yang didesain untuk kecepatan, keamanan, dan keandalan pengiriman ke seluruh ranah
+                            Nusantara.</p>
+                    </div>
+                    <div>
+                        <h4 style="font-weight: 700; margin-bottom: 20px;">Layanan Cepat</h4>
+                        <ul style="list-style: none; padding: 0; color: rgba(255,255,255,0.6); line-height: 2;">
+                            <li><a href="#" style="color: inherit; text-decoration: none;">Cek Tarif Pengiriman</a></li>
+                            <li><a href="#" style="color: inherit; text-decoration: none;">Lacak Paket Real-time</a></li>
+                            <li><a href="#" style="color: inherit; text-decoration: none;">Bantuan & Dukungan</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="font-weight: 700; margin-bottom: 20px;">Kebijakan</h4>
+                        <ul style="list-style: none; padding: 0; color: rgba(255,255,255,0.6); line-height: 2;">
+                            <li><a href="#" style="color: inherit; text-decoration: none;">Syarat & Ketentuan</a></li>
+                            <li><a href="#" style="color: inherit; text-decoration: none;">Kebijakan Privasi</a></li>
+                            <li><a href="#" style="color: inherit; text-decoration: none;">Klaim Asuransi</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div
+                    style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; text-align: center; color: rgba(255,255,255,0.5); font-size: 0.9rem;">
+                    <p>&copy; 2024 LogistiKita - Fiqry Firmansyah. Hak Cipta Dilindungi.</p>
+                </div>
+                        <div class="booking-row">
+                            <div class="form-group-lite">
+                                <label>Provinsi</label>
+                                <select>
+                                    <option>DKI Jakarta</option>
+                                    <option>Jawa Barat</option>
+                                    <option>Banten</option>
+                                </select>
+                            </div>
+                            <div class="form-group-lite">
+                                <label>Kota/Kabupaten</label>
+                                <select>
+                                    <option>Jakarta Selatan</option>
+                                    <option>Bandung</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="booking-row">
+                            <div class="form-group-lite">
+                                <label>Kecamatan</label>
+                                <input type="text" placeholder="Kecamatan">
+                            </div>
+                            <div class="form-group-lite">
+                                <label>Kode Pos</label>
+                                <input type="text" placeholder="Kode Pos">
+                            </div>
+                        </div>
+
+                        <h4 class="form-section-title" style="margin-top: 20px;"><i class="fas fa-box"
+                                style="color: #22c55e;"></i> Informasi Paket</h4>
+                        <div class="booking-row">
+                            <div class="form-group-lite">
+                                <label>Isi Paket</label>
+                                <input type="text" placeholder="Contoh: Pakaian, Dokumen, dll">
+                            </div>
+                            <div class="form-group-lite">
+                                <label>Kategori Barang</label>
+                                <select>
+                                    <option>Dokumen</option>
+                                    <option>Pakaian / Fashion</option>
+                                    <option>Elektronik</option>
+                                    <option>Makanan Kering</option>
+                                    <option>Lainnya</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="booking-row">
+                            <div class="form-group-lite">
+                                <label>Berat Actual (kg)</label>
+                                <input type="number" id="booking-berat" value="1" min="1" required>
+                            </div>
+                            <div class="form-group-lite">
+                                <label>Dimensi (P x L x T) cm *Opsional</label>
+                                <input type="text" placeholder="Contoh: 10x10x10">
+                            </div>
+                        </div>
+                        <div class="booking-row">
+                            <div class="form-group-lite" style="display: flex; align-items: center; gap: 12px;">
+                                <input type="checkbox" id="asuransi"
+                                    style="width: 24px; height: 24px; cursor: pointer;">
+                                <label for="asuransi" style="margin: 0; cursor: pointer; padding-top: 3px;">Gunakan
+                                    Asuransi Pengiriman</label>
+                            </div>
+                            <div class="form-group-lite">
+                                <label>Nilai Barang (Rp)</label>
+                                <input type="number" id="booking-nilai-barang" placeholder="0">
+                            </div>
+                        </div>
+
+                        <div style="border-top: 1px solid var(--gray-100); padding-top: 40px;">
+                            <h4 class="form-section-title"><i class="fas fa-truck-fast"></i> Layanan & Pembayaran</h4>
+                            <div class="booking-row">
+                                <div class="form-group-lite">
+                                    <label>Pilihan Layanan</label>
+                                    <select id="booking-layanan">
+                                        <option value="15000">Logisti-Express (H+1 sampai)</option>
+                                        <option value="10000">Logisti-Reguler (2-3 hari sampai)</option>
+                                        <option value="25000">Logisti-Priority (Sameday delivery)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group-lite">
+                                    <label>Metode Pembayaran</label>
+                                    <select id="booking-pembayaran">
+                                        <option value="smartbank">SmartBank Direct Debit (Otomatis)</option>
+                                        <option value="saldo">Saldo LogistiKita</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="summary-elite" style="display: flex; flex-direction: column; gap: 16px;">
+                            <div style="background: var(--white); border-radius: 12px; padding: 16px; border: 1px solid var(--gray-100);">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">
+                                    <span>Estimasi Ongkos Kirim:</span>
+                                    <span id="summary-ongkir">Rp 15.000</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">
+                                    <span>Biaya Layanan (5% via SmartBank):</span>
+                                    <span id="summary-fee">Rp 750</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: 600; color: var(--text-secondary);">
+                                    <span>Biaya Asuransi (0.5%):</span>
+                                    <span id="summary-asuransi">Rp 0</span>
+                                </div>
+                                <hr style="border: none; border-top: 1px dashed #cbd5e1; margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                    <p style="font-size: 0.9rem; font-weight: 700; color: var(--brand-red); text-transform: uppercase; margin: 0;">Total Keseluruhan</p>
+                                    <p style="font-size: 2.2rem; font-weight: 900; color: var(--brand-dark); margin: 0;" id="summary-total">Rp 15.750</p>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="btn-submit-booking"
+                                style="height: 64px; border-radius: 16px; font-weight: 800; font-size: 1.1rem; width: 100%;">
+                                <i class="fas fa-check-circle" style="margin-right: 8px;"></i> KONFIRMASI PENGIRIMAN
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TAB: STATUS PENGIRIMAN (ACTIVE) -->
+            <div id="status" class="tab-pane">
+                <div class="history-panel" style="margin-top: -60px; position: relative; z-index: 20;">
+                    <div class="history-panel-header">
+                        <h3>Status Pengiriman Berlangsung</h3>
+                        <p style="color: var(--text-secondary); font-weight: 600;">Paket yang saat ini masih dalam
+                            proses pengiriman</p>
+                    </div>
+
+                    <!-- Active Status Cards -->
+                    <div id="active-status-container">
+                        <p style="text-align:center; padding: 20px; color: var(--text-secondary);">Memuat data pengiriman aktif...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: HISTORY (ALL) -->
+            <div id="history" class="tab-pane">
+                <div class="history-panel" style="margin-top: -60px; position: relative; z-index: 20;">
+                    <div class="history-panel-header">
+                        <h3>Riwayat Pengiriman</h3>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>No. Resi</th>
+                                    <th>Penerima</th>
+                                    <th>Tujuan</th>
+                                    <th>Layanan</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                <tr><td colspan="6" style="text-align:center;">Memuat riwayat...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Footer -->
+        <footer style="background-color: var(--brand-dark); color: var(--white); padding: 60px 0 30px; margin-top: 80px;">
+            <div class="container">
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-bottom: 40px;">
+                    <div>
+                        <h3 style="font-weight: 800; font-size: 1.5rem; margin-bottom: 20px;">Logisti<span
+                                style="color: var(--brand-primary);">Kita</span></h3>
+                        <p style="color: rgba(255,255,255,0.6); line-height: 1.6; margin-bottom: 20px;">Platform logistik
+                            modern yang didesain untuk kecepatan, keamanan, dan keandalan pengiriman ke seluruh ranah
+                            Nusantara.</p>
+                    </div>
+                    <div>
+                        <h4 style="font-weight: 700; margin-bottom: 20px;">Layanan Cepat</h4>
+                        <ul style="list-style: none; padding: 0; color: rgba(255,255,255,0.6); line-height: 2;">
+                            <li><a href="#" style="color: inherit; text-decoration: none;">Cek Tarif Pengiriman</a></li>
+                            <li><a href="#" style="color: inherit; text-decoration: none;">Lacak Paket Real-time</a></li>
+                            <li><a href="#" style="color: inherit; text-decoration: none;">Bantuan & Dukungan</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="font-weight: 700; margin-bottom: 20px;">Kebijakan</h4>
+                        <ul style="list-style: none; padding: 0; color: rgba(255,255,255,0.6); line-height: 2;">
+                            <li><a href="#" style="color: inherit; text-decoration: none;">Syarat & Ketentuan</a></li>
+                            <li><a href="#" style="color: inherit; text-decoration: none;">Kebijakan Privasi</a></li>
+                            <li><a href="#" style="color: inherit; text-decoration: none;">Klaim Asuransi</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div
+                    style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; text-align: center; color: rgba(255,255,255,0.5); font-size: 0.9rem;">
+                    <p>&copy; 2024 LogistiKita - Fiqry Firmansyah. Hak Cipta Dilindungi.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/dashboard.js"></script>
+</body>
+</html>

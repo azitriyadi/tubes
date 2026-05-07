@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogistiKita | Premier Logistics Solutions</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav>
+        <div class="container">
+            <a href="home" class="logo">
+                <i class="fas fa-cube"></i>
+                <span>Logisti<b>Kita</b></span>
+            </a>
+
+            <input type="checkbox" id="menu-btn">
+            <label for="menu-btn" class="menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
+
+            <div class="nav-links">
+                <a href="#home">Beranda</a>
+                <a href="#cek-tarif">Cek Tarif</a>
+                <a href="#tracking">Lacak Resi</a>
+                <a href="#layanan">Layanan</a>
+                <a href="#tentang">Tentang</a>
+                <a href="auth" class="btn btn-primary">Mulai Pengiriman</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <h1>Solusi Logistik Terpadu <br>Untuk Bisnis Masa Depan</h1>
+            <p>Menghubungkan ekosistem bisnis Anda dengan jaringan pengiriman terluas, tercepat, dan paling andal di
+                Indonesia.</p>
+            <div class="hero-actions">
+                <a href="auth" class="btn btn-primary">Mulai Pengiriman</a>
+                <a href="#cek-tarif" class="btn btn-outline" style="color: white; border-color: white;">Cek Tarif</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools Section (Floating) -->
+    <section class="tools-section">
+        <div class="container">
+            <div class="tools-grid">
+                <!-- Tracking Box -->
+                <div class="tool-card" id="tracking">
+                    <h3><i class="fas fa-search-location"></i> Lacak Kiriman</h3>
+                    <div class="input-field">
+                        <label>Nomor Resi / AWB</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-barcode"></i>
+                            <input type="text" id="track-input" placeholder="LKT-XXXXXXXXX">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 12px;"
+                        onclick="trackShipment()">Cari Paket</button>
+
+                    <div id="track-result-mini" class="result-display" style="display: none;">
+                        <div class="result-row">
+                            <div>
+                                <p style="font-weight: 700; color: var(--brand-primary);">SEDANG TRANSIT</p>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary);">Paket Anda sedang diproses
+                                    di Hub Jakarta Selatan.</p>
+                            </div>
+                            <i class="fas fa-truck-loading"
+                                style="font-size: 1.5rem; color: var(--text-secondary);"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Price Checker Box -->
+                <div class="tool-card" id="cek-tarif">
+                    <h3><i class="fas fa-calculator"></i> Estimasi Tarif</h3>
+                    <div class="input-row">
+                        <div class="input-field">
+                            <label>Dari Kota</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <input type="text" placeholder="Asal">
+                            </div>
+                        </div>
+                        <div class="input-field">
+                            <label>Ke Kota</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-location-arrow"></i>
+                                <input type="text" placeholder="Tujuan">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-field">
+                            <label>Berat (KG)</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-weight-hanging"></i>
+                                <input type="number" id="ongkir-weight" placeholder="1.0">
+                            </div>
+                        </div>
+                        <div class="input-field">
+                            <label>Layanan</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-box"></i>
+                                <select id="ongkir-service">
+                                    <option value="9000">Logisti-Reguler (2-3 Hari)</option>
+                                    <option value="15000">Logisti-Express (1 Hari)</option>
+                                    <option value="25000">Logisti-Priority (6-8 Jam)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" style="width: 100%;" onclick="calculateOngkir()">Hitung
+                        Biaya</button>
+
+                    <div id="ongkir-result-card" class="result-display" style="display: none;">
+                        <div class="result-row">
+                            <div>
+                                <p id="result-service-name" style="font-weight: 700;"></p>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary);">Estimasi Tiba: <span
+                                        id="result-eta"></span></p>
+                            </div>
+                            <div class="price-tag" id="result-price"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="section-padding">
+        <div class="container">
+            <div class="section-header">
+                <h2>Keunggulan LogistiKita</h2>
+                <p>Kami mendefinisikan ulang standar pengiriman dengan integrasi teknologi dan jaringan operasional yang
+                    mumpuni.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                    <h4>Kecepatan Instan</h4>
+                    <p>Optimasi rute berbasis AI memastikan paket Anda tiba lebih cepat dari estimasi standar industri.
+                    </p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h4>Keamanan Berlapis</h4>
+                    <p>Setiap pengiriman dilengkapi dengan asuransi komprehensif dan pelacakan real-time 24/7.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                    <h4>Nilai Ekonomis</h4>
+                    <p>Tarif yang sangat kompetitif tanpa mengorbankan kualitas layanan dan kecepatan pengiriman.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Workflow -->
+    <section class="section-padding workflow">
+        <div class="container">
+            <div class="section-header">
+                <h2>Alur Kerja Profesional</h2>
+                <p>Proses pengiriman yang transparan dan sistematis untuk memastikan kepuasan pelanggan.</p>
+            </div>
+            <div class="workflow-grid">
+                <div class="workflow-step">
+                    <div class="step-num">1</div>
+                    <h5>Pemesanan</h5>
+                    <p>Input data melalui aplikasi atau website.</p>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-num">2</div>
+                    <h5>Penjemputan</h5>
+                    <p>Kurir mengambil paket sesuai jadwal.</p>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-num">3</div>
+                    <h5>Sortir & Hub</h5>
+                    <p>Paket diproses di hub pusat kami.</p>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-num">4</div>
+                    <h5>Pengantaran</h5>
+                    <p>Paket sampai di tujuan akhir.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services -->
+    <section class="section-padding" id="layanan">
+        <div class="container">
+            <div class="section-header">
+                <h2>Pilihan Layanan Kami</h2>
+                <p>Sesuaikan kebutuhan logistik Anda dengan berbagai opsi pengiriman premium kami.</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-image"
+                        style="background-image: url('https://images.unsplash.com/photo-1566576721346-d4a3b4eaad55?auto=format&fit=crop&q=80&w=600');">
+                    </div>
+                    <div class="service-body">
+                        <span class="service-badge">Standar</span>
+                        <h4>Logisti-Reguler</h4>
+                        <p>Layanan andalan dengan jangkauan nasional yang luas dan biaya sangat ekonomis.</p>
+                        <a href="#" class="btn btn-outline" style="width: 100%;">Selengkapnya</a>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <div class="service-image"
+                        style="background-image: url('https://images.unsplash.com/photo-1512418490979-92798cec1380?auto=format&fit=crop&q=80&w=600');">
+                    </div>
+                    <div class="service-body">
+                        <span class="service-badge">Prioritas</span>
+                        <h4>Logisti-Express</h4>
+                        <p>Kirim hari ini, tiba besok. Solusi tepat untuk kebutuhan kiriman yang mendesak.</p>
+                        <a href="#" class="btn btn-outline" style="width: 100%;">Selengkapnya</a>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <div class="service-image"
+                        style="background-image: url('https://images.unsplash.com/photo-1606185542453-619f7e53ef9c?auto=format&fit=crop&q=80&w=600');">
+                    </div>
+                    <div class="service-body">
+                        <span class="service-badge">Eksklusif</span>
+                        <h4>Logisti-Priority</h4>
+                        <p>Layanan tercepat kami dengan jaminan sampai di hari yang sama untuk area tertentu.</p>
+                        <a href="#" class="btn btn-outline" style="width: 100%;">Selengkapnya</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-info">
+                    <a href="home" class="footer-logo logo" style="color: white;">
+                        <i class="fas fa-cube"></i>
+                        <span>Logisti<b>Kita</b></span>
+                    </a>
+                    <p class="footer-desc">Solusi logistik terpadu untuk efisiensi bisnis masa depan Anda.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h5>Layanan</h5>
+                    <ul>
+                        <li><a href="#">Lacak Paket</a></li>
+                        <li><a href="#">Estimasi Tarif</a></li>
+                        <li><a href="#">Keagenan</a></li>
+                        <li><a href="#">Cargo Solution</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col" id="tentang">
+                    <h5>Perusahaan</h5>
+                    <ul>
+                        <li><a href="#">Tentang Kami</a></li>
+                        <li><a href="#">Karir</a></li>
+                        <li><a href="#">Pusat Media</a></li>
+                        <li><a href="#">ESG Commitment</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h5>Hubungi Kami</h5>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-phone-alt"></i> +62 21 500 123</a></li>
+                        <li><a href="#"><i class="fas fa-envelope"></i> care@logistikita.id</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 PT Logistikita Indonesia Tbk. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/home.js"></script>
+</body>
+
+</html>
