@@ -146,21 +146,21 @@ Semua request API mengembalikan respons JSON seragam dengan header CORS dan HTTP
 
 ```mermaid
 sequenceDiagram
-    participant User as Eco Warrior
-    participant Coll as Eco Collector
-    participant Sys as EcoRecycle System
-    participant Admin as Eco Manager
+    participant User as Eco Warrior (Donatur)
+    participant Coll as Eco Collector (Kolektor)
+    participant Sys as Sistem EcoRecycle
+    participant Admin as Eco Manager (Admin)
 
-    User->>Sys: Request Pickup E-Waste (Submit Address & Weight)
-    Sys-->>User: Tracking ID (ECR-YYYYMMDD-XXXXX)
-    Coll->>Sys: Claim Task from Bandung Queue
-    Sys-->>Coll: View Location Details (Bandung Maps Route)
-    Coll->>Sys: Update Status to PICKUP & TRANSIT
-    Coll->>Sys: Verify Weight physically & Deliver to Hub (ARRIVED)
-    Admin->>Sys: Approve Weight Verification & Trigger Payout
-    Sys->>Sys: Generate transaction reference (TX-XXXXX)
-    Sys->>Sys: Change status to COMPLETED & Log Audit Transaction
-    Sys-->>User: Wallet credited & Payout Notification Alert
+    User->>Sys: Ajukan Penjemputan Sampah Elektronik (Input Alamat & Berat)
+    Sys-->>User: Berikan Nomor Pelacakan (ECR-YYYYMMDD-XXXXX)
+    Coll->>Sys: Klaim Tugas dari Antrean Penjemputan Bandung
+    Sys-->>Coll: Tampilkan Detail Lokasi & Peta Rute
+    Coll->>Sys: Perbarui Status ke Penjemputan (PICKUP) & Di Perjalanan (TRANSIT)
+    Coll->>Sys: Verifikasi Berat Fisik & Antar ke Hub Daur Ulang (ARRIVED)
+    Admin->>Sys: Setujui Verifikasi Berat & Cairkan Dana Payout
+    Sys->>Sys: Hasilkan Kode Referensi Transaksi Lokal (TX-XXXXX)
+    Sys->>Sys: Ubah Status ke Selesai (COMPLETED) & Simpan Log Transaksi
+    Sys-->>User: Saldo Reward Dikirim & Muncul Notifikasi Berhasil
 ```
 
 ---
