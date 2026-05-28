@@ -1,190 +1,176 @@
-#  EcoRecycle - Smart E-Waste Reverse Logistics (V1.0)
+# EcoRecycle - Smart E-Waste Reverse Logistics (V2.0)
 
-EcoRecycle adalah platform inovatif yang dirancang untuk mengelola rantai pasok terbalik (reverse logistics) khusus sampah elektronik (e-waste). Platform ini memfasilitasi siklus hidup produk elektronik mulai dari akhir penggunaan (end-of-life) hingga proses daur ulang yang bertanggung jawab, sambil memberikan insentif ekonomi kepada pengguna.
-
----
-
-##  Deskripsi Proyek
-Masalah sampah elektronik (e-waste) global terus meningkat. EcoRecycle hadir sebagai jembatan antara konsumen (**Eco Warriors**) dan fasilitas pengolahan sampah (**Collectors**). Dengan sistem pelacakan berbasis tracking number unik dan integrasi reward otomatis, kita dapat memastikan e-waste tidak berakhir di TPA, melainkan didaur ulang secara efisien untuk mendukung ekonomi sirkular.
+EcoRecycle adalah platform inovatif yang dirancang untuk mengelola rantai pasok terbalik (reverse logistics) khusus sampah elektronik (e-waste) di wilayah Bandung (Kota, Kabupaten, dan KBB). Platform ini memfasilitasi siklus hidup produk elektronik mulai dari akhir penggunaan (end-of-life) hingga proses daur ulang yang bertanggung jawab di hub daur ulang, sambil memberikan insentif ekonomi digital kepada pengguna.
 
 ---
 
-##  Fitur Utama
-1.  **Smart E-Waste Estimator**: Hitung potensi reward berdasarkan berat dan kategori sampah elektronik.
-2.  **Reverse Logistics Tracking**: Lacak perjalanan sampah Anda dari penjemputan hingga proses akhir daur ulang.
-3.  **Automated Eco-Rewards**: Integrasi pembayaran otomatis via SmartBank API setelah sampah diverifikasi.
-4.  **Multi-Role Dashboard**: Panel khusus untuk Eco Warriors (Penyetor), Expert Collectors (Kurir), dan Eco Admin (Pengelola).
-5.  **Interactive Maps**: Penentuan lokasi penjemputan dan navigasi kolektor menggunakan Leaflet.js.
-6.  **`transactions`**: Integrasi keuangan (Payouts) hasil reward.
+## 🌟 Deskripsi Proyek
+Masalah sampah elektronik (e-waste) global terus meningkat. EcoRecycle hadir sebagai jembatan antara konsumen (**Eco Warriors**), mitra penjemputan lapangan (**Eco Collectors**), dan manajer keuangan/operasional (**Eco Managers**). Dengan sistem pelacakan berbasis tracking number unik dan integrasi reward otomatis via E-Wallet / Transfer Bank, kita dapat memastikan e-waste tidak berakhir di TPA, melainkan didaur ulang secara efisien untuk mendukung ekonomi sirkular.
 
 ---
 
-##  Logika Bisnis & Aturan Reward
-Untuk menjaga keberlanjutan platform, EcoRecycle menerapkan aturan keuangan berikut:
-1.  **Estimasi Reward**: Dihitung berdasarkan `Berat (KG) x Rate Kategori`.
-2.  **Handling Fee**: Setiap transaksi dikenakan biaya operasional sebesar **5%** dari total reward gross.
-3.  **Net Reward**: Nilai yang diterima pengguna adalah `Gross Reward - 5% Fee`.
-4.  **Verifikasi Kolektor**: Reward hanya akan diproses jika Kolektor telah menekan tombol "Selesai Verifikasi" yang menandakan barang sudah sesuai dengan deskripsi.
+## 🛠️ Fitur Utama
+
+1. **Carbon & Eco-Reward Estimator**: Hitung potensi reward finansial dan kontribusi pengurangan emisi CO2 berdasarkan berat (KG) dan kategori sampah elektronik.
+2. **Reverse Logistics Tracking**: Lacak perjalanan sampah elektronik Anda dengan timeline interaktif (Pending ➔ Dijemput ➔ Transit ➔ Tiba di Hub ➔ Selesai & Dibayar).
+3. **Automated Eco-Rewards Payout**: Integrasi pembayaran otomatis digital via E-Wallet / Transfer Bank setelah sampah elektronik tiba di hub dan diverifikasi oleh Eco Manager.
+4. **Gamified Eco-Level & Impact Score**: Klasifikasi pengguna berdasarkan total donasi sampah elektronik (Bronze Saver, Silver Guardian, Emerald Hero) yang dihitung secara dinamis.
+5. **Interactive Maps (Leaflet.js)**: Penentuan rute penjemputan donor oleh kolektor secara interaktif di wilayah Bandung.
+6. **Multi-Role Dashboard**: Panel terintegrasi untuk 3 target pengguna utama:
+   - **Eco Warriors** (Melihat status donasi, grafik tren bulanan, estimasi karbon, & dompet digital).
+   - **Eco Collectors** (Menerima antrean pickup Bandung, navigasi maps, & klaim komisi).
+   - **Eco Managers / Admin** (Analitik volume e-waste, live map kolektor, & validasi payout reward).
 
 ---
 
-##  Arsitektur & Teknologi
+## 📐 Arsitektur & Teknologi
 
 ### Tech Stack
-- **Backend**: PHP 7.4/8.x (Native MVC Architecture)
-- **Database**: MySQL / MariaDB
+- **Backend**: PHP 7.4/8.x (Native MVC Architecture dengan Prepared Statements & Signed Token)
+- **Database**: MySQL / MariaDB (Optimasi Skema)
 - **Frontend**: HTML5, Vanilla CSS3 (Modern Tech Design), JavaScript (Vanilla ES6)
-- **Libraries**: SweetAlert2 (Notifications), Leaflet.js (Mapping), Chart.js (Analytics), FontAwesome 6 (Icons)
+- **Pustaka**: SweetAlert2 (Notifikasi UI), Leaflet.js (Peta Rute), Chart.js (Grafik Analitik)
 
 ### Persyaratan Sistem
-- **Server**: Apache / Nginx (Recommended: XAMPP / Laragon)
-- **PHP Version**: 7.4 ke atas
+- **Server**: Apache / Nginx (XAMPP / Laragon)
+- **PHP Version**: 7.4 ke atas (dengan ekstensi `mysqli` dan `json` aktif)
 - **Database**: MySQL 5.7+ atau MariaDB 10.4+
-- **Browser**: Modern Browser (Chrome, Edge, Firefox, Safari) dengan dukungan JavaScript aktif.
 
-### Struktur Folder
+### Struktur Folder Proyek
 ```text
-/logistikita_tubes
+/tubes_pemrograman3
 ├── app/
 │   ├── Config/         # Konfigurasi Database & Global
+│   │   └── Database.php
 │   ├── Controllers/    # Handler API & Logika Bisnis (MVC)
+│   │   ├── BaseController.php      # Controller Induk (Signed Tokens & REST Codes)
+│   │   ├── AuthController.php      # Autentikasi Pengguna & Registrasi
+│   │   └── EcoRecycleController.php # Logika E-Waste & Payout
 │   ├── Models/         # Abstraksi Data & Query SQL (MVC)
-│   └── Views/          # Template HTML (Landing, Dashboard, Admin, Collector)
+│   │   ├── User.php
+│   │   └── WastePickup.php
+│   └── Views/          # Template Antarmuka HTML
+│       ├── index.html              # Landing Page Terfokus (Conversion-Oriented)
+│       ├── login.html              # Autentikasi Masuk
+│       ├── register.html           # Pendaftaran Akun
+│       ├── dashboard.html          # Portal Eco Warrior
+│       ├── collector.html          # Portal Eco Collector
+│       ├── admin.html              # Portal Eco Manager
+│       └── profile.html            # Manajemen Akun Pengguna
 ├── assets/
-│   ├── css/            # UI Styling (style.css, admin.css, dashboard.css)
-│   ├── js/             # Frontend Logic (home.js, dashboard.js, admin.js)
-│   └── img/            # Aset Gambar & Media (High-Quality Generated)
-├── index.php           # Front Controller & API Router (Routing System)
+│   ├── css/            # UI Styling (style.css, admin.css, dashboard.css, collector.css)
+│   ├── js/             # Front Logic (home.js, auth.js, dashboard.js, admin.js, collector.js)
+│   └── img/            # Aset Gambar & Media
+├── index.php           # Front Controller & API Router
 ├── setup.php           # Database Auto-Installer & Seeder
 └── README.md           # Dokumentasi Teknis Lengkap
 ```
 
 ---
 
-##  Skema Database (Smart Schema)
-Aplikasi ini menggunakan database `ecorecycle` dengan struktur yang dioptimalkan:
+## 🔒 Skema Keamanan & Database
+
+Basis data `ecorecycle` menggunakan relasi data yang optimal dengan skema berikut:
 
 ### 1. Tabel `users`
-| Kolom | Tipe | Deskripsi |
-| --- | --- | --- |
-| `id` | INT (PK) | ID Unik Pengguna |
-| `name` | VARCHAR | Nama Lengkap |
-| `email` | VARCHAR | Email (Unique) |
-| `password` | VARCHAR | Password Hash |
-| `role` | ENUM | `user`, `collector`, `admin` |
+Menyimpan akun pengguna. Password diamankan dengan hash `password_hash()`.
+Role yang didukung: `admin` (Eco Manager), `collector` (Eco Collector), `user` (Eco Warrior).
 
 ### 2. Tabel `waste_categories`
-| Kolom | Tipe | Deskripsi |
-| --- | --- | --- |
-| `id` | INT (PK) | ID Kategori |
-| `name` | VARCHAR | Contoh: Gadgets, Computers |
-| `rate_per_kg` | DECIMAL | Nilai reward per kilogram |
+Daftar kategori sampah dan rate reward per kilogram (KG).
 
 ### 3. Tabel `pickups`
-| Kolom | Tipe | Deskripsi |
-| --- | --- | --- |
-| `id` | INT (PK) | ID Penjemputan |
-| `tracking_number` | VARCHAR | Nomor Unik (ECR-...) |
-| `user_id` | INT (FK) | Referensi ke tabel `users` |
-| `status` | ENUM | `pending`, `processing`, `transit`, `completed` |
-| `reward_amount` | DECIMAL | Total reward yang diterima |
+Tabel transaksi donasi utama. Dilengkapi kolom `collector_id` untuk pemetaan tugas kolektor yang akurat.
+
+### 4. Tabel `pickup_history`
+Mencatat detail lini masa dan riwayat mutasi status donasi.
+
+### 5. Tabel `transactions`
+Menyimpan log audit transaksi payout reward ke dompet digital / rekening bank pengguna.
 
 ---
 
-##  Panduan Instalasi (Step-by-Step)
+## 🚀 Panduan Instalasi (Lokal XAMPP)
 
-### 1. Persiapan Environment
-- Pastikan Anda memiliki server lokal (XAMPP/Laragon) dengan **PHP minimal versi 7.4**.
-- Pastikan ekstensi `mysqli` dan `json` sudah aktif di PHP Anda.
+### 1. Setup Project
+1. Clone repositori ini dan letakkan di direktori root server lokal Anda.
+   (Contoh: `C:/xampp/htdocs/progress_tubes/tubes_pemrograman3/`).
+2. Pastikan MySQL/MariaDB server Anda sudah aktif di XAMPP Control Panel.
 
-### 2. Setup Project
-1.  Download atau clone project ini.
-2.  Letakkan di folder root server Anda (Contoh: `C:/xampp/htdocs/progress_tubes/logistikita_tubes/`).
+### 2. Inisialisasi Database
+Jalankan skrip auto-installer melalui command line di direktori proyek:
+```bash
+php setup.php
+```
+*Skrip ini secara otomatis membuat database `ecorecycle`, menginisialisasi semua tabel dengan relasi kunci asing, dan menyuntikkan data awal kategori sampah beserta akun demo.*
 
-### 3. Inisialisasi Database
-Buka browser dan akses alamat berikut:
-`http://localhost/progress_tubes/logistikita_tubes/setup.php`
-
-> [!IMPORTANT]
-> Script ini akan secara otomatis:
-> - Membuat database **`ecorecycle`**.
-> - Membuat semua tabel dan relasi.
-> - Mengisi data awal (**Seeding**) kategori sampah.
-> - Membuat akun demo: **Admin** (admin@eco.com), **Collector** (coll@eco.com), dan **User** (user@eco.com) dengan password `password123`.
-
----
-
-##  Cara Penggunaan Aplikasi
-
-###  Sebagai Eco Warrior (User)
-1.  **Login/Register**: Masuk ke dashboard pengguna.
-2.  **Request Pickup**: Klik "Setor Sampah Baru", pilih kategori (misal: Laptop), isi berat estimasi dan alamat penjemputan.
-3.  **Monitor**: Cek status penjemputan secara berkala di tab "Status Penjemputan".
-4.  **Reward**: Setelah status selesai, saldo reward akan otomatis masuk ke profil Anda.
-
-###  Sebagai Expert Collector (Kurir)
-1.  **Terima Tugas**: Lihat daftar antrean penjemputan di wilayah Anda.
-2.  **Navigasi**: Gunakan peta interaktif untuk menuju lokasi donor.
-3.  **Update Status**: Setelah sampah diambil, ubah status menjadi `transit` dan akhirnya `completed` setelah diverifikasi di hub.
-
-###  Sebagai Eco Admin
-1.  **Monitoring**: Pantau statistik total e-waste yang berhasil didaur ulang.
-2.  **User Management**: Kelola data pengguna dan kolektor.
-3.  **Finance Control**: Verifikasi pencairan reward yang dilakukan sistem.
+### 3. Kredensial Akun Demo
+Setelah inisialisasi basis data selesai, Anda dapat login menggunakan kredensial demo berikut (password default: `password123`):
+* **Eco Manager (Admin)**: `admin@ecorecycle.com`
+* **Eco Collector (Kolektor)**: `collector@ecorecycle.com`
+* **Eco Warrior (User)**: `user@ecorecycle.com`
 
 ---
 
-##  Dokumentasi API (Web Service)
+## 🌐 Dokumentasi API (Web Service)
 
-### 1. Modul Autentikasi
-- **Login**: `POST /api/auth/login`
-- **Register**: `POST /api/auth/register`
+Semua request API mengembalikan respons JSON seragam dengan header CORS dan HTTP response status codes yang tepat (misal: 201 Created, 401 Unauthorized, 405 Method Not Allowed).
 
-### 2. Modul E-Waste
-#### **Request Penjemputan**
-- **Endpoint**: `POST /api/ecorecycle/request_pickup`
-- **Contoh Request**:
-  ```json
-  {
-    "user_id": 1,
-    "category": "Computers",
-    "weight_kg": 5,
-    "pickup_address": "Jl. Merdeka No. 1, Bandung"
-  }
-  ```
+### 1. Autentikasi Pengguna
+* **Login**: `POST /api/auth/login`
+  - Input: `{"email": "...", "password": "..."}`
+  - Output: Mengembalikan Signed Token (HMAC SHA256) untuk hak akses di request berikutnya.
+* **Register**: `POST /api/auth/register`
+  - Input: `{"name": "...", "email": "...", "password": "...", "role": "user"}`
 
-#### **Cek Status Tracking**
-- **Endpoint**: `GET /api/ecorecycle/pickup_status?tracking_number=ECR-XXXXX`
+### 2. Pengelolaan E-Waste (Memerlukan Token Autentikasi)
+* **Request Penjemputan**: `POST /api/ecorecycle/request_pickup`
+  - Header: `Authorization: Bearer <token>`
+  - Input: `{"category": "...", "weight_kg": ..., "pickup_address": "...", "contact_phone": "...", "item_description": "..."}`
+* **Ambil Tugas (Kolektor)**: `POST /api/ecorecycle/assign_collector`
+  - Header: `Authorization: Bearer <token>`
+  - Input: `{"tracking_number": "ECR-XXXX-XXXXX"}`
+* **Pembaruan Status Misi**: `POST /api/ecorecycle/pickup_status`
+  - Header: `Authorization: Bearer <token>`
+  - Input: `{"tracking_number": "ECR-...", "status": "transit|arrived", "location": "...", "notes": "..."}`
+* **Lacak Tracking Number**: `GET /api/ecorecycle/pickup_status?tracking_number=ECR-...`
+* **Kalkulator Estimator**: `POST /api/ecorecycle/estimate_reward`
+  - Input: `{"category": "...", "weight_kg": ...}`
+* **Pencairan Reward (Admin)**: `POST /api/ecorecycle/process_payout`
+  - Header: `Authorization: Bearer <token>`
+  - Input: `{"pickup_id": ...}`
 
 ---
 
-##  Alur Kerja Sistem (Workflow)
+## 🔄 Alur Kerja Sistem (Workflow)
 
 ```mermaid
 sequenceDiagram
     participant User as Eco Warrior
-    participant System as EcoRecycle System
-    participant Coll as Collector
-    participant Bank as SmartBank API
+    participant Coll as Eco Collector
+    participant Sys as EcoRecycle System
+    participant Admin as Eco Manager
 
-    User->>System: Request Pickup (Submit E-Waste)
-    System-->>User: Tracking ID (ECR-XXXX)
-    
-    Coll->>System: Accept Task & Pickup Item
-    Coll->>System: Update Status to COMPLETED
-    
-    System->>System: Calculate Net Reward (Total - 5% Fee)
-    System->>Bank: Process Payout Transfer
-    Bank-->>User: Reward Received in Digital Wallet
+    User->>Sys: Request Pickup E-Waste (Submit Address & Weight)
+    Sys-->>User: Tracking ID (ECR-YYYYMMDD-XXXXX)
+    Coll->>Sys: Claim Task from Bandung Queue
+    Sys-->>Coll: View Location Details (Bandung Maps Route)
+    Coll->>Sys: Update Status to PICKUP & TRANSIT
+    Coll->>Sys: Verify Weight physically & Deliver to Hub (ARRIVED)
+    Admin->>Sys: Approve Weight Verification & Trigger Payout
+    Sys->>Sys: Generate transaction reference (TX-XXXXX)
+    Sys->>Sys: Change status to COMPLETED & Log Audit Transaction
+    Sys-->>User: Wallet credited & Payout Notification Alert
 ```
 
 ---
 
-##  Pemecahan Masalah (Troubleshooting)
-- **Koneksi Gagal**: Cek `app/Config/Database.php` dan pastikan kredensial database Anda benar.
-- **Tampilan Berantakan**: Pastikan file CSS di `assets/css/` dapat diakses dan tidak terblokir oleh permission folder.
-- **API Return 404**: Gunakan server Apache dengan `.htaccess` aktif untuk mendukung routing URL cantik.
+## 🛠️ Pemecahan Masalah (Troubleshooting)
+
+1. **Gagal Setup Database**: Periksa kembali konfigurasi host, port, dan user di `app/Config/Database.php`. Jika Anda menggunakan konfigurasi non-standard di server produksi, atur variabel lingkungan berikut: `DB_HOST`, `DB_USER`, `DB_PASS`, `DB_NAME`.
+2. **Koneksi Database Terputus**: Pastikan driver `mysqli` terpasang di modul PHP server Anda.
+3. **API Mengembalikan Error 401**: Pastikan header `Authorization` dikirimkan dalam format `Bearer <token>` dan token belum kadaluwarsa (berlaku 24 jam setelah login).
 
 ---
 **EcoRecycle Project** - *Turning E-Waste into Eco-Wealth.*
-Dibuat dengan ❤️ untuk masa depan bumi yang lebih hijau.
+Dibuat dengan ❤️ untuk menjaga kelestarian lingkungan dan ekosistem hijau di Bandung.

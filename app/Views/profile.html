@@ -4,19 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akun Profil - LogistiKita</title>
+    <title>Profil Saya | EcoRecycle</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    
     <style>
         /* Sidebar & Layout Styles */
         :root {
             --sidebar-width: 280px;
-            --sidebar-bg: #0f172a;
-            --sidebar-text: #94a3b8;
-            --sidebar-hover: #1e293b;
-            --sidebar-active: #e11d48;
+            --sidebar-bg: #064e3b;
+            --sidebar-text: #a7f3d0;
+            --sidebar-hover: rgba(255, 255, 255, 0.05);
+            --sidebar-active: #10b981;
         }
 
         body.portal-page {
@@ -58,7 +58,7 @@
         }
 
         .sidebar-logo i {
-            color: var(--brand-red, #e11d48);
+            color: var(--sidebar-active);
             font-size: 2rem;
         }
 
@@ -76,7 +76,7 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #475569;
+            color: #34d399;
         }
 
         .sidebar-item {
@@ -101,7 +101,7 @@
         .sidebar-item.active {
             background: var(--sidebar-active);
             color: white;
-            box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
         }
 
         .sidebar-footer {
@@ -126,7 +126,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #e11d48, #991b1b);
+            background: #10b981;
             color: white;
             font-weight: 900;
         }
@@ -145,7 +145,7 @@
         .user-role-side {
             display: block;
             font-size: 0.75rem;
-            color: var(--sidebar-text);
+            color: #a7f3d0;
         }
 
         .portal-content {
@@ -190,7 +190,7 @@
         .header-tab.active {
             color: var(--brand-primary);
             border-color: var(--brand-primary);
-            background: rgba(225, 29, 72, 0.05);
+            background: rgba(16, 185, 129, 0.05);
         }
 
         /* Main Content Grid */
@@ -213,14 +213,14 @@
             height: 100px;
             margin: 0 auto 16px auto;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--brand-primary), #991b1b);
+            background: linear-gradient(135deg, var(--brand-primary), #047857);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2.5rem;
             font-weight: 900;
             color: white;
-            box-shadow: 0 10px 25px rgba(225, 29, 72, 0.2);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.25);
             border: 4px solid var(--white);
         }
 
@@ -233,14 +233,14 @@
 
         .premium-badge {
             display: inline-block;
-            background: rgba(225, 29, 72, 0.1);
+            background: rgba(16, 185, 129, 0.1);
             color: var(--brand-primary);
             padding: 6px 16px;
             border-radius: 50px;
             font-size: 0.75rem;
             font-weight: 800;
             letter-spacing: 0.5px;
-            border: 1px solid rgba(225, 29, 72, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
         /* Right Content Area */
@@ -317,7 +317,7 @@
             outline: none;
             border-color: var(--brand-primary);
             background: var(--white);
-            box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.1);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
         }
 
         .data-input[readonly] {
@@ -340,15 +340,15 @@
             display: inline-flex;
             align-items: center;
             gap: 12px;
-            box-shadow: 0 10px 25px rgba(225, 29, 72, 0.2);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
             width: 100%;
             justify-content: center;
         }
 
         .action-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 15px 35px rgba(225, 29, 72, 0.3);
-            background: #be123c;
+            box-shadow: 0 15px 35px rgba(16, 185, 129, 0.3);
+            background: #059669;
         }
 
         /* Toggle Switch */
@@ -489,10 +489,6 @@
             .toggle {
                 align-self: flex-start;
             }
-
-            .desk-text {
-                display: none;
-            }
         }
 
         @keyframes fadeIn {
@@ -500,7 +496,6 @@
                 opacity: 0;
                 transform: translateY(15px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -512,8 +507,8 @@
 <body class="portal-page">
     <!-- Mobile Header -->
     <div class="mobile-header">
-        <a href="#" class="mobile-logo" style="font-weight: 900; text-decoration: none; color: #1e293b; display: flex; align-items: center; gap: 8px; font-size: 1.2rem;">
-            <i class="fas fa-cube" style="color: #e11d48;"></i> LogistiKita
+        <a href="home" class="mobile-logo" style="font-weight: 900; text-decoration: none; color: #1e293b; display: flex; align-items: center; gap: 8px; font-size: 1.2rem;">
+            <i class="fas fa-leaf" style="color: #10b981;"></i> EcoRecycle
         </a>
         <button class="hamburger-btn" id="mobileMenuToggle" style="background: none; border: none; font-size: 1.5rem; color: #1e293b; cursor: pointer;">
             <i class="fas fa-bars"></i>
@@ -525,8 +520,8 @@
 
     <!-- Sidebar Navigation -->
     <aside class="sidebar" id="sidebar">
-        <a href="" class="sidebar-logo">
-            <i class="fas fa-cube"></i> LogistiKita
+        <a href="home" class="sidebar-logo">
+            <i class="fas fa-leaf"></i> EcoRecycle
         </a>
 
         <div class="sidebar-nav">
@@ -536,23 +531,23 @@
                     <i class="fas fa-home"></i> Beranda
                 </a>
                 <a href="dashboard" class="sidebar-item" style="text-decoration:none;">
-                    <i class="fas fa-box"></i> Pemesanan Pengiriman
+                    <i class="fas fa-recycle"></i> Setor E-Waste
                 </a>
                 <a href="dashboard" class="sidebar-item" style="text-decoration:none;">
-                    <i class="fas fa-truck-fast"></i> Status Pengiriman
+                    <i class="fas fa-truck-pickup"></i> Lacak Status
                 </a>
                 <a href="dashboard" class="sidebar-item" style="text-decoration:none;">
-                    <i class="fas fa-history"></i> Riwayat Pengiriman
+                    <i class="fas fa-history"></i> Riwayat Payout
                 </a>
             </div>
         </div>
 
         <div class="sidebar-footer">
             <div class="user-profile-side">
-                <div class="avatar" id="nav-user-avatar">U</div>
+                <div class="avatar" id="nav-user-avatar">EW</div>
                 <div class="user-info">
-                    <span class="user-name-side" id="nav-user-name">Pengguna</span>
-                    <span class="user-role-side" id="nav-user-role">MEMBER</span>
+                    <span class="user-name-side" id="nav-user-name">Eco Warrior</span>
+                    <span class="user-role-side" id="nav-user-role">WARRIOR</span>
                 </div>
             </div>
             <div style="padding: 0 16px; margin-top: 8px;">
@@ -564,138 +559,114 @@
     </aside>
 
     <div class="portal-content">
-    <!-- Main Content -->
-    <main class="profile-dashboard">
-        
-        <!-- Center Profile Tabs -->
-        <div class="profile-tabs-wrapper">
-            <div class="header-tab active" data-target="pane-data"><i class="fas fa-user"></i> Data Profil</div>
-            <div class="header-tab" data-target="pane-settings"><i class="fas fa-sliders-h"></i> Pengaturan</div>
-            <div class="header-tab" data-target="pane-policy"><i class="fas fa-shield-alt"></i> Persyaratan & Privasi</div>
-        </div>
-
-        <!-- Centered User Card -->
-        <div class="profile-header-centered">
-            <div class="avatar-glow" id="profile-avatar-glow">FF</div>
-            <h1 class="user-name" id="profile-user-name">Memuat...</h1>
-            <div class="premium-badge" id="profile-user-role"><i class="fas fa-crown"></i> MEMBER</div>
-        </div>
-
-        <section class="content-area">
-
-            <!-- PANE 1: Data Diri -->
-            <div id="pane-data" class="pane active">
-                <div class="pane-header">
-                    <h2>Data Diri</h2>
-                    <p>Kelola informasi identitas dan alamat untuk pengiriman.</p>
-                </div>
-                <form>
-                    <div class="data-grid">
-                        <div class="data-group">
-                            <label>Nama Lengkap</label>
-                            <input type="text" class="data-input" id="profile-input-name" value="">
-                        </div>
-                        <div class="data-group">
-                            <label>Nomor HP / WhatsApp</label>
-                            <input type="tel" class="data-input" id="profile-input-phone" value="" placeholder="Masukkan Nomor HP">
-                        </div>
-                        <div class="data-group" style="grid-column: 1 / -1;">
-                            <label>Alamat Email</label>
-                            <input type="email" class="data-input" id="profile-input-email" value="" readonly>
-                        </div>
-                        <div class="data-group" style="grid-column: 1 / -1;">
-                            <label>Alamat Utama (Rumah / Kantor)</label>
-                            <textarea class="data-input"
-                                rows="4">Jl. Telekomunikasi No. 1, Terusan Buahbatu, Bandung, Jawa Barat</textarea>
-                        </div>
-                    </div>
-                    <!-- Moved standard action button inside for cleaner mobile view -->
-                    <button type="button" class="action-btn"><i class="fas fa-save"></i> Simpan Perubahan</button>
-                </form>
+        <!-- Main Content -->
+        <main class="profile-dashboard">
+            
+            <!-- Center Profile Tabs -->
+            <div class="profile-tabs-wrapper">
+                <div class="header-tab active" data-target="pane-data"><i class="fas fa-user"></i> Data Profil</div>
+                <div class="header-tab" data-target="pane-settings"><i class="fas fa-sliders-h"></i> Pengaturan</div>
+                <div class="header-tab" data-target="pane-policy"><i class="fas fa-shield-alt"></i> Kebijakan & Privasi</div>
             </div>
 
-            <!-- PANE 2: Pengaturan -->
-            <div id="pane-settings" class="pane">
-                <div class="pane-header">
-                    <h2>Pengaturan Akun</h2>
-                    <p>Sesuaikan preferensi notifikasi dan keamanan akun Anda.</p>
-                </div>
-
-                <div class="setting-row">
-                    <div class="setting-info">
-                        <h4>Notifikasi Pengiriman</h4>
-                        <p>Terima update resi via WhatsApp & Email.</p>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="setting-row">
-                    <div class="setting-info">
-                        <h4>Autentikasi Dua Faktor</h4>
-                        <p>Tingkatkan lapisan keamanan saat login baru.</p>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="setting-row" style="border-bottom: none;">
-                    <div class="setting-info">
-                        <h4>Ganti Kata Sandi</h4>
-                        <p>Perbarui keamanan akun berkala.</p>
-                    </div>
-                    <button type="button" class="action-btn"
-                        style="margin-top:0; width: auto; background: var(--gray-800); box-shadow:none; padding: 12px 24px;"><i
-                            class="fas fa-key"></i> Ubah Password</button>
-                </div>
+            <!-- Centered User Card -->
+            <div class="profile-header-centered">
+                <div class="avatar-glow" id="profile-avatar-glow">EW</div>
+                <h1 class="user-name" id="profile-user-name">Memuat...</h1>
+                <div class="premium-badge" id="profile-user-role"><i class="fas fa-crown"></i> ECO WARRIOR</div>
             </div>
 
-            <!-- PANE 3: Kebijakan -->
-            <div id="pane-policy" class="pane">
-                <div class="pane-header">
-                    <h2>Persyaratan & Privasi</h2>
-                    <p>Aturan perlindungan privasi data pribadi Anda.</p>
+            <section class="content-area">
+
+                <!-- PANE 1: Data Diri -->
+                <div id="pane-data" class="pane active">
+                    <div class="pane-header">
+                        <h2>Data Diri</h2>
+                        <p>Kelola data identitas dan alamat donasi sampah elektronik Anda.</p>
+                    </div>
+                    <form>
+                        <div class="data-grid">
+                            <div class="data-group">
+                                <label>Nama Lengkap</label>
+                                <input type="text" class="data-input" id="profile-input-name" value="">
+                            </div>
+                            <div class="data-group">
+                                <label>Nomor WhatsApp Aktif</label>
+                                <input type="tel" class="data-input" id="profile-input-phone" value="" placeholder="Masukkan Nomor WA">
+                            </div>
+                            <div class="data-group" style="grid-column: 1 / -1;">
+                                <label>Alamat Email</label>
+                                <input type="email" class="data-input" id="profile-input-email" value="" readonly>
+                            </div>
+                            <div class="data-group" style="grid-column: 1 / -1;">
+                                <label>Alamat Utama Penjemputan (Bandung)</label>
+                                <textarea class="data-input" rows="4">Jl. Telekomunikasi No. 1, Terusan Buahbatu, Bandung, Jawa Barat</textarea>
+                            </div>
+                        </div>
+                        <button type="button" class="action-btn" onclick="alert('Profil berhasil diperbarui!')"><i class="fas fa-save"></i> Simpan Perubahan</button>
+                    </form>
                 </div>
-                <div
-                    style="background: var(--gray-50); padding: 30px; border-radius: 16px; border: 1px solid var(--gray-200); color: var(--text-secondary); line-height: 1.8; max-height: 400px; overflow-y: auto;">
-                    <h4 style="color: var(--brand-dark); margin-bottom: 10px; font-size: 1.1rem;">1. Syarat Penggunaan
-                        Layanan</h4>
-                    <p style="margin-bottom: 20px;">Dengan mengakses portal LogistiKita, Anda menyetujui seluruh
-                        ketentuan standar logistik, mencakup batas maksimum beban, larangan jenis barang tertentu
-                        (seperti barang mudah meledak), serta ketentuan asuransi pengiriman.</p>
 
-                    <h4 style="color: var(--brand-dark); margin-bottom: 10px; font-size: 1.1rem;">2. Pengumpulan Data
-                    </h4>
-                    <p style="margin-bottom: 20px;">LogistiKita mengumpulkan informasi dasar seperti Nama, Alamat, dan
-                        Nomor HP murni untuk kebutuhan pengiriman fisik. Data ini dilindungi enkripsi standar industri
-                        tingkat bank.</p>
+                <!-- PANE 2: Pengaturan -->
+                <div id="pane-settings" class="pane">
+                    <div class="pane-header">
+                        <h2>Pengaturan Akun</h2>
+                        <p>Sesuaikan keamanan akun dan metode payout reward Anda.</p>
+                    </div>
 
-                    <h4 style="color: var(--brand-dark); margin-bottom: 10px; font-size: 1.1rem;">3. Hak Penghapusan
-                        (Right to be Forgotten)</h4>
-                    <p>Sebagai pengguna, Anda berhak penuh untuk meminta pembersihan seluruh jejak digital kami
-                        (History, Order, Data Akun). Silakan hubungi pusat bantuan kami kapan saja.</p>
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <h4>Notifikasi WhatsApp</h4>
+                            <p>Terima update otomatis status kurir dan payout via WA.</p>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <h4>Autentikasi Dua Faktor</h4>
+                            <p>Tingkatkan lapisan keamanan saat login baru.</p>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-row" style="border-bottom: none;">
+                        <div class="setting-info">
+                            <h4>Kata Sandi</h4>
+                            <p>Perbarui keamanan akun berkala.</p>
+                        </div>
+                        <button type="button" class="action-btn" style="margin-top:0; width: auto; background: #1e293b; box-shadow:none; padding: 12px 24px;" onclick="alert('Membuka formulir penggantian kata sandi...')">
+                            <i class="fas fa-key"></i> Ubah Password
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-        </section>
-    </main>
+                <!-- PANE 3: Kebijakan -->
+                <div id="pane-policy" class="pane">
+                    <div class="pane-header">
+                        <h2>Kebijakan & Privasi</h2>
+                        <p>Persyaratan penyerahan limbah e-waste dan privasi data.</p>
+                    </div>
+                    <div style="background: var(--gray-50); padding: 30px; border-radius: 16px; border: 1px solid var(--gray-200); color: var(--text-secondary); line-height: 1.8; max-height: 400px; overflow-y: auto;">
+                        <h4 style="color: var(--brand-dark); margin-bottom: 10px; font-size: 1.1rem;">1. Ketentuan E-Waste</h4>
+                        <p style="margin-bottom: 20px;">EcoRecycle murni menerima kategori sampah elektronik seperti Small Gadgets, Computers, Large Appliances, dan Aki/Baterai. Limbah non-elektronik berbahaya (bahan peledak atau zat kimia non-komponen e-waste) sangat dilarang.</p>
 
-    <!-- Footer -->
-    <footer class="portal-footer" style="background-color: var(--brand-dark); padding: 60px 0 30px 0; color: white;">
-        <div class="container" style="text-align: center;">
-            <a href="home" class="logo" style="color: white; justify-content: center; margin-bottom: 24px;">
-                <i class="fas fa-cube"
-                    style="background: white; -webkit-text-fill-color: var(--brand-primary); padding: 5px; border-radius: 8px;"></i>
-                <span>Logisti<b>Kita</b></span>
-            </a>
-            <p style="color: rgba(255,255,255,0.6); max-width: 600px; margin: 0 auto 30px auto; font-size:0.9rem;">
-                Solusi logistik premium untuk bisnis dan personal. Tercepat, terpercaya, dan tersebar di seluruh
-                Indonesia.</p>
-        </div>
+                        <h4 style="color: var(--brand-dark); margin-bottom: 10px; font-size: 1.1rem;">2. Keamanan Data</h4>
+                        <p style="margin-bottom: 20px;">Kami mengenkripsi nama, alamat penjemputan, dan kontak WhatsApp Anda untuk kebutuhan sinkronisasi kurir kolektor di lapangan. Data tidak akan disalahgunakan atau dibagikan ke pihak ketiga di luar logistik e-waste.</p>
+
+                        <h4 style="color: var(--brand-dark); margin-bottom: 10px; font-size: 1.1rem;">3. Hak Penghapusan Akun</h4>
+                        <p>Eco Warrior berhak penuh meminta penghapusan seluruh data identitas dan riwayat transaksi donasi mereka dari basis data kami kapan saja melalui pusat bantuan.</p>
+                    </div>
+                </div>
+
+            </section>
+        </main>
     </div> <!-- End of portal-content -->
 
     <script>
@@ -726,10 +697,8 @@
         // Tab Switching
         headerTabs.forEach(tab => {
             tab.addEventListener('click', () => {
-                // Determine target pane
                 const targetPaneId = tab.getAttribute('data-target');
 
-                // Synchronize active state across *all* instances of the tab (desktop & mobile)
                 headerTabs.forEach(t => {
                     if (t.getAttribute('data-target') === targetPaneId) {
                         t.classList.add('active');
@@ -738,11 +707,9 @@
                     }
                 });
 
-                // Switch panes
                 panes.forEach(p => p.classList.remove('active'));
                 document.getElementById(targetPaneId).classList.add('active');
 
-                // Close sidebar automatically if open
                 closeSidebar();
             });
         });
@@ -763,7 +730,7 @@
             const navUserAvatar = document.getElementById('nav-user-avatar');
             
             if(navUserName) navUserName.innerText = user.name;
-            if(navUserRole) navUserRole.innerText = user.role === 'user' ? 'PREMIUM MEMBER' : user.role.toUpperCase();
+            if(navUserRole) navUserRole.innerText = user.role === 'user' ? 'ECO WARRIOR' : user.role.toUpperCase();
             if(navUserAvatar) navUserAvatar.innerText = user.name.substring(0, 2).toUpperCase();
             
             // Profile Header Data
@@ -772,7 +739,9 @@
             const profileAvatar = document.getElementById('profile-avatar-glow');
             
             if(profileName) profileName.innerText = user.name;
-            if(profileRole) profileRole.innerHTML = user.role === 'user' ? '<i class="fas fa-crown"></i> PREMIUM MEMBER' : '<i class="fas fa-shield-halved"></i> ' + user.role.toUpperCase();
+            if(profileRole) {
+                profileRole.innerHTML = user.role === 'user' ? '<i class="fas fa-crown"></i> ECO WARRIOR' : '<i class="fas fa-shield-halved"></i> ' + user.role.toUpperCase();
+            }
             if(profileAvatar) profileAvatar.innerText = user.name.substring(0, 2).toUpperCase();
 
             // Profile Form Data
@@ -780,10 +749,7 @@
             const inputEmail = document.getElementById('profile-input-email');
             
             if(inputName) inputName.value = user.name;
-            if(inputEmail) {
-                // Generate a mockup email based on username if email doesn't exist
-                inputEmail.value = user.email || (user.name.toLowerCase().replace(/\s+/g, '.') + '@logistikita.com');
-            }
+            if(inputEmail) inputEmail.value = user.email;
         }
 
         // Run on load

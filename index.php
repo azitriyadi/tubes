@@ -12,7 +12,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // Autoloader
 require_once 'app/Config/Database.php';
 require_once 'app/Models/User.php';
-require_once 'app/Models/SmartBank.php';
 require_once 'app/Controllers/BaseController.php';
 require_once 'app/Controllers/AuthController.php';
 require_once 'app/Controllers/EcoRecycleController.php';
@@ -52,6 +51,9 @@ if (strpos($request, 'api/') === 0) {
             break;
         case 'ecorecycle/list_pickups':
             $ecoController->listPickups();
+            break;
+        case 'ecorecycle/assign_collector':
+            $ecoController->assignCollector();
             break;
         default:
             http_response_code(404);

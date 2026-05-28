@@ -1,554 +1,458 @@
-// State Machine
-let currentRole = 'admin';
+// EcoRecycle Admin Command Center Logic
 
-// Element Grabbers
-const btnAdmin = document.getElementById('btnAdminSide');
-const btnFinance = document.getElementById('btnFinanceSide');
-const menuContent = document.getElementById('sidebar-menu-content');
-const roleLabel = document.getElementById('currentRoleLabel');
+let liveMap;
+let financeChart;
+let globalPickups = [];
+let activeFilterRange = 'all'; // all, today, week, month
 
-const sidebar = document.getElementById('sidebar');
-const sidebarToggle = document.getElementById('sidebarToggle');
-const sidebarOverlay = document.getElementById('sidebarOverlay');
-const accountOverlay = document.getElementById('accountOverlay');
+function toggleAdminSidebar() {
+    document.getElementById('sidebar').classList.add('active');
+    document.getElementById('sidebarOverlay').style.display = 'block';
+}
 
-// Nav Links Data
-const adminLinks = `
-    <div class="sidebar-item active" data-target="admin-view"><i class="fas fa-chart-line"></i> Dashboard</div>
-    <div class="sidebar-item" data-target="shipments-view"><i class="fas fa-recycle"></i> E-Waste Pickups</div>
-    <div class="sidebar-item" data-target="fleet-view"><i class="fas fa-truck"></i> Collection Fleet</div>
-    <div class="sidebar-item" data-target="couriers-view"><i class="fas fa-id-card"></i> Collectors</div>
-    <div class="sidebar-item" data-target="accounts-view"><i class="fas fa-user-shield"></i> User Accounts</div>
-    <div class="sidebar-item" data-target="customers-view"><i class="fas fa-users"></i> Eco Warriors</div>
-    <div class="sidebar-item" data-target="reports-view"><i class="fas fa-file-invoice"></i> Impact Reports</div>
-`;
+function closeAdminSidebar() {
+    document.getElementById('sidebar').classList.remove('active');
+    document.getElementById('sidebarOverlay').style.display = 'none';
+}
 
-const financeLinks = `
-    <div class="sidebar-item finance-active active" data-target="finance-view"><i class="fas fa-chart-line"></i> Dashboard Keuangan</div>
-    <div class="sidebar-item finance-active" data-target="settlement-view"><i class="fas fa-file-invoice-dollar"></i> Settlement</div>
-    <div class="sidebar-item finance-active" data-target="api-view"><i class="fas fa-server"></i> API Gateway</div>
-`;
+function switchAdminTab(targetId) {
+    document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
 
-// Universal Navigation Function
-function navToView(targetId) {
-    // Hide all sections
-    const sections = document.querySelectorAll('.view-section');
-    sections.forEach(s => s.classList.remove('active'));
+    const targetSection = document.getElementById(targetId);
+    if (targetSection) targetSection.classList.add('active');
 
-    // Show target section
-    const target = document.getElementById(targetId);
-    if (target) {
-        setTimeout(() => target.classList.add('active'), 50);
+    const sidebarItem = document.querySelector(`.sidebar-item[data-target="${targetId}"]`);
+    if (sidebarItem) sidebarItem.classList.add('active');
+
+    if (targetId === 'admin-view') {
+        setTimeout(initLiveMap, 200);
+    } else if (targetId === 'finance-view') {
+        setTimeout(initFinanceChart, 200);
     }
 
-    // Update Sidebar Active State
-    const items = document.querySelectorAll('.sidebar-item');
-    items.forEach(item => {
-        if (item.getAttribute('data-target') === targetId) {
-            item.classList.add('active');
-        } else {
-            item.classList.remove('active');
-        }
-    });
-
-    // Special: Init charts when view is shown
-    if (targetId === 'finance-view') {
-        setTimeout(initFinanceChart, 100);
-    }
-
-    if (window.innerWidth <= 1024) closeSidebar();
+    closeAdminSidebar();
 }
 
-// Switch Role Logic
-function switchToAdmin() {
-    if (currentRole === 'admin') return;
-    currentRole = 'admin';
-
-    if (btnAdmin) btnAdmin.classList.add('active');
-    if (btnFinance) btnFinance.classList.remove('active');
-    if (roleLabel) roleLabel.innerText = 'System Admin';
-
-    if (menuContent) menuContent.innerHTML = adminLinks;
-    navToView('admin-view');
+function logoutAdmin() {
+    localStorage.removeItem('user');
+    window.location.href = 'auth';
 }
 
-function switchToFinance() {
-    if (currentRole === 'finance') return;
-    currentRole = 'finance';
+// 1. Initialize Map
+function initLiveMap() {
+    try {
+        const mapEl = document.getElementById('live-map');
+        if (!mapEl) return;
+        if (liveMap) liveMap.remove();
+        if (typeof L === 'undefined') return;
 
-    if (btnFinance) btnFinance.classList.add('active');
-    if (btnAdmin) btnAdmin.classList.remove('active');
-    if (roleLabel) roleLabel.innerText = 'Finance Manager';
+        liveMap = L.map('live-map', { zoomControl: false }).setView([-6.9175, 107.6191], 12);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(liveMap);
 
-    if (menuContent) menuContent.innerHTML = financeLinks;
-    navToView('finance-view');
-}
-
-function toggleSidebar() {
-    if (sidebar) sidebar.classList.toggle('active');
-    if (sidebarOverlay) sidebarOverlay.classList.toggle('active');
-}
-
-function closeSidebar() {
-    if (sidebar) sidebar.classList.remove('active');
-    if (sidebarOverlay) sidebarOverlay.classList.remove('active');
-}
-
-function toggleAccountOverlay(name = '') {
-    if (accountOverlay) accountOverlay.classList.toggle('active');
-    if (name) {
-        const title = document.getElementById('overlayTitle');
-        if (title) title.innerText = 'Edit Akun Pengguna';
-        const userInp = document.getElementById('userName');
-        if (userInp) userInp.value = name;
-    } else {
-        const title = document.getElementById('overlayTitle');
-        if (title) title.innerText = 'Tambah Akun Baru';
-        const userInp = document.getElementById('userName');
-        if (userInp) userInp.value = '';
-    }
-}
-
-function saveUser() {
-    Swal.fire({
-        icon: 'success',
-        title: 'Akun Disimpan',
-        text: 'Perubahan akun berhasil disimpan ke database satelit.',
-        confirmButtonColor: 'var(--brand-primary)'
-    });
-    toggleAccountOverlay();
-}
-
-// Delegation for sidebar items
-document.addEventListener('click', (e) => {
-    const sidebarItem = e.target.closest('.sidebar-item');
-    if (sidebarItem) {
-        const target = sidebarItem.getAttribute('data-target');
-        if (target) navToView(target);
-    }
-});
-
-// Batch Approval Logic with Tab Filtering
-const selectAll = document.getElementById('selectAllRequests');
-const batchBar = document.getElementById('batchBar');
-const batchCount = document.getElementById('batchCount');
-const statusTabs = document.querySelectorAll('.status-tab');
-const tableRows = document.querySelectorAll('#approvalTableBody tr');
-
-function updateBatchBar() {
-    // Count checked boxes only for VISIBLE rows
-    const checkedCount = Array.from(tableRows).filter(row =>
-        row.style.display !== 'none' &&
-        row.querySelector('.request-check') &&
-        row.querySelector('.request-check').checked
-    ).length;
-
-    if (batchBar && batchCount) {
-        if (checkedCount > 0) {
-            batchBar.style.display = 'flex';
-            batchCount.innerText = checkedCount;
-        } else {
-            batchBar.style.display = 'none';
-        }
-    }
-}
-
-// Tab Switching Logic
-statusTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-        const filter = tab.getAttribute('data-filter');
-
-        // Update active tab UI
-        statusTabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-
-        // Filter rows
-        tableRows.forEach(row => {
-            if (filter === 'all' || row.getAttribute('data-status') === filter) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-                const check = row.querySelector('.request-check');
-                if (check) check.checked = false; // Uncheck hidden rows
-            }
-        });
-
-        if (selectAll) selectAll.checked = false;
-        updateBatchBar();
-    });
-});
-
-if (selectAll) {
-    selectAll.addEventListener('change', () => {
-        tableRows.forEach(row => {
-            if (row.style.display !== 'none') {
-                const check = row.querySelector('.request-check');
-                if (check) check.checked = selectAll.checked;
-            }
-        });
-        updateBatchBar();
-    });
-}
-
-// Listen for individual check changes
-document.addEventListener('change', (e) => {
-    if (e.target.classList.contains('request-check')) {
-        updateBatchBar();
-    }
-});
-
-// Leaflet Map Initialization
-let map;
-function initMap() {
-    if (document.getElementById('map') && typeof L !== 'undefined') {
-        // Center on Indonesia (Java region)
-        if (!map) {
-            map = L.map('map').setView([-6.2088, 106.8456], 7);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
-        }
-
-        // Custom Icon
-        const truckIcon = L.divIcon({
-            className: 'custom-marker',
-            html: '<i class="fas fa-truck"></i>',
-            iconSize: [30, 30],
-            iconAnchor: [15, 15]
-        });
-
-        // Clear existing markers if any
-        map.eachLayer((layer) => {
-            if (layer instanceof L.Marker) {
-                map.removeLayer(layer);
-            }
-        });
-
-        // Add active transit markers dynamically
-        if (window.activeTransits && window.activeTransits.length > 0) {
-            window.activeTransits.forEach((loc, index) => {
-                const latOffset = (Math.random() - 0.5) * 2; 
-                const lngOffset = (Math.random() - 0.5) * 2; 
-                
-                const lat = -6.2088 + latOffset;
-                const lng = 106.8456 + lngOffset;
-
-                L.marker([lat, lng], { icon: truckIcon })
-                    .addTo(map)
-                    .bindPopup(`<b>${loc.resi}</b><br>Tujuan: ${loc.penerima_nama}<br>Status: Moving`);
+        // Add markers for active pickups (pickup/transit/arrived)
+        const activePickups = globalPickups.filter(p => p.status === 'pickup' || p.status === 'transit' || p.status === 'arrived');
+        
+        activePickups.forEach((item, index) => {
+            const hash = Array.from(item.tracking_number).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const latOffset = (((hash * (index + 1)) % 100) - 50) / 10000;
+            const lngOffset = (((hash * (index + 2)) % 100) - 50) / 10000;
+            
+            const markerColor = item.status === 'arrived' ? '#15803d' : item.status === 'transit' ? '#0d9488' : '#1d4ed8';
+            
+            const customIcon = L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="background:${markerColor}; width:12px; height:12px; border-radius:50%; border:2px solid white; box-shadow:0 0 10px rgba(0,0,0,0.2);"></div>`
             });
-        }
-    }
-}
 
-let financeChartInstance = null;
-function initFinanceChart(grossArray = [0, 0, 0, 0, 0, 0, 0], settlementArray = [0, 0, 0, 0, 0, 0, 0]) {
-    const ctx = document.getElementById('financeChart');
-    if (ctx && typeof Chart !== 'undefined') {
-        if (financeChartInstance) {
-            financeChartInstance.destroy();
-        }
-        financeChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
-                datasets: [{
-                    label: 'Gross Revenue (Juta Rp)',
-                    data: grossArray,
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    fill: true,
-                    tension: 0.4,
-                    borderWidth: 3,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#10b981'
-                }, {
-                    label: 'Settlement (Juta Rp)',
-                    data: settlementArray,
-                    borderColor: '#e11d48',
-                    backgroundColor: 'rgba(225, 29, 72, 0.1)',
-                    fill: true,
-                    tension: 0.4,
-                    borderWidth: 3,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#e11d48'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: {
-                            font: { family: 'Outfit', weight: 'bold' },
-                            usePointStyle: true,
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(0,0,0,0.05)' },
-                        ticks: { font: { family: 'Outfit' } }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { font: { family: 'Outfit' } }
-                    }
-                }
-            }
+            L.marker([-6.9175 + latOffset, 107.6191 + lngOffset], { icon: customIcon })
+                .addTo(liveMap)
+                .bindPopup(`<strong>${item.tracking_number}</strong><br>Donatur: ${item.donor_name}<br>Status: ${item.status.toUpperCase()}`);
         });
+
+        setTimeout(() => { liveMap.invalidateSize(); }, 400);
+    } catch (e) {
+        console.error('Failed to initialize admin map:', e);
     }
 }
 
-// Fetch Admin Data
-function loadAdminData() {
+// 2. Load KPIs and Data
+function loadAdminCommandData() {
     const userSession = localStorage.getItem('user');
     if (!userSession) {
         window.location.href = 'auth';
         return;
     }
     const user = JSON.parse(userSession);
+
     if (user.role !== 'admin') {
         window.location.href = 'auth';
         return;
     }
 
-    const userNameEl = document.querySelector('.user-name');
-    if (userNameEl) userNameEl.innerText = user.name;
+    // Set Header profile
+    document.getElementById('welcome-message').innerText = `Selamat Datang, ${user.name}`;
+    document.getElementById('admin-display-name').innerText = user.name;
+    document.getElementById('admin-avatar').innerText = user.name.substring(0, 2).toUpperCase();
 
-    fetch('api/ecorecycle/list_pickups?type=all')
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                const tbody = document.getElementById('approvalTableBody');
-                if (tbody) tbody.innerHTML = '';
-                const pengiriman = data.data;
+    // Fetch Global Pickups
+    fetch('api/ecorecycle/list_pickups?type=all', {
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + user.token
+        }
+    })
+    .then(res => {
+        if (res.status === 401) logoutAdmin();
+        return res.json();
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            globalPickups = data.data;
 
-                const kpiTotal = document.getElementById('kpi-total');
-                if (kpiTotal) kpiTotal.innerText = pengiriman.length;
+            // Update global pickups tables
+            renderPickupsTables();
 
-                let pendingCount = 0;
-                let transitCount = 0;
-                let deliveredCount = 0;
-                let grossRevenue = 0;
-                let miniGridHtml = '';
-                let fleetHtml = '';
-                let shipmentsHtml = '';
-                window.activeTransits = []; // For Map
-
-                pengiriman.forEach(item => {
-                    grossRevenue += parseFloat(item.biaya_ongkir) + parseFloat(item.biaya_layanan || 0) + parseFloat(item.asuransi || 0);
-
-                    let dateObj = new Date(item.created_at || Date.now());
-                    let dateStr = `${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
-                    let tracking_number = item.tracking_number || item.resi;
-
-                    let statusHtml = '';
-                    if (item.status === 'pending') {
-                        statusHtml = '<span class="status-pill status-pending">Pending Verifikasi</span>';
-                    } else if (item.status === 'completed') {
-                        statusHtml = '<span class="status-pill status-success">Verified</span>';
-                    } else {
-                        statusHtml = `<span class="status-pill status-processing">${item.status.toUpperCase()}</span>`;
-                    }
-
-                    if (item.status === 'pending') pendingCount++;
-                    if (item.status === 'transit') {
-                        transitCount++;
-                        window.activeTransits.push(item);
-                        miniGridHtml += `
-                                <tr>
-                                    <td>${item.resi}</td>
-                                    <td>${item.penerima_nama.substring(0, 10)}...</td>
-                                    <td><span class="dot-online"></span></td>
-                                </tr>
-                            `;
-                        fleetHtml += `
-                                <tr>
-                                    <td><span class="text-bold">${item.resi}</span></td>
-                                    <td>Kurir LogistiKita</td>
-                                    <td>Sistem Pusat</td>
-                                    <td>Menuju Tujuan</td>
-                                    <td>-</td>
-                                    <td><span class="status-pill status-processing">Moving</span></td>
-                                </tr>
-                            `;
-                    }
-                    if (item.status === 'delivered') deliveredCount++;
-
-                    shipmentsHtml += `
-                            <tr>
-                                <td><span class="text-bold">${item.resi}</span></td>
-                                <td>Client ${item.user_id}</td>
-                                <td>${item.penerima_nama}</td>
-                                <td><span class="text-bold">${item.layanan || item.nama_layanan || '-'}</span></td>
-                                <td>${statusHtml}</td>
-                                <td>${dateStr}</td>
-                                <td><button class="btn-ghost">Detail</button></td>
-                            </tr>
-                        `;
-
-                    let actionHtml = '';
-                    if (item.status === 'pending') {
-                        actionHtml = `<button class="btn-action-primary" onclick="updateStatus('${item.resi}', 'menunggu_pickup')"><i class="fas fa-check"></i> Terima</button>`;
-                    } else {
-                        actionHtml = `<button class="btn-action-secondary" disabled>Selesai</button>`;
-                    }
-
-                    if (tbody) {
-                        tbody.innerHTML += `
-                                <tr data-status="${item.status}">
-                                    <td class="check-col"><input type="checkbox" class="custom-checkbox request-check"></td>
-                                    <td>
-                                        <div style="display: flex; flex-direction: column;">
-                                            <span class="text-bold"><span class="urgency-dot urgency-standard"></span>${item.resi}</span>
-                                            <span class="text-sub">Penerima: ${item.penerima_nama}</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="text-bold" style="color: var(--brand-red);">${item.nama_layanan || item.layanan_id}</span>
-                                        <span class="text-sub">${item.penerima_alamat.substring(0,20)}...</span>
-                                    </td>
-                                    <td>${statusHtml}</td>
-                                    <td style="text-align: center;">${actionHtml}</td>
-                                </tr>
-                            `;
-                    }
-                });
-
-                if (pengiriman.length === 0 && tbody) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;">Belum ada permohonan pengiriman baru</td></tr>';
+            // Load Stats KPI via separate API
+            fetch('api/ecorecycle/pickup_status?type=stats', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + user.token
                 }
+            })
+            .then(r => r.json())
+            .then(statRes => {
+                if (statRes.status === 'success') {
+                    const stats = statRes.data;
+                    
+                    document.getElementById('kpi-total-weight').innerText = parseFloat(stats.total_weight).toFixed(1);
+                    document.getElementById('kpi-total-pickups').innerText = stats.total_pickups;
+                    document.getElementById('kpi-pending-pickups').innerText = stats.pending_verifications;
+                    document.getElementById('kpi-active-collectors').innerText = stats.collectors_online;
 
-                const kpiPending = document.getElementById('kpi-pending');
-                if (kpiPending) kpiPending.innerText = pendingCount;
-                const kpiArmada = document.getElementById('kpi-armada');
-                if (kpiArmada) kpiArmada.innerText = transitCount;
-                const kpiDelivered = document.getElementById('kpi-delivered');
-                if (kpiDelivered) kpiDelivered.innerText = deliveredCount;
-
-                const tabAll = document.getElementById('tab-count-all');
-                if (tabAll) tabAll.innerText = pengiriman.length;
-                const tabPending = document.getElementById('tab-count-pending');
-                if (tabPending) tabPending.innerText = pendingCount;
-                const tabDelivered = document.getElementById('tab-count-delivered');
-                if (tabDelivered) tabDelivered.innerText = deliveredCount;
-
-                const fleetActive = document.getElementById('fleet-active');
-                if (fleetActive) fleetActive.innerText = transitCount;
-                const fleetTransit = document.getElementById('fleet-transit');
-                if (fleetTransit) fleetTransit.innerText = transitCount;
-                const fleetArriving = document.getElementById('fleet-arriving');
-                if (fleetArriving) fleetArriving.innerText = deliveredCount;
-
-                const miniGrid = document.getElementById('mini-grid-body');
-                if (miniGrid) {
-                    if (miniGridHtml === '') miniGridHtml = '<tr><td colspan="3" style="text-align:center;">Tidak ada armada di jalan</td></tr>';
-                    miniGrid.innerHTML = miniGridHtml;
+                    // Finance tab KPIs
+                    const formatter = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
+                    document.getElementById('finance-paid-amount').innerText = formatter.format(stats.total_reward_paid);
+                    document.getElementById('finance-pending-amount').innerText = formatter.format(stats.total_reward_pending);
                 }
+            });
 
-                const fleetBody = document.getElementById('fleet-table-body');
-                if (fleetBody) {
-                    if (fleetHtml === '') fleetHtml = '<tr><td colspan="6" style="text-align:center;">Tidak ada armada di jalan</td></tr>';
-                    fleetBody.innerHTML = fleetHtml;
-                }
-
-                const shipmentsBody = document.getElementById('shipments-table-body');
-                if (shipmentsBody) {
-                    if (shipmentsHtml === '') shipmentsHtml = '<tr><td colspan="7" style="text-align:center;">Belum ada data pengiriman global</td></tr>';
-                    shipmentsBody.innerHTML = shipmentsHtml;
-                }
-
-                const formatter = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' });
-                const grossEl = document.getElementById('finance-gross');
-                if (grossEl) grossEl.innerText = formatter.format(grossRevenue);
-                const settleEl = document.getElementById('finance-settlement');
-                if (settleEl) settleEl.innerText = formatter.format(grossRevenue * 0.1); 
-                const marginEl = document.getElementById('finance-margin');
-                if (marginEl) marginEl.innerText = '95.5%';
-
-                // Update Map
-                initMap();
-
-                // Update Chart Data
-                let valInJuta = grossRevenue / 1000000;
-                if (valInJuta === 0) valInJuta = 10;
-                let gData = [valInJuta * 0.15, valInJuta * 0.20, valInJuta * 0.10, valInJuta * 0.25, valInJuta * 0.10, valInJuta * 0.15, valInJuta * 0.05];
-                let sData = gData.map(v => v * 0.7);
-                initFinanceChart(gData, sData);
-            }
-        });
-
-    fetch('api/ecorecycle/pickup_status?type=stats')
-        .then(r => r.json())
-        .then(d => {
-            if (d.status === 'success') {
-                const totalFeeStr = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(d.data.total_fee);
-                const el = document.getElementById('finance-total-fee');
-                if (el) el.innerText = totalFeeStr;
-            }
-        });
+            initLiveMap();
+        }
+    })
+    .catch(err => {
+        console.error('Error loading admin dashboard data:', err);
+    });
 }
 
+function renderPickupsTables() {
+    const pendingBody = document.getElementById('pendingPickupsTableBody');
+    const globalBody = document.getElementById('globalPickupsTableBody');
+    const payoutBody = document.getElementById('payoutLedgerTableBody');
 
+    if (pendingBody) pendingBody.innerHTML = '';
+    if (globalBody) globalBody.innerHTML = '';
+    if (payoutBody) payoutBody.innerHTML = '';
 
-function updateStatus(resi, newStatus) {
+    let pendingHtml = '';
+    let globalHtml = '';
+    let payoutHtml = '';
+
+    const searchVal = document.getElementById('admin-search-input').value.toLowerCase().trim();
+
+    globalPickups.forEach(item => {
+        // Filter by search query
+        if (searchVal !== '' && !item.tracking_number.toLowerCase().includes(searchVal)) return;
+
+        // Filter by Date Range
+        const dateObj = new Date(item.created_at);
+        const now = new Date();
+        if (activeFilterRange === 'today') {
+            if (dateObj.toDateString() !== now.toDateString()) return;
+        } else if (activeFilterRange === 'week') {
+            const diffTime = Math.abs(now - dateObj);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays > 7) return;
+        } else if (activeFilterRange === 'month') {
+            if (dateObj.getMonth() !== now.getMonth() || dateObj.getFullYear() !== now.getFullYear()) return;
+        }
+
+        const dateStr = `${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
+        const netReward = parseFloat(item.eco_reward) - parseFloat(item.processing_fee);
+
+        let badgeClass = 'status-pending';
+        if (item.status === 'pickup') badgeClass = 'status-processing';
+        else if (item.status === 'transit') badgeClass = 'status-processing';
+        else if (item.status === 'arrived') badgeClass = 'status-processing';
+        else if (item.status === 'completed') badgeClass = 'status-success';
+
+        let statusText = item.status.toUpperCase();
+        if (item.status === 'arrived') statusText = 'TIBA DI HUB';
+
+        // Global DB Row
+        globalHtml += `
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding:16px; font-weight:800; color:#0f172a;">${item.tracking_number}</td>
+                <td style="padding:16px;">${dateStr}</td>
+                <td style="padding:16px; font-weight:600;">${item.donor_name}</td>
+                <td style="padding:16px;">${item.category_name}</td>
+                <td style="padding:16px; font-weight:700;">${item.weight_kg} KG</td>
+                <td style="padding:16px; font-weight:600; color:#475569;">${item.collector_name || 'Belum Ditugaskan'}</td>
+                <td style="padding:16px;"><span class="status-pill ${badgeClass}">${statusText}</span></td>
+            </tr>
+        `;
+
+        // Pending Approval Row (Status 'pending')
+        if (item.status === 'pending') {
+            pendingHtml += `
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding:12px; font-weight:800; color:#0f172a;">${item.tracking_number}</td>
+                    <td style="padding:12px; font-weight:600;">${item.donor_name}</td>
+                    <td style="padding:12px;">${item.category_name} • ${item.weight_kg} KG</td>
+                    <td style="padding:12px; text-align:right;">
+                        <button class="btn btn-primary" style="padding:6px 12px; font-size:0.75rem; border-radius:8px;" onclick="approveAndAssign('${item.tracking_number}')">Terima & Tugaskan</button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Payout Ledger Row (Status 'arrived' or 'completed')
+        if (item.status === 'arrived' || item.status === 'completed') {
+            let actionBtn = `<span class="status-pill status-success"><i class="fas fa-check-double"></i> SUDAH DIBAYAR</span>`;
+            if (item.status === 'arrived') {
+                actionBtn = `<button class="btn btn-primary" style="padding:6px 12px; font-size:0.75rem; border-radius:8px; background:#10b981;" onclick="processPayout(${item.id}, ${netReward})">Cairkan Payout</button>`;
+            }
+
+            payoutHtml += `
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding:12px; font-weight:800; color:#0f172a;">${item.tracking_number}</td>
+                    <td style="padding:12px; font-weight:600;">${item.donor_name}</td>
+                    <td style="padding:12px; font-weight:800; color:#059669;">Rp ${netReward.toLocaleString('id-ID')}</td>
+                    <td style="padding:12px; text-align:right;">${actionBtn}</td>
+                </tr>
+            `;
+        }
+    });
+
+    if (pendingBody) {
+        if (pendingHtml === '') pendingBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:16px; color:#64748b;">Tidak ada permohonan pending baru.</td></tr>';
+        else pendingBody.innerHTML = pendingHtml;
+    }
+
+    if (globalBody) {
+        if (globalHtml === '') globalBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:16px; color:#64748b;">Tidak ada data penjemputan terdaftar.</td></tr>';
+        else globalBody.innerHTML = globalHtml;
+    }
+
+    if (payoutBody) {
+        if (payoutHtml === '') payoutBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:16px; color:#64748b;">Tidak ada data penyerahan siap payout.</td></tr>';
+        else payoutBody.innerHTML = payoutHtml;
+    }
+}
+
+// Search and Date Filter Handlers
+function filterPickupsTable() {
+    renderPickupsTables();
+}
+
+function setFilterRange(range) {
+    activeFilterRange = range;
+    
+    // Highlight active button style in future if we want
+    document.querySelectorAll('.filter-panel button').forEach(btn => {
+        btn.classList.remove('btn-secondary');
+        btn.classList.add('btn-outline');
+    });
+
+    renderPickupsTables();
+}
+
+// 3. Admin Accept & Assign Demo Collector
+function approveAndAssign(trackingNum) {
+    const userSession = localStorage.getItem('user');
+    if (!userSession) return;
+    const user = JSON.parse(userSession);
+
     Swal.fire({
-        title: 'Konfirmasi',
-        text: `Terima pesanan ${resi}?`,
+        title: 'Terima Permohonan & Tugaskan',
+        text: `Terima penjemputan ${trackingNum} dan tugaskan ke Kolektor EcoRecycle?`,
         icon: 'question',
         showCancelButton: true,
-        confirmButtonColor: 'var(--brand-primary)',
+        confirmButtonColor: '#10b981',
         cancelButtonColor: '#64748b',
-        confirmButtonText: 'Ya, Terima!',
+        confirmButtonText: 'Ya, Tugaskan!',
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch('api/ecorecycle/pickup_status', {
+            // Assign to demo collector (ID: 2)
+            fetch('api/ecorecycle/assign_collector', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tracking_number: resi, status: newStatus, location: 'Eco HQ', notes: 'Waste verified by Admin' })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil',
-                            text: 'Status berhasil diupdate!',
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
-                        loadAdminData();
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal',
-                            text: 'Gagal update status: ' + data.message
-                        });
-                    }
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + user.token
+                },
+                body: JSON.stringify({
+                    tracking_number: trackingNum,
+                    collector_id: 2 // Demo Collector
                 })
-                .catch(err => {
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: 'Tugas penjemputan berhasil diberikan ke Kolektor.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        loadAdminCommandData();
+                    });
+                } else {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Kesalahan',
-                        text: 'Gagal terhubung ke server.'
+                        title: 'Gagal',
+                        text: data.message,
+                        confirmButtonColor: '#10b981'
                     });
+                }
+            })
+            .catch(err => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan',
+                    text: 'Gagal menghubungi server.',
+                    confirmButtonColor: '#10b981'
                 });
+            });
         }
     });
 }
 
-// Initialize Everything
-document.addEventListener('DOMContentLoaded', () => {
-    initMap();
-    initFinanceChart();
-    loadAdminData();
+// 4. Process Payout with Digital Transfer
+function processPayout(pickupId, amount) {
+    const userSession = localStorage.getItem('user');
+    if (!userSession) return;
+    const user = JSON.parse(userSession);
 
-    if (btnAdmin) btnAdmin.addEventListener('click', switchToAdmin);
-    if (btnFinance) btnFinance.addEventListener('click', switchToFinance);
-    if (sidebarToggle) sidebarToggle.addEventListener('click', toggleSidebar);
-    if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
-});
+    Swal.fire({
+        title: 'Verifikasi & Cairkan Reward',
+        html: `Apakah data timbangan fisik sudah benar?<br>Sistem akan mentransfer <strong>Rp ${amount.toLocaleString('id-ID')}</strong> ke metode e-wallet / transfer bank donatur.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Cairkan Dana!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Call API
+            fetch('api/ecorecycle/process_payout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + user.token
+                },
+                body: JSON.stringify({
+                    pickup_id: pickupId
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const ref = data.data.transaction_reference || data.data.bank_reference || '';
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Payout Sukses!',
+                        html: `Dana berhasil ditransfer.<br>Ref Referensi: <strong>${ref}</strong>`,
+                        confirmButtonColor: '#10b981'
+                    }).then(() => {
+                        loadAdminCommandData();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Payout Gagal',
+                        text: data.message,
+                        confirmButtonColor: '#10b981'
+                    });
+                }
+            })
+            .catch(err => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan',
+                    text: 'Gagal terhubung ke server.',
+                    confirmButtonColor: '#10b981'
+                });
+            });
+        }
+    });
+}
+
+// 5. Initialize Finance Chart.js
+function initFinanceChart() {
+    const ctx = document.getElementById('financeChart');
+    if (!ctx) return;
+
+    if (financeChart) {
+        financeChart.destroy();
+    }
+
+    // Process chart values based on completed payouts in database
+    const completedPayments = globalPickups.filter(p => p.status === 'completed');
+    
+    // Group payments by category
+    const categoryTotals = {};
+    completedPayments.forEach(p => {
+        const net = parseFloat(p.eco_reward) - parseFloat(p.processing_fee);
+        categoryTotals[p.category_name] = (categoryTotals[p.category_name] || 0) + net;
+    });
+
+    const labels = Object.keys(categoryTotals);
+    const data = Object.values(categoryTotals);
+
+    // Fallback if empty
+    if (labels.length === 0) {
+        labels.push('Gadgets', 'Computers', 'Appliances');
+        data.push(50000, 120000, 75000);
+    }
+
+    financeChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: ['#10b981', '#0d9488', '#0f766e', '#047857', '#059669'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        font: { family: 'Outfit', weight: 'bold' }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Global scope bindings
+window.switchAdminTab = switchAdminTab;
+window.toggleAdminSidebar = toggleAdminSidebar;
+window.closeAdminSidebar = closeAdminSidebar;
+window.logoutAdmin = logoutAdmin;
+window.approveAndAssign = approveAndAssign;
+window.processPayout = processPayout;
+window.filterPickupsTable = filterPickupsTable;
+window.setFilterRange = setFilterRange;
+
+document.addEventListener('DOMContentLoaded', loadAdminCommandData);

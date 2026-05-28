@@ -32,7 +32,7 @@ if (loginForm) {
                     }).then(() => {
                         // Redirect based on role
                         if (data.data.role === 'admin') window.location.href = 'admin';
-                        else if (data.data.role === 'kurir') window.location.href = 'collector';
+                        else if (data.data.role === 'collector') window.location.href = 'collector';
                         else window.location.href = 'dashboard';
                     });
                 } else {

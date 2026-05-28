@@ -4,282 +4,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eco Control Center | EcoRecycle Admin</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <title>Admin Portal | EcoRecycle</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
+    
     <!-- Leaflet Maps -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/admin.css">
 </head>
 
-<body>
+<body class="portal-page" style="background:#f8fafc; font-family:'Plus Jakarta Sans', sans-serif;">
+
     <!-- Sidebar Navigation -->
-    <aside class="sidebar" id="sidebar">
-        <a href="home" class="sidebar-logo">
-            <i class="fas fa-leaf"></i> EcoRecycle
+    <aside class="sidebar" id="sidebar" style="background-color: #0f172a; border-right: 1px solid #1e293b;">
+        <a href="home" class="sidebar-logo" style="color:white; font-family:'Outfit', sans-serif;">
+            <i class="fas fa-leaf" style="color:#10b981;"></i> EcoRecycle
         </a>
 
         <div class="sidebar-nav">
-            <div class="nav-group-label">Eco Control</div>
+            <div class="nav-group-label" style="color: #64748b;">Eco Manager Controls</div>
             <div id="sidebar-menu-content">
-                <div class="sidebar-item active" data-target="admin-view">
-                    <i class="fas fa-chart-line"></i> Dashboard
+                <div class="sidebar-item active" data-target="admin-view" onclick="switchAdminTab('admin-view')">
+                    <i class="fas fa-chart-line"></i> Dashboard Admin
                 </div>
-                <div class="sidebar-item" data-target="shipments-view">
+                <div class="sidebar-item" data-target="shipments-view" onclick="switchAdminTab('shipments-view')">
                     <i class="fas fa-recycle"></i> E-Waste Pickups
                 </div>
-                <div class="sidebar-item" data-target="fleet-view">
-                    <i class="fas fa-truck"></i> Collection Fleet
-                </div>
-                <div class="sidebar-item" data-target="couriers-view">
-                    <i class="fas fa-id-card"></i> Collectors
-                </div>
-                <div class="sidebar-item" data-target="customers-view">
-                    <i class="fas fa-users"></i> Eco Warriors
-                </div>
-                <div class="sidebar-item" data-target="reports-view">
-                    <i class="fas fa-file-invoice"></i> Impact Reports
+                <div class="sidebar-item" data-target="finance-view" onclick="switchAdminTab('finance-view')">
+                    <i class="fas fa-wallet"></i> Payout Ledger
                 </div>
             </div>
         </div>
 
-        <div class="sidebar-footer">
-            <div class="sidebar-role-toggle" id="roleToggleSide">
-                <button class="role-btn-side active admin" id="btnAdminSide">
-                    <i class="fas fa-shield-halved"></i> Admin
-                </button>
-                <button class="role-btn-side finance" id="btnFinanceSide">
-                    <i class="fas fa-wallet"></i> Finance
-                </button>
-            </div>
-
-            <div class="user-profile-side">
-                <img src="https://ui-avatars.com/api/?name=Eco+Admin&background=10b981&color=ffffff&bold=true"
-                    alt="Admin">
-                <div class="user-info">
-                    <span class="user-name">Fiqry F.</span>
-                    <span class="user-role" id="currentRoleLabel">System Admin</span>
+        <div class="sidebar-footer" style="border-top:1px solid #1e293b; padding:24px 16px;">
+            <div class="user-profile-side" style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                <div class="avatar-circle" style="width:40px; height:40px; border-radius:50%; background:#10b981; color:white; display:flex; align-items:center; justify-content:center; font-weight:800;" id="admin-avatar">EM</div>
+                <div>
+                    <span class="user-name" style="color:white; font-weight:700; font-size:0.9rem;" id="admin-display-name">Admin</span>
+                    <span class="user-role-side" style="color:#64748b; font-size:0.75rem; display:block;">System Manager</span>
                 </div>
-                <a href="auth" class="btn-logout-side" title="Logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                </a>
             </div>
+            <button onclick="logoutAdmin()" style="display: flex; align-items: center; justify-content: center; gap: 12px; font-weight: 700; color: #f87171; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.1); width: 100%; padding: 12px; border-radius: 12px; cursor: pointer; transition: background 0.3s;">
+                <i class="fas fa-sign-out-alt"></i> Log Out
+            </button>
         </div>
     </aside>
 
     <!-- Mobile Top Bar -->
-    <header class="mobile-header">
-        <button class="hamburger-btn" id="sidebarToggle" style="display: block; font-size: 1.25rem;">
+    <header class="mobile-header" style="background:#0f172a; border-bottom:1px solid #1e293b;">
+        <button class="hamburger-btn" id="sidebarToggle" onclick="toggleAdminSidebar()" style="display: block; font-size: 1.25rem; color:white; background:none; border:none; cursor:pointer;">
             <i class="fas fa-bars"></i>
         </button>
-        <a href="home" class="mobile-logo">
-            <i class="fas fa-leaf"></i> EcoRecycle
+        <a href="home" class="mobile-logo" style="color:white; font-weight:900; text-decoration:none;">
+            <i class="fas fa-leaf" style="color:#10b981;"></i> EcoRecycle
         </a>
-        <div style="width: 32px;"></div> <!-- Spacer -->
+        <div style="width: 32px;"></div>
     </header>
 
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeAdminSidebar()" style="background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 998; display: none;"></div>
 
     <!-- Main Workspace -->
-    <main class="main-container">
+    <main class="main-container" style="margin-left: 280px; width: calc(100% - 280px); padding: 40px; min-height: 100vh;">
 
         <!-- ===========================
-             VIEW 1: ADMINISTRATOR
+             VIEW 1: ADMINISTRATOR DASHBOARD
              =========================== -->
         <div id="admin-view" class="view-section active">
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">Eco Control Center Overview</h1>
-                    <p class="page-subtitle">Pusat monitoring penjemputan sampah elektronik, pergerakan armada kolektor, dan verifikasi muatan.</p>
+            
+            <!-- Header -->
+            <div class="page-header" style="margin-bottom:32px;">
+                <h1 style="font-family:'Outfit',sans-serif; font-size:2rem; font-weight:900; color:#0f172a;" id="welcome-message">Selamat Datang, Admin</h1>
+                <p style="color:#64748b; margin-top:4px;">Eco Command Center Overview. Pantau volume e-waste dan live koordinat kurir.</p>
+            </div>
+
+            <!-- search and filter section -->
+            <div class="filter-panel" style="background:white; border:1px solid #e2e8f0; padding:16px 24px; border-radius:16px; margin-bottom:24px; display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+                <div class="input-wrapper" style="flex:1; max-width:400px;">
+                    <i class="fas fa-search" style="color:#10b981;"></i>
+                    <input type="text" id="admin-search-input" placeholder="Cari nomor tracking..." oninput="filterPickupsTable()">
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn btn-outline" style="border-radius:10px; padding:10px 16px; font-size:0.85rem;" onclick="setFilterRange('today')">Hari Ini</button>
+                    <button class="btn btn-outline" style="border-radius:10px; padding:10px 16px; font-size:0.85rem;" onclick="setFilterRange('week')">Minggu Ini</button>
+                    <button class="btn btn-outline" style="border-radius:10px; padding:10px 16px; font-size:0.85rem;" onclick="setFilterRange('month')">Bulan Ini</button>
                 </div>
             </div>
 
-            <!-- KPI Cards -->
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <div class="kpi-card-header">
-                        <div>
-                            <h3 class="kpi-title">Active Pickups</h3>
-                            <p class="kpi-value" id="kpi-total">0</p>
-                        </div>
-                        <div class="kpi-icon-wrapper blue"><i class="fas fa-recycle"></i></div>
+            <!-- KPI Metrics Cards -->
+            <div class="kpi-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:20px; margin-bottom:32px;">
+                <div class="kpi-card" style="background:white; padding:24px; border-radius:20px; border:1px solid #e2e8f0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span style="font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase;">Volume Terkumpul</span>
+                        <div style="background:#ecfdf5; color:#10b981; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-weight-hanging"></i></div>
                     </div>
-                    <div class="kpi-trend up"><i class="fas fa-sync"></i> Real-time sync</div>
+                    <h2 style="font-size:1.8rem; font-weight:900; margin:0; color:#0f172a;"><span id="kpi-total-weight">0</span> KG</h2>
                 </div>
 
-                <div class="kpi-card">
-                    <div class="kpi-card-header">
-                        <div>
-                            <h3 class="kpi-title">Pending Verification</h3>
-                            <p class="kpi-value" id="kpi-pending">0</p>
-                        </div>
-                        <div class="kpi-icon-wrapper red"><i class="fas fa-clipboard-check"></i></div>
+                <div class="kpi-card" style="background:white; padding:24px; border-radius:20px; border:1px solid #e2e8f0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span style="font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase;">Total Penjemputan</span>
+                        <div style="background:#f0fdfa; color:#0d9488; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-recycle"></i></div>
                     </div>
-                    <div class="kpi-trend neutral"><i class="fas fa-clock"></i> Membutuhkan tindak lanjut</div>
+                    <h2 style="font-size:1.8rem; font-weight:900; margin:0; color:#0f172a;" id="kpi-total-pickups">0</h2>
                 </div>
 
-                <div class="kpi-card">
-                    <div class="kpi-card-header">
-                        <div>
-                            <h3 class="kpi-title">Collectors Online</h3>
-                            <p class="kpi-value" id="kpi-armada">0</p>
-                        </div>
-                        <div class="kpi-icon-wrapper green"><i class="fas fa-truck-pickup"></i></div>
+                <div class="kpi-card" style="background:white; padding:24px; border-radius:20px; border:1px solid #e2e8f0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span style="font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase;">Menunggu Verifikasi</span>
+                        <div style="background:#fffbeb; color:#d97706; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-clock"></i></div>
                     </div>
-                    <div class="kpi-trend up"><i class="fas fa-users"></i> Expert Collectors</div>
+                    <h2 style="font-size:1.8rem; font-weight:900; margin:0; color:#0f172a;" id="kpi-pending-pickups">0</h2>
                 </div>
 
-                <div class="kpi-card">
-                    <div class="kpi-card-header">
-                        <div>
-                            <h3 class="kpi-title">E-Waste Recycled</h3>
-                            <p class="kpi-value" id="kpi-delivered">0</p>
-                        </div>
-                        <div class="kpi-icon-wrapper purple"><i class="fas fa-check-circle"></i></div>
+                <div class="kpi-card" style="background:white; padding:24px; border-radius:20px; border:1px solid #e2e8f0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span style="font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase;">Kolektor Aktif</span>
+                        <div style="background:#f8fafc; color:#475569; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-users"></i></div>
                     </div>
-                    <div class="kpi-trend up"><i class="fas fa-leaf"></i> Impact Milestone</div>
+                    <h2 style="font-size:1.8rem; font-weight:900; margin:0; color:#0f172a;" id="kpi-active-collectors">0</h2>
                 </div>
             </div>
 
-            <div class="layout-grid">
-                <!-- Complex Table Panel -->
-                <div class="panel-card">
-                    <div class="panel-header" style="border-bottom: none; padding-bottom: 0;">
-                        <div>
-                            <h3>Permohonan Pickup Baru</h3>
-                            <p>Kelola verifikasi kategori sampah dan penjadwalan kolektor.</p>
-                        </div>
-                    </div>
-
-                    <div style="padding: 0 24px;">
-                        <div class="status-tabs">
-                            <div class="status-tab active" data-filter="all">Semua <span class="tab-count" id="tab-count-all">0</span></div>
-                            <div class="status-tab" data-filter="pending">Menunggu Verifikasi <span class="tab-count" id="tab-count-pending">0</span></div>
-                            <div class="status-tab" data-filter="completed">Selesai Diproses <span class="tab-count" id="tab-count-delivered">0</span></div>
-                        </div>
-                    </div>
-
-                    <div class="table-wrapper">
-                        <table class="enterprise-table" id="approvalTable">
+            <!-- Layout Grid: Table and Maps -->
+            <div class="layout-grid" style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap:24px;">
+                
+                <!-- Table Card -->
+                <div class="panel-card" style="background:white; border-radius:24px; border:1px solid #e2e8f0; padding:32px;">
+                    <h3 style="font-weight:900; font-size:1.2rem; color:#0f172a; margin-bottom:20px;">Daftar E-Waste Pending</h3>
+                    
+                    <div style="overflow-x:auto;">
+                        <table class="history-table" style="width:100%; border-collapse:collapse; min-width:500px;" id="pendingPickupsTable">
                             <thead>
-                                <tr>
-                                    <th class="check-col"><input type="checkbox" class="custom-checkbox" id="selectAllRequests"></th>
-                                    <th>Detail E-Waste</th>
-                                    <th>Kategori & Berat</th>
-                                    <th>Status Tracking</th>
-                                    <th style="text-align: center;">Tindakan</th>
+                                <tr style="border-bottom:2px solid #f1f5f9; text-align:left;">
+                                    <th style="padding:12px; font-size:0.75rem; font-weight:800; color:#64748b;">NO. TRACKING</th>
+                                    <th style="padding:12px; font-size:0.75rem; font-weight:800; color:#64748b;">DONATUR</th>
+                                    <th style="padding:12px; font-size:0.75rem; font-weight:800; color:#64748b;">KATEGORI & BERAT</th>
+                                    <th style="padding:12px; font-size:0.75rem; font-weight:800; color:#64748b; text-align:right;">AKSI</th>
                                 </tr>
                             </thead>
-                            <tbody id="approvalTableBody">
-                                <tr><td colspan="5" style="text-align:center; padding: 20px;">Memuat data...</td></tr>
+                            <tbody id="pendingPickupsTableBody">
+                                <tr><td colspan="4" style="text-align:center; padding:16px; color:#64748b;">Memuat data...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Map Panel -->
-                <div class="panel-card">
-                    <div class="panel-header" style="border-bottom: none; padding-bottom: 0;">
-                        <div>
-                            <h3>Live Collector Grid</h3>
-                            <p>Sistem Satelit EcoRecycle</p>
-                        </div>
-                    </div>
-                    <div class="map-container"
-                        style="height: 350px; margin: 24px; border-radius: 16px; overflow: hidden; border: 1px solid var(--card-border);">
-                        <div id="map"></div>
-                    </div>
-                    <div class="active-fleet-summary"
-                        style="display: flex; justify-content: space-between; padding: 20px 24px; background: #f8fafc; border-top: 1px solid var(--card-border);">
-                        <div class="fleet-stat">
-                            <span class="fleet-label">Active Collectors</span>
-                            <span class="fleet-val" id="fleet-active">0</span>
-                        </div>
-                        <div class="fleet-stat">
-                            <span class="fleet-label">On Route</span>
-                            <span class="fleet-val" id="fleet-transit">0</span>
-                        </div>
-                        <div class="fleet-stat">
-                            <span class="fleet-label">Verified</span>
-                            <span class="fleet-val" id="fleet-arriving">0</span>
-                        </div>
+                <!-- Leaflet Peta Live Grid -->
+                <div class="panel-card" style="background:white; border-radius:24px; border:1px solid #e2e8f0; padding:32px;">
+                    <h3 style="font-weight:900; font-size:1.2rem; color:#0f172a; margin-bottom:20px;">Live Collector Grid</h3>
+                    <div class="map-container" style="height: 300px; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0;">
+                        <div id="live-map" style="width:100%; height:100%;"></div>
                     </div>
                 </div>
             </div>
+
         </div>
 
-        <!-- VIEW 2: FINANCE (KEUANGAN) -->
-        <div id="finance-view" class="view-section">
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title" style="color: #064e3b;">Eco-Reward Payout Center</h1>
-                    <p class="page-subtitle">Dashboard Keuangan. Validasi pencairan reward dan monitoring biaya handling operasional.</p>
-                </div>
+        <!-- ===========================
+             VIEW 2: E-WASTE PICKUPS DATABASE
+             =========================== -->
+        <div id="shipments-view" class="view-section">
+            <div class="page-header" style="margin-bottom:32px;">
+                <h1 style="font-family:'Outfit',sans-serif; font-size:2rem; font-weight:900; color:#0f172a;">Global E-Waste Database</h1>
+                <p style="color:#64748b; margin-top:4px;">Daftar lengkap seluruh transaksi penjemputan sampah elektronik.</p>
             </div>
 
-            <!-- KPI Finance -->
-            <div class="kpi-grid">
-                <div class="kpi-card" style="border-top: 4px solid var(--brand-primary);">
-                    <div class="kpi-card-header">
-                        <div>
-                            <h3 class="kpi-title">Total Reward Dibayarkan</h3>
-                            <p class="kpi-value" id="finance-total-fee" style="font-size: 1.8rem;">Rp 0</p>
-                        </div>
-                        <div class="kpi-icon-wrapper green"><i class="fas fa-coins"></i></div>
-                    </div>
-                    <div class="kpi-trend up"><i class="fas fa-check-circle"></i> Payout Verified</div>
-                </div>
-
-                <div class="kpi-card">
-                    <div class="kpi-card-header">
-                        <div>
-                            <h3 class="kpi-title">Antrean Pencairan</h3>
-                            <p class="kpi-value" id="finance-settlement" style="font-size: 1.8rem;">Rp 0</p>
-                        </div>
-                        <div class="kpi-icon-wrapper red"><i class="fas fa-clock"></i> Pending Approval</div>
-                    </div>
-                    <div class="kpi-trend neutral"><i class="fas fa-shield-halved"></i> Secure Link</div>
-                </div>
-            </div>
-
-            <div class="panel-card">
-                <div class="panel-header">
-                    <div>
-                        <h3>Reward Ledger (SmartBank Integration)</h3>
-                        <p style="color: #10b981; font-weight: 600;"><i class="fas fa-lock"></i> Digital Payout Secured via SmartBank API</p>
-                    </div>
-                </div>
-                <div class="table-wrapper">
-                    <table class="enterprise-table">
+            <div class="panel-card" style="background:white; border-radius:24px; border:1px solid #e2e8f0; padding:32px;">
+                <div style="overflow-x:auto;">
+                    <table class="history-table" style="width:100%; border-collapse:collapse; min-width:800px;">
                         <thead>
-                            <tr>
-                                <th>Ref Payout</th>
-                                <th>Eco Warrior</th>
-                                <th>Nominal Reward</th>
-                                <th>Metode</th>
-                                <th>Status</th>
-                                <th style="text-align: right;">Aksi</th>
+                            <tr style="border-bottom:2px solid #f1f5f9; text-align:left;">
+                                <th style="padding:16px; font-size:0.75rem; font-weight:800; color:#64748b;">NO. TRACKING</th>
+                                <th style="padding:16px; font-size:0.75rem; font-weight:800; color:#64748b;">TANGGAL</th>
+                                <th style="padding:16px; font-size:0.75rem; font-weight:800; color:#64748b;">DONATUR</th>
+                                <th style="padding:16px; font-size:0.75rem; font-weight:800; color:#64748b;">KATEGORI</th>
+                                <th style="padding:16px; font-size:0.75rem; font-weight:800; color:#64748b;">BERAT</th>
+                                <th style="padding:16px; font-size:0.75rem; font-weight:800; color:#64748b;">KOLEKTOR</th>
+                                <th style="padding:16px; font-size:0.75rem; font-weight:800; color:#64748b;">STATUS</th>
                             </tr>
                         </thead>
-                        <tbody id="finance-table-body">
-                            <tr><td colspan="6" style="text-align:center; padding: 20px;">Data transaksi tersinkronisasi via EcoRecycle Finance Module.</td></tr>
+                        <tbody id="globalPickupsTableBody">
+                            <tr><td colspan="7" style="text-align:center; padding:16px; color:#64748b;">Memuat data...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- Other views are hidden by default and handled by JS -->
+        <!-- ===========================
+             VIEW 3: FINANCE & PAYOUT MANAGER
+             =========================== -->
+        <div id="finance-view" class="view-section">
+            <div class="page-header" style="margin-bottom:32px;">
+                <h1 style="font-family:'Outfit',sans-serif; font-size:2rem; font-weight:900; color:#0f172a;">Eco-Reward Payout Ledger</h1>
+                <p style="color:#64748b; margin-top:4px;">Validasi dan eksekusi pembayaran kompensasi reward donatur e-waste via E-Wallet / Transfer Bank.</p>
+            </div>
+
+            <!-- KPI Finance -->
+            <div class="kpi-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; margin-bottom:32px;">
+                <div class="kpi-card" style="background:white; padding:24px; border-radius:20px; border:1px solid #e2e8f0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span style="font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase;">Total Reward Dibayarkan</span>
+                        <div style="background:#ecfdf5; color:#10b981; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-coins"></i></div>
+                    </div>
+                    <h2 style="font-size:1.8rem; font-weight:900; margin:0; color:#0f172a;" id="finance-paid-amount">Rp 0</h2>
+                </div>
+
+                <div class="kpi-card" style="background:white; padding:24px; border-radius:20px; border:1px solid #e2e8f0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span style="font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase;">Antrean Reward Pending</span>
+                        <div style="background:#fffbeb; color:#d97706; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-wallet"></i></div>
+                    </div>
+                    <h2 style="font-size:1.8rem; font-weight:900; margin:0; color:#0f172a;" id="finance-pending-amount">Rp 0</h2>
+                </div>
+            </div>
+
+            <div class="layout-grid" style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap:24px; margin-bottom:32px;">
+                <!-- Payout table -->
+                <div class="panel-card" style="background:white; border-radius:24px; border:1px solid #e2e8f0; padding:32px;">
+                    <h3 style="font-weight:900; font-size:1.2rem; color:#0f172a; margin-bottom:20px;">Ledger Transaksi Payout</h3>
+                    
+                    <div style="overflow-x:auto;">
+                        <table class="history-table" style="width:100%; border-collapse:collapse; min-width:500px;">
+                            <thead>
+                                <tr style="border-bottom:2px solid #f1f5f9; text-align:left;">
+                                    <th style="padding:12px; font-size:0.75rem; font-weight:800; color:#64748b;">NO. TRACKING</th>
+                                    <th style="padding:12px; font-size:0.75rem; font-weight:800; color:#64748b;">DONATUR</th>
+                                    <th style="padding:12px; font-size:0.75rem; font-weight:800; color:#64748b;">NOMINAL</th>
+                                    <th style="padding:12px; font-size:0.75rem; font-weight:800; color:#64748b; text-align:right;">AKSI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payoutLedgerTableBody">
+                                <tr><td colspan="4" style="text-align:center; padding:16px; color:#64748b;">Memuat data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Monthly Revenue Chart -->
+                <div class="panel-card" style="background:white; border-radius:24px; border:1px solid #e2e8f0; padding:32px;">
+                    <h3 style="font-weight:900; font-size:1.2rem; color:#0f172a; margin-bottom:20px;">Tren Distribusi Reward</h3>
+                    <div style="height:250px; position:relative;">
+                        <canvas id="financeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="assets/js/admin.js"></script>
 </body>
+
 </html>

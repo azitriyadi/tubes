@@ -1,35 +1,32 @@
+// EcoRecycle Eco Warrior Dashboard Logic
+
+let monthlyChart = null;
+
+// Tab Switching
 const tabs = document.querySelectorAll('.hub-tab');
 const panes = document.querySelectorAll('.tab-pane');
 
 tabs.forEach(tab => {
     tab.addEventListener('click', (e) => {
         e.preventDefault();
-
-        // Update active state on nav links
-        tabs.forEach(t => {
-            t.classList.remove('active');
-        });
-
+        
+        tabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
 
-        // Switch content panes
         const target = tab.getAttribute('data-target');
         panes.forEach(p => p.classList.remove('active'));
-        document.getElementById(target).classList.add('active');
-
-        // Close sidebars if open
-        if (typeof closeAllSidebars === 'function') {
-            closeAllSidebars();
+        
+        const targetPane = document.getElementById(target);
+        if (targetPane) {
+            targetPane.classList.add('active');
         }
 
-        // Add minor smooth scroll to top of content if on mobile
-        if (window.innerWidth < 768) {
-            window.scrollTo({ top: 300, behavior: 'smooth' });
-        }
+        // Close sidebar on mobile
+        closeSidebar();
     });
 });
 
-// Single Mobile Sidebar Toggle Logic
+// Mobile Sidebar Toggle
 const hamburgerBtn = document.getElementById('mobileMenuToggle');
 const sidebar = document.getElementById('sidebar');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -40,284 +37,66 @@ function openSidebar() {
     document.body.style.overflow = 'hidden';
 }
 
-function closeSidebarAction() {
+function closeSidebar() {
     if (sidebar) sidebar.classList.remove('active');
     if (sidebarOverlay) sidebarOverlay.style.display = 'none';
     document.body.style.overflow = '';
 }
 
 if (hamburgerBtn) hamburgerBtn.addEventListener('click', openSidebar);
-if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebarAction);
+if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
 
-// Also close sidebar on link click
-tabs.forEach(tab => {
-    tab.addEventListener('click', closeSidebarAction);
-});
-
-// ================= INTEGRASI API =================
-// 1. Cek Tarif
-const btnHitung = document.getElementById('btn-hitung-biaya');
-if (btnHitung) {
-    btnHitung.addEventListener('click', function () {
-        const asal = document.getElementById('ongkir-asal').value;
-        const tujuan = document.getElementById('ongkir-tujuan').value;
-        const berat = document.getElementById('ongkir-weight').value;
-        const layanan = document.getElementById('ongkir-service').options[document.getElementById('ongkir-service').selectedIndex].text;
-
-        if (!asal || !tujuan || !berat) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Data Tidak Lengkap',
-                text: 'Mohon lengkapi asal, tujuan, dan berat!'
-            });
-            return;
-        }
-
-        btnHitung.innerText = 'Menghitung...';
-
-        fetch('api/ecorecycle/estimate_reward', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ category: layanan, weight_kg: berat })
-        })
-            .then(res => res.json())
-            .then(data => {
-                btnHitung.innerText = 'Hitung Biaya';
-                if (data.status === 'success') {
-                    // Format Rupiah
-                    const formatter = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' });
-                    document.getElementById('hasil-ongkir').innerText = "Estimasi Biaya: " + formatter.format(data.data.biaya_ongkir);
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: data.message
-                    });
-                }
-            })
-            .catch(err => {
-                btnHitung.innerText = 'Hitung Biaya';
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Kesalahan',
-                    text: 'Gagal terhubung ke server'
-                });
-            });
-    });
-}
-
-// 2. Tracking Resi
-const btnTrack = document.getElementById('btn-track-paket');
-if (btnTrack) {
-    btnTrack.addEventListener('click', function () {
-        const resi = document.getElementById('track-input').value;
-        if (!resi) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Resi Kosong',
-                text: 'Masukkan nomor resi terlebih dahulu'
-            });
-            return;
-        }
-
-        btnTrack.innerText = 'Mencari...';
-
-        fetch('api/ecorecycle/pickup_status?tracking_number=' + resi, {
-            method: 'GET'
-        })
-            .then(res => res.json())
-            .then(data => {
-                btnTrack.innerText = 'Cari Paket';
-                if (data.status === 'success') {
-                    Swal.fire({
-                        title: `Status Paket ${data.data.resi}`,
-                        html: `<b>Penerima:</b> ${data.data.penerima_nama}<br><b>Status:</b> ${data.data.status.toUpperCase()}`,
-                        icon: 'info'
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Tidak Ditemukan',
-                        text: 'Resi tidak ditemukan!'
-                    });
-                }
-            })
-            .catch(err => {
-                btnTrack.innerText = 'Cari Paket';
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Kesalahan',
-                    text: 'Gagal terhubung ke server'
-                });
-            });
-    });
-}
-
-// 3. Form Kirim Paket Baru (Booking)
-const bookingForm = document.getElementById('booking-form');
-
-// Auto Calculate Summary
-function calculateSummary() {
-    const formatter = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
-
-    const layananSelect = document.getElementById('booking-layanan');
-    if(!layananSelect) return;
+// Payout Preview Calculation
+function calculateFormPreview() {
+    const categorySelect = document.getElementById('form-waste-category');
+    const weightInput = document.getElementById('form-waste-weight');
     
-    const basePrice = parseInt(layananSelect.value);
-    const berat = parseFloat(document.getElementById('booking-berat').value) || 1;
-    const biaya_ongkir = basePrice * Math.ceil(berat);
+    if (!categorySelect || !weightInput) return;
 
-    const asuransiCheck = document.getElementById('asuransi').checked;
-    const nilaiBarang = parseFloat(document.getElementById('booking-nilai-barang').value) || 0;
-    let nilai_asuransi = 0;
-    if (asuransiCheck && nilaiBarang > 0) {
-        nilai_asuransi = nilaiBarang * 0.005;
-    }
+    const weight = parseFloat(weightInput.value) || 0;
+    
+    let rate = 5000;
+    const category = categorySelect.value;
+    if (category === 'Computers') rate = 7000;
+    else if (category === 'Large Appliances') rate = 10000;
+    else if (category === 'Batteries') rate = 3000;
 
-    const paymentSelect = document.getElementById('booking-pembayaran').value;
-    let service_fee = 0;
-    if (paymentSelect === 'smartbank') {
-        service_fee = biaya_ongkir * 0.05; // 5% fee via SmartBank
-    }
+    const gross = weight * rate;
+    const fee = gross * 0.05; // 5% handling fee
+    const net = gross - fee;
+    const carbon = (weight * 2.5).toFixed(1);
 
-    const total = biaya_ongkir + nilai_asuransi + service_fee;
-
-    document.getElementById('summary-ongkir').innerText = formatter.format(biaya_ongkir);
-    document.getElementById('summary-asuransi').innerText = formatter.format(nilai_asuransi);
-    document.getElementById('summary-fee').innerText = paymentSelect === 'smartbank' ? formatter.format(service_fee) : 'Rp 0';
-    document.getElementById('summary-total').innerText = formatter.format(total);
-
-    const btnSubmit = document.getElementById('btn-submit-booking');
-    if (paymentSelect === 'smartbank') {
-        btnSubmit.innerHTML = '<i class="fas fa-check-circle" style="margin-right: 8px;"></i> KONFIRMASI & BAYAR VIA SMARTBANK';
-        btnSubmit.style.background = 'var(--brand-primary)';
-    } else {
-        btnSubmit.innerHTML = '<i class="fas fa-check-circle" style="margin-right: 8px;"></i> KONFIRMASI PENGIRIMAN';
-        btnSubmit.style.background = 'var(--brand-dark)';
-    }
-}
-
-if (bookingForm) {
-    // Attach event listeners to trigger recalculation
-    document.getElementById('booking-layanan').addEventListener('change', calculateSummary);
-    document.getElementById('booking-berat').addEventListener('input', calculateSummary);
-    document.getElementById('asuransi').addEventListener('change', calculateSummary);
-    document.getElementById('booking-nilai-barang').addEventListener('input', calculateSummary);
-    document.getElementById('booking-pembayaran').addEventListener('change', calculateSummary);
-
-    // Initial calculation
-    calculateSummary();
-
-    bookingForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const btnSubmit = document.getElementById('btn-submit-booking');
-        btnSubmit.innerText = 'MEMPROSES...';
-
-        // Ambil data user dari localStorage
-        let userId = 3; // Default user_id fallback
-        const userSession = localStorage.getItem('user');
-        if (userSession) {
-            try { userId = JSON.parse(userSession).id; } catch (e) { }
-        }
-
-        // Kalkulasi biaya dasar dulu (Simulasi frontend cepat sebelum hitung real backend)
-        const layananSelect = document.getElementById('booking-layanan');
-        const basePrice = parseInt(layananSelect.value);
-        const berat = parseFloat(document.getElementById('booking-berat').value) || 1;
-        let biaya_ongkir = basePrice * Math.ceil(berat);
-
-        const asuransiCheck = document.getElementById('asuransi').checked;
-        const nilaiBarang = parseFloat(document.getElementById('booking-nilai-barang').value) || 0;
-        let nilai_asuransi = 0;
-        if (asuransiCheck && nilaiBarang > 0) {
-            nilai_asuransi = nilaiBarang * 0.005;
-        }
-        biaya_ongkir += nilai_asuransi; // Estimasi untuk dikirim
-
-        const payload = {
-            user_id: userId,
-            pengirim_nama: document.getElementById('booking-pengirim-nama').value,
-            pengirim_telp: document.getElementById('booking-pengirim-telp').value,
-            pengirim_alamat: document.getElementById('booking-pengirim-alamat').value,
-            penerima_nama: document.getElementById('booking-penerima-nama').value,
-            penerima_telp: document.getElementById('booking-penerima-telp').value,
-            penerima_alamat: document.getElementById('booking-penerima-alamat').value,
-            berat: berat,
-            layanan: layananSelect.options[layananSelect.selectedIndex].text,
-            biaya_ongkir: biaya_ongkir,
-            asuransi: asuransiCheck,
-            nilai_barang: nilaiBarang
-        };
-
-        fetch('api/ecorecycle/request_pickup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-            .then(res => res.json())
-            .then(data => {
-                const paymentSelect = document.getElementById('booking-pembayaran').value;
-                if (data.status === 'success') {
-                    // Jika SmartBank terpilih, otomatis bayar
-                    if (paymentSelect === 'smartbank') {
-                        fetch('api/ecorecycle/process_payout', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ pickup_id: data.data.pickup_id })
-                        })
-                            .then(r => r.json())
-                            .then(payData => {
-                                if (payData.status === 'success') {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Pemesanan Berhasil',
-                                        html: `Resi: <b>${data.data.resi}</b><br>Ref: ${payData.data.smartbank_ref}`,
-                                        confirmButtonText: 'Mantap!'
-                                    }).then(() => {
-                                        window.location.reload();
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        icon: 'warning',
-                                        title: 'Pemesanan Berhasil, Tapi...',
-                                        text: 'Pembayaran SmartBank gagal: ' + payData.message,
-                                    }).then(() => {
-                                        window.location.reload();
-                                    });
-                                }
-                            });
-                    } else {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Pemesanan Berhasil',
-                            text: `Nomor Resi Anda: ${data.data.resi}`,
-                        }).then(() => {
-                            window.location.reload();
-                        });
-                    }
-                } else {
-                    calculateSummary();
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: data.message
-                    });
-                }
-            })
-            .catch(err => {
-                calculateSummary();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Kesalahan',
-                    text: 'Gagal terhubung ke server backend'
-                });
-            });
+    const formatter = new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0
     });
+
+    document.getElementById('preview-gross-reward').innerText = formatter.format(gross);
+    document.getElementById('preview-fee').innerText = formatter.format(fee);
+    document.getElementById('preview-net-reward').innerText = formatter.format(net);
+    document.getElementById('preview-carbon').innerText = carbon;
 }
 
-// 4. Initialize User Data & Fetch Pengiriman
-function loadUserData() {
+const formWeight = document.getElementById('form-waste-weight');
+const formCat = document.getElementById('form-waste-category');
+
+if (formWeight) formWeight.addEventListener('input', calculateFormPreview);
+if (formCat) formCat.addEventListener('change', calculateFormPreview);
+
+// Logout
+function logoutUser() {
+    localStorage.removeItem('user');
+    window.location.href = 'auth';
+}
+
+// System Notification Alert Close
+function closeNotification() {
+    document.getElementById('system-notification-box').style.display = 'none';
+}
+
+// 4. Load User Data & Pickups
+function loadDashboardData() {
     const userSession = localStorage.getItem('user');
     if (!userSession) {
         window.location.href = 'auth';
@@ -325,101 +104,398 @@ function loadUserData() {
     }
 
     const user = JSON.parse(userSession);
-    const navUserName = document.getElementById('nav-user-name');
-    if (navUserName) navUserName.innerText = user.name;
     
-    const navUserRole = document.getElementById('nav-user-role');
-    if (navUserRole) navUserRole.innerText = user.role === 'user' ? 'PREMIUM MEMBER' : user.role.toUpperCase();
+    // Set Profile Info
+    document.getElementById('hero-welcome').innerText = `Halo, ${user.name}!`;
+    document.getElementById('user-display-name').innerText = user.name;
+    document.getElementById('profile-avatar').innerText = user.name.substring(0, 2).toUpperCase();
     
-    const navUserAvatar = document.getElementById('nav-user-avatar');
-    if (navUserAvatar) navUserAvatar.innerText = user.name.substring(0, 2).toUpperCase();
+    const settingsName = document.getElementById('settings-name');
+    const settingsEmail = document.getElementById('settings-email');
+    if (settingsName) settingsName.value = user.name;
+    if (settingsEmail) settingsEmail.value = user.email;
 
-    const heroWelcome = document.getElementById('hero-welcome');
-    if (heroWelcome) heroWelcome.innerHTML = `Selamat Datang,<br>${user.name}`;
+    const donorNameInput = document.getElementById('form-donor-name');
+    if (donorNameInput) donorNameInput.value = user.name;
 
-    const pengirimNama = document.getElementById('booking-pengirim-nama');
-    if (pengirimNama) pengirimNama.value = user.name;
+    // Fetch Pickups from API
+    fetch('api/ecorecycle/list_pickups?type=user', {
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + user.token
+        }
+    })
+    .then(res => {
+        if (res.status === 401) {
+            logoutUser();
+        }
+        return res.json();
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            const pickups = data.data;
+            
+            // Calculate Metrics
+            let totalWeight = 0;
+            let totalCarbon = 0;
+            let totalReward = 0;
+            let activeHtml = '';
+            let historyHtml = '';
+            
+            // Chart Data Helpers
+            const monthlyWeights = {};
 
-    // Fetch History
-    fetch(`api/ecorecycle/list_pickups?type=user&user_id=${user.id}`)
+            pickups.forEach(item => {
+                const weight = parseFloat(item.weight_kg);
+                const carbon = weight * 2.5;
+                const netReward = parseFloat(item.eco_reward) - parseFloat(item.processing_fee);
+                
+                totalWeight += weight;
+                totalCarbon += carbon;
+
+                if (item.status === 'completed') {
+                    totalReward += netReward;
+                }
+
+                // Group weights by month for Chart.js
+                const dateObj = new Date(item.created_at);
+                const monthName = dateObj.toLocaleString('id-ID', { month: 'short' });
+                monthlyWeights[monthName] = (monthlyWeights[monthName] || 0) + weight;
+
+                // Format Date
+                const dateStr = `${dateObj.getDate()} ${dateObj.toLocaleString('id-ID', { month: 'short' })} ${dateObj.getFullYear()}`;
+                
+                // Add to history list
+                let badgeClass = 'pending';
+                if (item.status === 'pickup') badgeClass = 'pickup';
+                else if (item.status === 'transit') badgeClass = 'transit';
+                else if (item.status === 'completed') badgeClass = 'completed';
+
+                historyHtml += `
+                    <tr>
+                        <td style="padding: 16px;">${dateStr}</td>
+                        <td style="padding: 16px;"><strong>${item.tracking_number}</strong></td>
+                        <td style="padding: 16px;">${item.category_name}</td>
+                        <td style="padding: 16px; font-weight:700;">${weight} KG</td>
+                        <td style="padding: 16px; font-weight:800; color:#059669;">Rp ${netReward.toLocaleString('id-ID')}</td>
+                        <td style="padding: 16px;"><span class="status-badge ${badgeClass}">${item.status.toUpperCase()}</span></td>
+                    </tr>
+                `;
+
+                // Add to active pickups list if not completed
+                if (item.status !== 'completed') {
+                    let stepIcon = 'fa-clock';
+                    let stepText = 'Menunggu kolektor mengambil e-waste.';
+                    
+                    if (item.status === 'pickup') {
+                        stepIcon = 'fa-truck-fast';
+                        stepText = 'Kolektor bersiap menjemput e-waste Anda.';
+                    } else if (item.status === 'transit') {
+                        stepIcon = 'fa-warehouse';
+                        stepText = 'E-waste dalam perjalanan menuju Recycling Hub.';
+                    }
+
+                    activeHtml += `
+                        <div class="active-pickup-card" style="display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap;">
+                            <div>
+                                <span style="font-size:0.75rem; font-weight:800; color:var(--text-secondary); text-transform:uppercase;">No. Tracking</span>
+                                <h4 style="font-weight:900; color:var(--brand-dark); margin:2px 0;">${item.tracking_number}</h4>
+                                <p style="font-size:0.8rem; color:var(--text-secondary); margin:4px 0 0 0;">${item.category_name} • ${weight} KG</p>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <div style="background:#ecfdf5; color:#10b981; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="fas ${stepIcon}"></i></div>
+                                <div>
+                                    <span class="status-badge ${badgeClass}">${item.status.toUpperCase()}</span>
+                                    <p style="font-size:0.75rem; color:var(--text-secondary); margin:2px 0 0 0;">${stepText}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            // Update Level Badge
+            let userLevel = "Bronze Saver";
+            if (totalWeight >= 15) userLevel = "Emerald Hero";
+            else if (totalWeight >= 5) userLevel = "Silver Guardian";
+            
+            document.getElementById('user-display-level').innerText = userLevel;
+            document.getElementById('profile-avatar').style.background = totalWeight >= 15 ? '#10b981' : totalWeight >= 5 ? '#0d9488' : '#64748b';
+
+            // Set Metrics
+            const rupiahFormatter = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
+            document.getElementById('metric-total-weight').innerText = totalWeight.toFixed(1);
+            document.getElementById('metric-total-carbon').innerText = totalCarbon.toFixed(1);
+            document.getElementById('metric-total-reward').innerText = rupiahFormatter.format(totalReward);
+
+            // Set Table Data
+            const historyBody = document.getElementById('payout-history-table-body');
+            if (historyBody) {
+                if (historyHtml === '') {
+                    historyBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 24px; color:var(--text-secondary);">Belum ada riwayat donasi e-waste.</td></tr>';
+                } else {
+                    historyBody.innerHTML = historyHtml;
+                }
+            }
+
+            // Set Active Pickups
+            const activeContainer = document.getElementById('active-pickups-container');
+            if (activeContainer) {
+                if (activeHtml === '') {
+                    activeContainer.innerHTML = '<div style="text-align:center; padding:24px; color:var(--text-secondary);">Tidak ada penjemputan e-waste aktif saat ini.</div>';
+                } else {
+                    activeContainer.innerHTML = activeHtml;
+                    
+                    // Show notification banner if there is an active pickup
+                    const latestPickup = pickups[0];
+                    if (latestPickup && latestPickup.status !== 'completed') {
+                        const notifBox = document.getElementById('system-notification-box');
+                        const notifMsg = document.getElementById('notification-message');
+                        if (notifBox && notifMsg) {
+                            notifMsg.innerHTML = `Penjemputan <strong>${latestPickup.tracking_number}</strong> dalam status: <strong>${latestPickup.status.toUpperCase()}</strong>.`;
+                            notifBox.style.display = 'flex';
+                        }
+                    }
+                }
+            }
+
+            // Render Chart
+            renderChart(monthlyWeights);
+        }
+    })
+    .catch(err => {
+        console.error('Error fetching dashboard data:', err);
+    });
+}
+
+// 5. Submit New Pickup Form
+const pickupForm = document.getElementById('pickup-request-form');
+if (pickupForm) {
+    pickupForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const userSession = localStorage.getItem('user');
+        if (!userSession) return;
+        const user = JSON.parse(userSession);
+
+        const btn = this.querySelector('button[type="submit"]');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+        btn.disabled = true;
+
+        const payload = {
+            item_description: document.getElementById('form-item-description').value,
+            pickup_address: document.getElementById('form-pickup-address').value,
+            contact_phone: document.getElementById('form-donor-phone').value,
+            weight_kg: parseFloat(document.getElementById('form-waste-weight').value),
+            category: document.getElementById('form-waste-category').value
+        };
+
+        fetch('api/ecorecycle/request_pickup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + user.token
+            },
+            body: JSON.stringify(payload)
+        })
         .then(res => res.json())
         .then(data => {
             if (data.status === 'success') {
-                const pengiriman = data.data;
-                const historyTable = document.getElementById('history-table-body');
-                const activeContainer = document.getElementById('active-status-container');
-
-                if (historyTable) historyTable.innerHTML = '';
-                if (activeContainer) activeContainer.innerHTML = '';
-
-                let hasActive = false;
-
-                if (pengiriman.length === 0) {
-                    if (historyTable) historyTable.innerHTML = '<tr><td colspan="6" style="text-align:center;">Belum ada riwayat pengiriman</td></tr>';
-                    if (activeContainer) activeContainer.innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-secondary);">Tidak ada pengiriman aktif</p>';
-                    return;
-                }
-
-                pengiriman.forEach(item => {
-                    // Table row
-                    const dateObj = new Date(item.created_at);
-                    const dateStr = `${dateObj.getDate()} ${dateObj.toLocaleString('id-ID', { month: 'short' })} ${dateObj.getFullYear()}`;
-
-                    let badgeClass = 'transit';
-                    if (item.status === 'delivered') badgeClass = 'delivered';
-                    else if (item.status === 'pending') badgeClass = 'processing';
-
-                    if (historyTable) {
-                        historyTable.innerHTML += `
-                            <tr>
-                                <td>${dateStr}</td>
-                                <td><strong>${item.resi}</strong></td>
-                                <td>${item.penerima_nama}</td>
-                                <td>${item.penerima_alamat.substring(0, 20)}...</td>
-                                <td>${item.nama_layanan || item.layanan_id}</td>
-                                <td><span class="status-badge ${badgeClass}">${item.status.toUpperCase()}</span></td>
-                            </tr>
-                        `;
-                    }
-
-                    // Active Cards
-                    if (item.status !== 'delivered') {
-                        hasActive = true;
-                        let icon = 'fa-boxes';
-                        if (item.status === 'transit') icon = 'fa-truck-fast';
-
-                        if (activeContainer) {
-                            activeContainer.innerHTML += `
-                                <div style="background-color: var(--gray-50); border-radius: 20px; padding: 32px; margin-bottom: 24px; border: 1px solid var(--gray-100);">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                                        <div>
-                                            <h4 style="font-size: 1.2rem; font-weight: 800; color: var(--brand-dark);">${item.resi}</h4>
-                                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Menuju: ${item.penerima_nama} (${item.penerima_alamat.substring(0,15)}...)</p>
-                                        </div>
-                                        <span class="status-badge ${badgeClass}">${item.status.toUpperCase()}</span>
-                                    </div>
-                                    <div style="display: flex; align-items: center; gap: 16px;">
-                                        <i class="fas ${icon}" style="font-size: 2rem; color: var(--brand-primary);"></i>
-                                        <div>
-                                            <p style="font-weight: 700;">Paket dalam status: ${item.status.replace('_', ' ')}</p>
-                                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Dibuat: ${dateStr}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    }
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Permohonan Berhasil!',
+                    html: `Nomor Tracking: <strong>${data.data.tracking_number}</strong><br>Kolektor kami akan segera menghubungi Anda.`,
+                    confirmButtonColor: '#10b981',
+                    confirmButtonText: 'Selesai'
+                }).then(() => {
+                    pickupForm.reset();
+                    calculateFormPreview();
+                    loadDashboardData();
+                    // Switch to Beranda
+                    document.querySelector('.sidebar-item[data-target="beranda"]').click();
                 });
-
-                if (!hasActive && activeContainer) {
-                    activeContainer.innerHTML = '<p style="text-align:center; padding: 20px; color: var(--text-secondary);">Tidak ada pengiriman aktif</p>';
-                }
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: data.message,
+                    confirmButtonColor: '#10b981'
+                });
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
             }
         })
         .catch(err => {
-            console.error('Error fetching delivery data:', err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Kesalahan',
+                text: 'Gagal menghubungi server.',
+                confirmButtonColor: '#10b981'
+            });
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
         });
+    });
 }
 
-// Run on load
-document.addEventListener('DOMContentLoaded', loadUserData);
+// 6. Track Search
+function searchTracking() {
+    const input = document.getElementById('track-number-search');
+    const container = document.getElementById('tracking-timeline-container');
+    
+    if (!input || !container) return;
+    const trackingNum = input.value.trim();
+
+    if (trackingNum === '') {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Kolom Kosong',
+            text: 'Silakan masukkan nomor tracking terlebih dahulu.',
+            confirmButtonColor: '#10b981'
+        });
+        return;
+    }
+
+    const userSession = localStorage.getItem('user');
+    if (!userSession) return;
+    const user = JSON.parse(userSession);
+
+    fetch(`api/ecorecycle/pickup_status?tracking_number=${trackingNum}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + user.token
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const item = data.data;
+            const history = item.history || [];
+
+            document.getElementById('track-disp-number').innerText = item.tracking_number;
+            
+            let badgeClass = 'pending';
+            if (item.status === 'pickup') badgeClass = 'pickup';
+            else if (item.status === 'transit') badgeClass = 'transit';
+            else if (item.status === 'completed') badgeClass = 'completed';
+
+            const statusBadge = document.getElementById('track-disp-status');
+            statusBadge.className = `status-badge ${badgeClass}`;
+            statusBadge.innerText = item.status.toUpperCase();
+
+            document.getElementById('track-disp-detail').innerText = `${item.category_name} • ${item.weight_kg} KG`;
+
+            // Populate Timeline
+            const timelineList = document.getElementById('track-timeline-list');
+            timelineList.innerHTML = '';
+
+            if (history.length === 0) {
+                timelineList.innerHTML = '<p style="color:var(--text-secondary);">Belum ada log pelacakan.</p>';
+            } else {
+                history.forEach(log => {
+                    const dateObj = new Date(log.updated_at);
+                    const timeStr = `${dateObj.getDate()} ${dateObj.toLocaleString('id-ID', { month: 'short' })} ${dateObj.getFullYear()}, ${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+                    
+                    timelineList.innerHTML += `
+                        <div class="timeline-node">
+                            <div class="timeline-node-dot"></div>
+                            <div class="timeline-node-time">${timeStr}</div>
+                            <div class="timeline-node-title">${log.status.toUpperCase()}</div>
+                            <div class="timeline-node-desc">Lokasi: <strong>${log.location}</strong><br>${log.notes}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            container.style.display = 'block';
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Tidak Ditemukan',
+                text: 'Nomor tracking tidak terdaftar.',
+                confirmButtonColor: '#10b981'
+            });
+        }
+    })
+    .catch(err => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Kesalahan',
+            text: 'Gagal terhubung ke server.',
+            confirmButtonColor: '#10b981'
+        });
+    });
+}
+
+// 7. Update Settings Form
+const settingsForm = document.getElementById('settings-profile-form');
+if (settingsForm) {
+    settingsForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Profil Disimpan',
+            text: 'Perubahan profil berhasil disimpan.',
+            confirmButtonColor: '#10b981'
+        });
+    });
+}
+
+// 8. Render Chart.js
+function renderChart(monthlyWeights) {
+    const ctx = document.getElementById('monthlyWasteChart');
+    if (!ctx) return;
+
+    const labels = Object.keys(monthlyWeights).reverse();
+    const weights = Object.values(monthlyWeights).reverse();
+
+    // Fallback if empty
+    if (labels.length === 0) {
+        labels.push('Mei');
+        weights.push(0);
+    }
+
+    if (monthlyChart) {
+        monthlyChart.destroy();
+    }
+
+    monthlyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Berat E-Waste (KG)',
+                data: weights,
+                backgroundColor: '#10b981',
+                borderRadius: 8,
+                barThickness: 24
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+    loadDashboardData();
+    calculateFormPreview();
+});
