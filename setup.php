@@ -79,6 +79,7 @@ $sql = "CREATE TABLE IF NOT EXISTS pickups (
     category_id INT(11),
     eco_reward DECIMAL(15,2),
     processing_fee DECIMAL(15,2),
+    photo_url VARCHAR(255) DEFAULT NULL,
     is_processed BOOLEAN DEFAULT FALSE,
     status VARCHAR(50) DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

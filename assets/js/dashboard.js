@@ -283,21 +283,24 @@ if (pickupForm) {
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
         btn.disabled = true;
 
-        const payload = {
-            item_description: document.getElementById('form-item-description').value,
-            pickup_address: document.getElementById('form-pickup-address').value,
-            contact_phone: document.getElementById('form-donor-phone').value,
-            weight_kg: parseFloat(document.getElementById('form-waste-weight').value),
-            category: document.getElementById('form-waste-category').value
-        };
+        const formData = new FormData();
+        formData.append('item_description', document.getElementById('form-item-description').value);
+        formData.append('pickup_address', document.getElementById('form-pickup-address').value);
+        formData.append('contact_phone', document.getElementById('form-donor-phone').value);
+        formData.append('weight_kg', parseFloat(document.getElementById('form-waste-weight').value));
+        formData.append('category', document.getElementById('form-waste-category').value);
+
+        const photoInput = document.getElementById('form-waste-photo');
+        if (photoInput && photoInput.files.length > 0) {
+            formData.append('photo', photoInput.files[0]);
+        }
 
         fetch('api/ecorecycle/request_pickup', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + user.token
             },
-            body: JSON.stringify(payload)
+            body: formData
         })
         .then(res => res.json())
         .then(data => {

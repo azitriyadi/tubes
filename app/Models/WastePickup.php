@@ -56,13 +56,15 @@ class WastePickup {
         $eco_reward = $reward_per_kg * $weight_kg;
         $processing_fee = $processing_fee_per_kg * $weight_kg;
 
+        $photo_url = $data['photo_url'] ?? null;
+
         $sql = "INSERT INTO " . $this->table_name . " 
-                (user_id, tracking_number, item_description, pickup_address, contact_phone, weight_kg, category_id, eco_reward, processing_fee, status) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')";
+                (user_id, tracking_number, item_description, pickup_address, contact_phone, weight_kg, category_id, eco_reward, processing_fee, photo_url, status) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')";
         
         $stmt = $this->conn->prepare($sql);
         if ($stmt) {
-            $stmt->bind_param("issssdddd", $user_id, $tracking_number, $item_description, $pickup_address, $contact_phone, $weight_kg, $category_id, $eco_reward, $processing_fee);
+            $stmt->bind_param("issssdddds", $user_id, $tracking_number, $item_description, $pickup_address, $contact_phone, $weight_kg, $category_id, $eco_reward, $processing_fee, $photo_url);
             if ($stmt->execute()) {
                 $pickup_id = $this->conn->insert_id;
                 $stmt->close();

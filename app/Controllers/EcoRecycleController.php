@@ -33,6 +33,30 @@ class EcoRecycleController extends BaseController {
         }
         $data['weight_kg'] = $weight;
 
+        // Proses Upload Foto (Opsional)
+        $photo_url = null;
+        if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+            $fileTmpPath = $_FILES['photo']['tmp_name'];
+            $fileName = $_FILES['photo']['name'];
+            $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+            
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+            if (in_array($fileExtension, $allowedExtensions)) {
+                $newFileName = md5(time() . $fileName) . '.' . $fileExtension;
+                $uploadFileDir = __DIR__ . '/../../uploads/';
+                if (!is_dir($uploadFileDir)) {
+                    mkdir($uploadFileDir, 0755, true);
+                }
+                $dest_path = $uploadFileDir . $newFileName;
+                if (move_uploaded_file($fileTmpPath, $dest_path)) {
+                    $photo_url = 'uploads/' . $newFileName;
+                }
+            } else {
+                $this->sendResponse('error', 'Ekstensi file foto tidak diizinkan (Hanya JPG, JPEG, PNG, WEBP).', null, 400);
+            }
+        }
+        $data['photo_url'] = $photo_url;
+
         // Set user_id dari token autentikasi agar aman
         $data['user_id'] = $user['id'];
 

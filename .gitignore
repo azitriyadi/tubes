@@ -5,6 +5,9 @@
 .env.test.local
 .env.production.local
 
+# User uploads
+uploads/
+
 # IDE & Editor files
 .vscode/
 .idea/
