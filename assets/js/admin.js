@@ -36,7 +36,7 @@ function switchAdminTab(targetId) {
 
 function logoutAdmin() {
     localStorage.removeItem('user');
-    window.location.href = 'auth';
+    window.location.href = 'login';
 }
 
 // 1. Initialize Map
@@ -80,13 +80,13 @@ function initLiveMap() {
 function loadAdminCommandData() {
     const userSession = localStorage.getItem('user');
     if (!userSession) {
-        window.location.href = 'auth';
+        window.location.href = 'login';
         return;
     }
     const user = JSON.parse(userSession);
 
     if (user.role !== 'admin') {
-        window.location.href = 'auth';
+        window.location.href = 'login';
         return;
     }
 

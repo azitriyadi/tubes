@@ -87,7 +87,7 @@ if (formCat) formCat.addEventListener('change', calculateFormPreview);
 // Logout
 function logoutUser() {
     localStorage.removeItem('user');
-    window.location.href = 'auth';
+    window.location.href = 'login';
 }
 
 // System Notification Alert Close
@@ -99,7 +99,7 @@ function closeNotification() {
 function loadDashboardData() {
     const userSession = localStorage.getItem('user');
     if (!userSession) {
-        window.location.href = 'auth';
+        window.location.href = 'login';
         return;
     }
 

@@ -240,13 +240,13 @@ function claimPickup(trackingNum) {
 function loadCollectorData() {
     const userSession = localStorage.getItem('user');
     if (!userSession) {
-        window.location.href = 'auth';
+        window.location.href = 'login';
         return;
     }
     const user = JSON.parse(userSession);
 
     if (user.role !== 'collector') {
-        window.location.href = 'auth';
+        window.location.href = 'login';
         return;
     }
 
@@ -380,7 +380,7 @@ function loadCollectorData() {
 
 function logoutCollector() {
     localStorage.removeItem('user');
-    window.location.href = 'auth';
+    window.location.href = 'login';
 }
 
 // Global Exports

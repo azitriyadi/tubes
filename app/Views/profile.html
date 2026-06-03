@@ -551,7 +551,7 @@
                 </div>
             </div>
             <div style="padding: 0 16px; margin-top: 8px;">
-                <a href="auth" style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #f87171; text-decoration: none; padding: 12px; border-radius: 12px; transition: background 0.3s;">
+                <a href="login" onclick="logoutProfile(event)" style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #f87171; text-decoration: none; padding: 12px; border-radius: 12px; transition: background 0.3s;">
                     <i class="fas fa-sign-out-alt"></i> Log Out
                 </a>
             </div>
@@ -718,7 +718,7 @@
         function loadUserData() {
             const userSession = localStorage.getItem('user');
             if(!userSession) {
-                window.location.href = 'auth';
+                window.location.href = 'login';
                 return;
             }
             
@@ -750,6 +750,12 @@
             
             if(inputName) inputName.value = user.name;
             if(inputEmail) inputEmail.value = user.email;
+        }
+
+        function logoutProfile(e) {
+            if(e) e.preventDefault();
+            localStorage.removeItem('user');
+            window.location.href = 'login';
         }
 
         // Run on load
