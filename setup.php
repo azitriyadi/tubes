@@ -1,6 +1,25 @@
 <?php
 // EcoRecycle Database Auto-Installer & Seeder
-// Konfigurasi koneksi dasar (dapat dikonfigurasi melalui variabel lingkungan untuk produksi)
+// Load environment variables from .env file if it exists
+if (file_exists(__DIR__ . '/.env')) {
+    $lines = file(__DIR__ . '/.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) continue;
+        $parts = explode('=', $line, 2);
+        if (count($parts) === 2) {
+            $name = trim($parts[0]);
+            $value = trim($parts[1]);
+            $value = trim($value, "\"'");
+            if (!array_key_exists($name, $_SERVER) && !array_key_exists($name, $_ENV)) {
+                putenv("{$name}={$value}");
+                $_ENV[$name] = $value;
+                $_SERVER[$name] = $value;
+            }
+        }
+    }
+}
+
+// Konfigurasi koneksi dasar
 $host = getenv('DB_HOST') ?: "localhost";
 $user = getenv('DB_USER') ?: "root";
 $pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : "";
@@ -116,19 +135,19 @@ $conn->query("INSERT INTO waste_categories (category_name, description, reward_p
 // 1. Tugas Pending di Desa Lembang (Kabupaten Bandung Barat)
 $conn->query("INSERT INTO pickups (id, user_id, collector_id, tracking_number, item_description, pickup_address, contact_phone, weight_kg, category_id, eco_reward, processing_fee, is_processed, status, created_at) 
 VALUES (1, 3, NULL, 'ECR-20260529-01', '1 buah Laptop Asus mati total, 1 monitor LCD kedip', 'Desa Lembang, Kec. Lembang, Kabupaten Bandung Barat', '08122455667', 8.5, 2, 59500, 8500, FALSE, 'pending', '2026-05-28 10:15:00')");
-$conn->query("INSERT INTO pickup_history (pickup_id, status, location, notes) VALUES (1, 'pending', 'Rumah Donatur', 'Permohonan penjemputan baru diajukan.')");
+$conn->query("INSERT INTO pickup_history (pickup_id, status, location, notes) VALUES (1, 'pending', 'Lokasi Masyarakat (User)', 'Permohonan penjemputan baru diajukan.')");
 
 // 2. Tugas Transit di Desa Bojongsoang (Kabupaten Bandung)
 $conn->query("INSERT INTO pickups (id, user_id, collector_id, tracking_number, item_description, pickup_address, contact_phone, weight_kg, category_id, eco_reward, processing_fee, is_processed, status, created_at) 
 VALUES (2, 3, 2, 'ECR-20260529-02', '3 buah HP layar retak, 1 tablet mati', 'Desa Bojongsoang, Kec. Bojongsoang, Kabupaten Bandung', '08778899001', 4.2, 1, 21000, 2100, FALSE, 'transit', '2026-05-28 14:30:00')");
-$conn->query("INSERT INTO pickup_history (pickup_id, status, location, notes) VALUES (2, 'pending', 'Rumah Donatur', 'Permohonan penjemputan baru diajukan.')");
+$conn->query("INSERT INTO pickup_history (pickup_id, status, location, notes) VALUES (2, 'pending', 'Lokasi Masyarakat (User)', 'Permohonan penjemputan baru diajukan.')");
 $conn->query("INSERT INTO pickup_history (pickup_id, status, location, notes) VALUES (2, 'pickup', 'Kolektor Wilayah', 'Penjemputan diambil alih oleh Kolektor: Eco Collector')");
 $conn->query("INSERT INTO pickup_history (pickup_id, status, location, notes) VALUES (2, 'transit', 'Di Perjalanan', 'Limbah telah diangkut oleh kolektor menuju Recycling Hub.')");
 
 // 3. Tugas Completed di Cibeunying Kidul (Kota Bandung)
 $conn->query("INSERT INTO pickups (id, user_id, collector_id, tracking_number, item_description, pickup_address, contact_phone, weight_kg, category_id, eco_reward, processing_fee, is_processed, status, created_at) 
 VALUES (3, 3, 2, 'ECR-20260529-03', '1 buah TV LED Samsung 32 inch layar bergaris', 'Kelurahan Cikutra, Kec. Cibeunying Kidul, Kota Bandung', '08133445566', 15.0, 3, 150000, 75000, TRUE, 'completed', '2026-05-27 09:00:00')");
-$conn->query("INSERT INTO pickup_history (pickup_id, status, location, notes) VALUES (3, 'pending', 'Rumah Donatur', 'Permohonan penjemputan baru diajukan.')");
+$conn->query("INSERT INTO pickup_history (pickup_id, status, location, notes) VALUES (3, 'pending', 'Lokasi Masyarakat (User)', 'Permohonan penjemputan baru diajukan.')");
 $conn->query("INSERT INTO pickup_history (pickup_id, status, location, notes) VALUES (3, 'pickup', 'Kolektor Wilayah', 'Penjemputan diambil alih oleh Kolektor: Eco Collector')");
 $conn->query("INSERT INTO pickup_history (pickup_id, status, location, notes) VALUES (3, 'transit', 'Di Perjalanan', 'Limbah telah diangkut oleh kolektor menuju Recycling Hub.')");
 $conn->query("INSERT INTO pickup_history (pickup_id, status, location, notes) VALUES (3, 'completed', 'Pusat Daur Ulang', 'E-Waste berhasil diproses dan reward ditransfer.')");

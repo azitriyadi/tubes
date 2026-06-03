@@ -42,6 +42,16 @@ class AuthController extends BaseController {
             $this->sendResponse('error', 'Nama, email, dan password wajib diisi.', null, 400);
         }
 
+        // Validasi format email
+        if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $this->sendResponse('error', 'Format email tidak valid.', null, 400);
+        }
+
+        // Validasi panjang password
+        if (strlen($data['password']) < 6) {
+            $this->sendResponse('error', 'Password harus minimal terdiri dari 6 karakter.', null, 400);
+        }
+
         $role = isset($data['role']) ? $data['role'] : 'user';
         
         // Batasi pembuatan role agar aman

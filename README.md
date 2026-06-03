@@ -146,7 +146,7 @@ Semua request API mengembalikan respons JSON seragam dengan header CORS dan HTTP
 
 ```mermaid
 sequenceDiagram
-    participant User as Eco Warrior (Donatur)
+    participant User as Eco Warrior (Masyarakat)
     participant Coll as Eco Collector (Kolektor)
     participant Sys as Sistem EcoRecycle
     participant Admin as Eco Manager (Admin)

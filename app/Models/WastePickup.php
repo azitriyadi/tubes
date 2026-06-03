@@ -7,6 +7,37 @@ class WastePickup {
         $this->conn = $db;
     }
 
+    public function getCategoryDetails($category_name) {
+        $category_id = 1; // default fallback
+        $reward_per_kg = 5000;
+        $processing_fee_per_kg = 500;
+        $category_display_name = 'Small Gadgets'; // fallback
+
+        $cat_sql = "SELECT id, category_name, reward_per_kg, processing_fee_per_kg FROM waste_categories WHERE category_name LIKE ?";
+        $cat_stmt = $this->conn->prepare($cat_sql);
+        if ($cat_stmt) {
+            $search_cat = "%" . $category_name . "%";
+            $cat_stmt->bind_param("s", $search_cat);
+            $cat_stmt->execute();
+            $res = $cat_stmt->get_result();
+            if ($res && $res->num_rows > 0) {
+                $cat_data = $res->fetch_assoc();
+                $category_id = $cat_data['id'];
+                $category_display_name = $cat_data['category_name'];
+                $reward_per_kg = $cat_data['reward_per_kg'];
+                $processing_fee_per_kg = $cat_data['processing_fee_per_kg'];
+            }
+            $cat_stmt->close();
+        }
+
+        return [
+            'id' => $category_id,
+            'category_name' => $category_display_name,
+            'reward_per_kg' => (float)$reward_per_kg,
+            'processing_fee_per_kg' => (float)$processing_fee_per_kg
+        ];
+    }
+
     public function create($data) {
         $tracking_number = 'ECR-' . date('Ymd') . '-' . rand(10000, 99999);
         $user_id = (int)$data['user_id'];
@@ -17,25 +48,10 @@ class WastePickup {
         $category_name = $data['category'] ?? '';
 
         // Get category info
-        $category_id = 1; // default fallback
-        $reward_per_kg = 5000;
-        $processing_fee_per_kg = 500;
-
-        $cat_sql = "SELECT id, reward_per_kg, processing_fee_per_kg FROM waste_categories WHERE category_name LIKE ?";
-        $cat_stmt = $this->conn->prepare($cat_sql);
-        if ($cat_stmt) {
-            $search_cat = "%" . $category_name . "%";
-            $cat_stmt->bind_param("s", $search_cat);
-            $cat_stmt->execute();
-            $res = $cat_stmt->get_result();
-            if ($res && $res->num_rows > 0) {
-                $cat_data = $res->fetch_assoc();
-                $category_id = $cat_data['id'];
-                $reward_per_kg = $cat_data['reward_per_kg'];
-                $processing_fee_per_kg = $cat_data['processing_fee_per_kg'];
-            }
-            $cat_stmt->close();
-        }
+        $cat_details = $this->getCategoryDetails($category_name);
+        $category_id = $cat_details['id'];
+        $reward_per_kg = $cat_details['reward_per_kg'];
+        $processing_fee_per_kg = $cat_details['processing_fee_per_kg'];
 
         $eco_reward = $reward_per_kg * $weight_kg;
         $processing_fee = $processing_fee_per_kg * $weight_kg;
@@ -52,7 +68,7 @@ class WastePickup {
                 $stmt->close();
 
                 // Add to history log
-                $this->addHistory($pickup_id, 'pending', 'Rumah Donatur', 'Permohonan penjemputan baru diajukan.');
+                $this->addHistory($pickup_id, 'pending', 'Lokasi Masyarakat (User)', 'Permohonan penjemputan baru diajukan.');
 
                 return [
                     'pickup_id' => $pickup_id,

@@ -1,6 +1,8 @@
 <?php
 class BaseController {
-    private static $secret_key = "EcoRecycleSecretKey_2026_SecureHMAC";
+    private static function getSecretKey() {
+        return getenv('JWT_SECRET') ?: "EcoRecycleSecretKey_2026_SecureHMAC";
+    }
 
     protected function sendResponse($status, $message, $data = null, $http_code = 200) {
         http_response_code($http_code);
@@ -27,7 +29,7 @@ class BaseController {
             'exp' => time() + (3600 * 24) // Expire dalam 24 jam
         ];
         $encoded_payload = base64_encode(json_encode($payload));
-        $signature = hash_hmac('sha256', $encoded_payload, self::$secret_key);
+        $signature = hash_hmac('sha256', $encoded_payload, self::getSecretKey());
         return $encoded_payload . '.' . $signature;
     }
 
@@ -39,7 +41,7 @@ class BaseController {
         if (count($parts) !== 2) return null;
 
         list($encoded_payload, $signature) = $parts;
-        $expected_signature = hash_hmac('sha256', $encoded_payload, self::$secret_key);
+        $expected_signature = hash_hmac('sha256', $encoded_payload, self::getSecretKey());
         
         if (hash_equals($expected_signature, $signature)) {
             $payload = json_decode(base64_decode($encoded_payload), true);

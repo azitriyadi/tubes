@@ -35,7 +35,7 @@ function initMap() {
             const p2 = [-6.9250 + latOffset2, 107.6300 + lngOffset2]; // Mock Donor Location
 
             L.marker(p1, { icon: collIcon }).addTo(map).bindPopup('Lokasi Anda (Kolektor)');
-            L.marker(p2, { icon: donorIcon }).addTo(map).bindPopup(`Donatur: ${globalActiveMission.donor_name}`);
+            L.marker(p2, { icon: donorIcon }).addTo(map).bindPopup(`Pengirim (Masyarakat): ${globalActiveMission.donor_name}`);
 
             const polyline = L.polyline([p1, p2], { color: '#10b981', weight: 4, dashArray: '6, 12' }).addTo(map);
             map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
@@ -98,7 +98,7 @@ function viewActiveMission(item) {
         <strong>Kategori:</strong> ${item.category_name}<br>
         <strong>Kondisi/Deskripsi:</strong> ${item.item_description}<br>
         <strong>Estimasi Berat:</strong> ${item.weight_kg} KG<br>
-        <strong>Kontak Donatur:</strong> ${item.contact_phone} (${item.donor_name})
+        <strong>Kontak Pengirim (Masyarakat):</strong> ${item.contact_phone} (${item.donor_name})
     `;
 
     const btn = document.getElementById('mission-btn');
@@ -211,7 +211,7 @@ function claimPickup(trackingNum) {
                     Swal.fire({
                         icon: 'success',
                         title: 'Tugas Diambil!',
-                        text: 'Silakan lihat rincian alamat donatur di tab Misi Aktif.',
+                        text: 'Silakan lihat rincian alamat penjemputan masyarakat di tab Misi Aktif.',
                         confirmButtonColor: '#10b981'
                     }).then(() => {
                         loadCollectorData();

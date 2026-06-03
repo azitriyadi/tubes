@@ -67,7 +67,7 @@ function initLiveMap() {
 
             L.marker([-6.9175 + latOffset, 107.6191 + lngOffset], { icon: customIcon })
                 .addTo(liveMap)
-                .bindPopup(`<strong>${item.tracking_number}</strong><br>Donatur: ${item.donor_name}<br>Status: ${item.status.toUpperCase()}`);
+                .bindPopup(`<strong>${item.tracking_number}</strong><br>Pengirim (Masyarakat): ${item.donor_name}<br>Status: ${item.status.toUpperCase()}`);
         });
 
         setTimeout(() => { liveMap.invalidateSize(); }, 400);
@@ -337,7 +337,7 @@ function processPayout(pickupId, amount) {
 
     Swal.fire({
         title: 'Verifikasi & Cairkan Reward',
-        html: `Apakah data timbangan fisik sudah benar?<br>Sistem akan mentransfer <strong>Rp ${amount.toLocaleString('id-ID')}</strong> ke metode e-wallet / transfer bank donatur.`,
+        html: `Apakah data timbangan fisik sudah benar?<br>Sistem akan mentransfer <strong>Rp ${amount.toLocaleString('id-ID')}</strong> ke metode e-wallet / transfer bank masyarakat (user).`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#10b981',

@@ -26,6 +26,13 @@ class EcoRecycleController extends BaseController {
             }
         }
 
+        // Validasi berat numerik positif
+        $weight = (float)$data['weight_kg'];
+        if ($weight <= 0) {
+            $this->sendResponse('error', 'Berat e-waste harus berupa angka numerik positif dan lebih besar dari 0 KG.', null, 400);
+        }
+        $data['weight_kg'] = $weight;
+
         // Set user_id dari token autentikasi agar aman
         $data['user_id'] = $user['id'];
 
@@ -129,21 +136,16 @@ class EcoRecycleController extends BaseController {
 
         $category = $data['category'];
         
-        // Mock kalkulasi rate berdasarkan kategori
-        $reward_rate = 5000;
-        if (strpos(strtolower($category), 'computer') !== false || strpos(strtolower($category), 'laptop') !== false) {
-            $reward_rate = 7000;
-        } else if (strpos(strtolower($category), 'large') !== false || strpos(strtolower($category), 'kulkas') !== false || strpos(strtolower($category), 'ac') !== false) {
-            $reward_rate = 10000;
-        } else if (strpos(strtolower($category), 'batter') !== false || strpos(strtolower($category), 'ups') !== false) {
-            $reward_rate = 3000;
-        }
+        // Ambil tarif kategori dari database via Model
+        $cat_details = $this->wastePickupModel->getCategoryDetails($category);
+        $reward_rate = $cat_details['reward_per_kg'];
+        $category_display_name = $cat_details['category_name'];
 
         $total_reward = $reward_rate * $weight;
         $co2_saved = $weight * 2.5; // Estimasi 1 KG e-waste = 2.5 KG CO2 offset
 
         $this->sendResponse('success', 'Estimasi reward berhasil dihitung.', [
-            'category' => $category,
+            'category' => $category_display_name,
             'weight_kg' => $weight,
             'reward_rate' => $reward_rate,
             'total_estimate' => $total_reward,
