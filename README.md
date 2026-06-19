@@ -1,8 +1,7 @@
-# EcoRecycle - Smart E-Waste Recycling Management Platform (V2.0)
+# EcoRecycle - Smart E-Waste Recycling Management Platform (V2.0 Go Edition)
 
 EcoRecycle adalah platform inovatif yang dirancang untuk mengelola rantai pasok pengumpulan dan daur ulang khusus sampah elektronik (e-waste) di wilayah Bandung (Kota, Kabupaten, dan KBB). Platform ini memfasilitasi siklus hidup produk elektronik mulai dari akhir penggunaan (end-of-life) hingga proses daur ulang yang bertanggung jawab di hub daur ulang, sambil memberikan insentif ekonomi digital secara langsung kepada pengguna.
 
----
 
 ## 🌟 Deskripsi Proyek
 Masalah sampah elektronik (e-waste) global terus meningkat secara eksponensial. EcoRecycle hadir sebagai jembatan yang menghubungkan konsumen (**Eco Warriors**), mitra penjemputan lapangan (**Eco Collectors**), dan manajer keuangan/operasional (**Eco Managers/Admin**). Dengan sistem pelacakan berbasis tracking number unik dan pembayaran reward langsung (tunai/transfer manual), platform ini memastikan e-waste tidak berakhir di TPA, melainkan didaur ulang secara aman demi mendukung ekonomi sirkular.
@@ -27,16 +26,15 @@ Masalah sampah elektronik (e-waste) global terus meningkat secara eksponensial. 
 ## 📐 Arsitektur & Teknologi
 
 ### Tech Stack
-- **Backend**: PHP 7.4 / 8.x (Native MVC Architecture dengan Prepared Statements & Signed Token)
-- **Database**: MySQL / MariaDB (Optimasi Skema)
-- **Environment Variables**: Pemuatan konfigurasi dinamis via loader `.env` native tanpa dependensi eksternal.
+- **Backend (Web Service)**: Go (Golang) 1.24+ (Standalone HTTP Server menggunakan routing native berkinerja tinggi)
+- **Database**: MySQL / MariaDB (Koneksi database terkelola dengan database/sql pool)
+- **Environment Variables**: Konfigurasi dinamis lokal dimuat secara native melalui parser `.env` mandiri.
 - **Frontend**: HTML5, Vanilla CSS3 (Modern Tech HSL Design), JavaScript (Vanilla ES6)
 - **Pustaka**: SweetAlert2 (Notifikasi UI), Leaflet.js (Peta Rute), Chart.js (Grafik Tren Bulanan)
 
 ### Persyaratan Sistem
-- **Server**: Apache / Nginx (XAMPP / Laragon)
-- **PHP Version**: 7.4 ke atas (dengan ekstensi `mysqli` dan `json` aktif)
-- **Database**: MySQL 5.7+ atau MariaDB 10.4+
+- **Go Compiler**: Go 1.24 ke atas
+- **Database**: MySQL 5.7+ atau MariaDB 10.4+ (XAMPP MySQL tetap dapat digunakan)
 
 ---
 
@@ -44,16 +42,7 @@ Masalah sampah elektronik (e-waste) global terus meningkat secara eksponensial. 
 ```text
 /tubes_pemrograman3
 ├── app/
-│   ├── Config/         # Konfigurasi Database & Global
-│   │   └── Database.php
-│   ├── Controllers/    # Handler API & Logika Bisnis (MVC)
-│   │   ├── BaseController.php      # Controller Induk (Signed Tokens, REST Codes, Env Loader)
-│   │   ├── AuthController.php      # Autentikasi & Registrasi (Validasi email/sandi)
-│   │   └── EcoRecycleController.php # Logika E-Waste, Upload Gambar, & Payout
-│   ├── Models/         # Abstraksi Data & Query SQL (MVC)
-│   │   ├── User.php
-│   │   └── WastePickup.php         # Operasi CRUD E-waste & Kategori DB
-│   └── Views/          # Template Antarmuka HTML
+│   └── Views/          # Template Antarmuka HTML (Frontend)
 │       ├── index.html              # Landing Page Edukatif (Workflow & Bahaya B3)
 │       ├── login.html              # Autentikasi Masuk
 │       ├── register.html           # Pendaftaran Akun
@@ -69,8 +58,11 @@ Masalah sampah elektronik (e-waste) global terus meningkat secara eksponensial. 
 ├── .env                # Kredensial database & Kunci Keamanan lokal (Aman / Git-ignored)
 ├── .env.example        # Template konfigurasi environment variables untuk kolaborator
 ├── .gitignore          # Konfigurasi Git untuk mengabaikan berkas sensitif & uploads/
-├── index.php           # Front Controller, API Router, & .env Loader
-├── setup.php           # Database Auto-Installer, Seeder, & .env Loader
+├── go.mod              # Konfigurasi Modul Dependensi Go
+├── go.sum              # Checksum Dependensi Go
+├── main.go             # Entry Point HTTP Server Go & Handler REST API
+├── db_init/            # Direktori Database Auto-Installer & Seeder (CLI Go)
+│   └── db_init.go
 └── README.md           # Dokumentasi Teknis Lengkap
 ```
 
@@ -81,16 +73,16 @@ Masalah sampah elektronik (e-waste) global terus meningkat secara eksponensial. 
 Basis data `ecorecycle` menggunakan relasi data yang optimal dengan skema berikut:
 
 ### Keamanan Web Service
-1. **SQL Injection Prevention**: Seluruh operasi query database di layer Model menggunakan **Prepared Statements** (`$conn->prepare()`, `bind_param()`) secara konsisten.
-2. **Stateless API Authentication**: Menggunakan sistem **Signed Token kustom** berbasis algoritma **HMAC SHA-256** untuk menjamin keamanan request API tanpa menggunakan session PHP standar (mencegah pembajakan sesi).
+1. **SQL Injection Prevention**: Seluruh operasi query database menggunakan parameter placeholder `?` (`db.Prepare()` atau `db.QueryRow()`, `db.Exec()`) bawaan driver Go MySQL.
+2. **Stateless API Authentication**: Menggunakan sistem **Signed Token kustom** berbasis algoritma **HMAC SHA-256** untuk menjamin keamanan request API tanpa menggunakan session (mencegah pembajakan sesi).
 3. **Pemisahan Kredensial**: Semua data sensitif (password DB, JWT Secret Key) disimpan di file `.env` yang diabaikan oleh Git.
 4. **Server-Side Input Validation**: 
-   - Validasi format email riil menggunakan `FILTER_VALIDATE_EMAIL`.
+   - Validasi format email secara presisi.
    - Validasi kekuatan kata sandi minimal 6 karakter saat registrasi.
    - Validasi tipe data numerik positif untuk berat limbah (mencegah nilai negatif).
 
 ### Skema Tabel Database
-1. **Tabel `users`**: Menyimpan akun pengguna. Password diamankan dengan hash `password_hash()`.
+1. **Tabel `users`**: Menyimpan akun pengguna. Password diamankan dengan hash `bcrypt`.
 2. **Tabel `waste_categories`**: Daftar kategori sampah elektronik dan rate reward per kilogram (KG).
 3. **Tabel `pickups`**: Tabel transaksi donasi utama. Dilengkapi kolom `photo_url` untuk foto limbah dan kolom `collector_id` untuk pemetaan kurir penjemput.
 4. **Tabel `pickup_history`**: Mencatat detail lini masa dan riwayat mutasi status donasi.
@@ -98,12 +90,12 @@ Basis data `ecorecycle` menggunakan relasi data yang optimal dengan skema beriku
 
 ---
 
-## 🚀 Panduan Instalasi (Lokal XAMPP)
+## 🚀 Panduan Instalasi (Lokal Dev)
 
 ### 1. Setup Proyek
-1. Clone repositori ini dan letakkan di direktori root server lokal Anda.
+1. Clone repositori ini dan letakkan di direktori server lokal Anda.
    (Contoh: `C:/xampp/htdocs/progress_tubes/tubes_pemrograman3/`).
-2. Pastikan MySQL/MariaDB server Anda sudah aktif di XAMPP Control Panel.
+2. Pastikan MySQL/MariaDB server Anda sudah aktif di XAMPP Control Panel (Port `3306`).
 
 ### 2. Konfigurasi Environment (.env)
 1. Salin berkas `.env.example` menjadi `.env`:
@@ -113,12 +105,21 @@ Basis data `ecorecycle` menggunakan relasi data yang optimal dengan skema beriku
 2. Sesuaikan kredensial basis data Anda (seperti port, user, password DB) di dalam `.env`.
 
 ### 3. Inisialisasi Database
-Jalankan skrip auto-installer melalui command line di direktori proyek:
-```bash
-php setup.php
+Jalankan skrip inisialisasi basis data dan pengisian awal data seeder:
+```powershell
+go run db_init/db_init.go
 ```
+*(Catatan: Folder dinamai `db_init` agar Windows UAC tidak memblokir jalannya file executable biner dengan label "setup" / "install" saat eksekusi)*
 
-### 4. Kredensial Akun Demo
+### 4. Menjalankan Server Go
+Kompilasi server utama dan jalankan:
+```powershell
+go build -o ecorecycle.exe main.go
+.\ecorecycle.exe
+```
+Buka browser pada alamat: **`http://localhost:8080`**
+
+### 5. Kredensial Akun Demo
 Login menggunakan kredensial demo berikut (password default: `password123`):
 * **Eco Manager (Admin)**: `admin@ecorecycle.com`
 * **Eco Collector (Kolektor)**: `collector@ecorecycle.com`
@@ -164,7 +165,7 @@ Semua request API mengembalikan respons JSON seragam dengan header CORS dan HTTP
 sequenceDiagram
     participant User as Eco Warrior (Masyarakat)
     participant Coll as Eco Collector (Kolektor)
-    participant Sys as Sistem EcoRecycle
+    participant Sys as Sistem EcoRecycle (Go Server)
     participant Admin as Eco Manager (Admin)
  
     User->>Sys: Hitung reward di estimator & Ajukan Penjemputan (Unggah Info + Foto)
@@ -182,22 +183,20 @@ sequenceDiagram
 
 ## 🛠️ Pemecahan Masalah (Troubleshooting)
 
-1. **Gagal Setup Database / Connection Refused**: Pastikan MySQL di XAMPP Control Panel sudah aktif. Jika Anda menggunakan port non-standar (misalnya `3307`), buka file `.env` dan ubah `DB_HOST=localhost` menjadi `DB_HOST=localhost:3307`.
-2. **Koneksi Database Terputus**: Pastikan driver `mysqli` terpasang di modul PHP server Anda.
+1. **UAC Elevation Required saat setup**: Windows secara default menolak eksekusi biner dengan nama yang mengandung kata "setup". Gunakan build rename: `go build -o db_installer.exe setup.go` lalu jalankan `.\db_installer.exe`.
+2. **Koneksi Database Terputus / Refused**: Pastikan MySQL di XAMPP Control Panel sudah aktif. Jika Anda menggunakan port non-standar (misalnya `3307`), buka file `.env` dan ubah `DB_HOST=localhost` menjadi `DB_HOST=localhost:3307`.
 3. **API Mengembalikan Error 401**: Pastikan header `Authorization` dikirimkan dalam format `Bearer <token>` dan token belum kadaluwarsa (berlaku 24 jam setelah login).
-4. **Tombol Log Out Menghasilkan 404**: Ini sudah diperbaiki secara menyeluruh dengan memperbarui target link pengalihan dari `'auth'` menjadi `'login'` yang valid di `dashboard.js`, `collector.js`, `admin.js`, dan `profile.html`.
+4. **Tombol Log Out Menghasilkan 404**: Ini sudah diperbaiki secara menyeluruh dengan memperbarui target link pengalihan dari `'auth'` menjadi `'login'` yang valid di berkas JS frontend.
 
 ---
 
 ## 📈 Persentase Progress Aplikasi saat ini
 ### **Progress Aplikasi: 100% Selesai & Siap Digunakan**
-Seluruh modul utama dan penyempurnaan sesuai standar akademis telah berhasil diselesaikan:
-- [x] **Arsitektur MVC & REST API Base Controller** (100% Selesai)
-- [x] **Keamanan Signed Token HMAC-SHA256 Stateless** (100% Selesai)
-- [x] **Manajemen Konfigurasi Lingkungan Dinamis (.env)** (100% Selesai)
-- [x] **Validasi Masukan di Sisi Server (Email & Berat Numerik Positif)** (100% Selesai)
-- [x] **Integrasi Database Real-Time pada Kalkulator Estimator** (100% Selesai)
-- [x] **Fitur Unggah Foto E-Waste di Dasbor & Penyimpanan Backend** (100% Selesai)
-- [x] **Landing Page Hibrida (Panduan Alur & Edukasi B3 Lingkungan)** (100% Selesai)
-- [x] **Perbaikan Bug Redirect Halaman 404 Log Out** (100% Selesai)
-- [x] **Konfigurasi Git (.gitignore & .env.example)** (100% Selesai)
+Backend platform telah sepenuhnya dikonversi ke **Go (Golang)**:
+- [x] **Inisialisasi Modul & Dependensi Go** (100% Selesai)
+- [x] **Installer Database setup.go & db_installer.exe** (100% Selesai)
+- [x] **Server Utama HTTP & Router main.go** (100% Selesai)
+- [x] **Signed Token HMAC-SHA256 Kompatibel** (100% Selesai)
+- [x] **Seluruh REST API Endpoint (Auth, Pickup, Payout, Stats)** (100% Selesai)
+- [x] **Pembersihan File Backend PHP Lama** (100% Selesai)
+- [x] **Pengujian Fungsionalitas REST API & Frontend** (100% Selesai)

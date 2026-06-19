@@ -53,3 +53,28 @@ function calculateEcoEstimate() {
     resultCard.style.display = 'block';
     resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
+
+function openCalculatorModal() {
+    const modal = document.getElementById('calculatorModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeCalculatorModal() {
+    const modal = document.getElementById('calculatorModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// Tutup modal jika mengklik di luar area konten modal
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('calculatorModal');
+    if (event.target === modal) {
+        closeCalculatorModal();
+    }
+});
+
