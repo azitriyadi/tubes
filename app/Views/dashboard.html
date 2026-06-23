@@ -19,7 +19,7 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css?v=20260622-ui-refresh">
 </head>
 
 <body class="portal-page">
@@ -80,6 +80,16 @@
                 <div>
                     <h1 id="hero-welcome" style="font-size: 2.2rem; font-weight: 900; color: white; margin: 0;">Halo, Eco Warrior!</h1>
                     <p style="color: #a7f3d0; margin: 8px 0 0 0; font-size: 1rem;">Siap berkontribusi menurunkan emisi karbon hari ini?</p>
+                    <div class="hero-actions">
+                        <button type="button" class="hero-action-btn primary" onclick="document.querySelector('.sidebar-item[data-target=&quot;setor-sampah&quot;]').click()">
+                            <i class="fas fa-plus"></i>
+                            Ajukan Setoran
+                        </button>
+                        <button type="button" class="hero-action-btn" onclick="document.querySelector('.sidebar-item[data-target=&quot;lacak-pickup&quot;]').click()">
+                            <i class="fas fa-location-dot"></i>
+                            Lacak Pickup
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- Profil Info -->
@@ -174,6 +184,48 @@
                     </div>
 
                     <form id="pickup-request-form">
+                        <div class="pickup-step-block">
+                            <div class="pickup-step-header">
+                                <span class="pickup-step-number">1</span>
+                                <div>
+                                    <h3>Jenis Sampah Elektronik</h3>
+                                    <p>Pilih kategori yang paling mendekati barang Anda.</p>
+                                </div>
+                            </div>
+
+                            <div class="category-helper-grid" id="category-helper-grid">
+                                <button type="button" class="category-helper-card active" data-category="Small Gadgets" data-weight="0.5" data-example="HP rusak, tablet, kamera digital, charger, atau perangkat kecil lainnya.">
+                                    <i class="fas fa-mobile-screen-button"></i>
+                                    <strong>Gadget Kecil</strong>
+                                    <span>HP, tablet, kamera</span>
+                                </button>
+                                <button type="button" class="category-helper-card" data-category="Computers" data-weight="2.0" data-example="Laptop rusak, CPU, monitor, motherboard, RAM, keyboard, atau perangkat komputer.">
+                                    <i class="fas fa-laptop"></i>
+                                    <strong>Komputer</strong>
+                                    <span>Laptop, CPU, monitor</span>
+                                </button>
+                                <button type="button" class="category-helper-card" data-category="Large Appliances" data-weight="8.0" data-example="TV, kulkas, AC, mesin cuci, atau perangkat elektronik besar.">
+                                    <i class="fas fa-tv"></i>
+                                    <strong>Elektronik Besar</strong>
+                                    <span>TV, AC, kulkas</span>
+                                </button>
+                                <button type="button" class="category-helper-card" data-category="Batteries" data-weight="1.0" data-example="Baterai laptop, powerbank rusak, aki, baterai lithium-ion, atau UPS battery.">
+                                    <i class="fas fa-car-battery"></i>
+                                    <strong>Baterai</strong>
+                                    <span>Powerbank, aki, UPS</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="pickup-step-block">
+                            <div class="pickup-step-header">
+                                <span class="pickup-step-number">2</span>
+                                <div>
+                                    <h3>Data Penjemputan</h3>
+                                    <p>Lengkapi kontak dan alamat agar kolektor mudah menemukan lokasi.</p>
+                                </div>
+                            </div>
+
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                             <div class="input-field">
                                 <label>Nama Penyetor</label>
@@ -198,10 +250,20 @@
                                 <textarea id="form-pickup-address" placeholder="Tulis alamat lengkap penjemputan beserta kec/desa" required style="width: 100%; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 16px 14px 44px; font-family: inherit; font-size: 0.95rem; background: var(--bg-muted); height: 80px; resize: none;"></textarea>
                             </div>
                         </div>
+                        </div>
+
+                        <div class="pickup-step-block">
+                            <div class="pickup-step-header">
+                                <span class="pickup-step-number">3</span>
+                                <div>
+                                    <h3>Detail Barang</h3>
+                                    <p>Berat boleh berupa perkiraan awal dan akan diverifikasi ulang di hub.</p>
+                                </div>
+                            </div>
 
                         <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; margin-bottom: 20px;">
                             <div class="input-field">
-                                <label>Kategori Sampah Elektronik</label>
+                                <label>Kategori Terpilih</label>
                                 <div class="input-wrapper">
                                     <i class="fas fa-laptop"></i>
                                     <select id="form-waste-category" required>
@@ -227,6 +289,10 @@
                                 <i class="fas fa-camera" style="top: 26px;"></i>
                                 <input type="file" id="form-waste-photo" accept="image/*" style="padding-top: 12px; height: auto; min-height: 52px; background: var(--bg-muted); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;">
                             </div>
+                            <div id="photo-preview-card" class="photo-preview-card" style="display:none;">
+                                <img id="photo-preview-img" alt="Preview foto e-waste">
+                                <button type="button" id="remove-photo-btn" aria-label="Hapus foto"><i class="fas fa-times"></i></button>
+                            </div>
                         </div>
 
                         <div class="input-field" style="margin-bottom: 32px;">
@@ -236,6 +302,7 @@
                                 <textarea id="form-item-description" placeholder="Contoh: 1 Laptop Lenovo mati total, 2 Baterai kembung" required style="width: 100%; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 16px 14px 44px; font-family: inherit; font-size: 0.95rem; background: var(--bg-muted); height: 80px; resize: none;"></textarea>
                             </div>
                         </div>
+                        </div>
 
                         <!-- Panel Payout Preview -->
                         <div style="background: #f8fafc; border: 1px solid var(--gray-200); border-radius: 20px; padding: 24px; margin-bottom: 32px; display: flex; flex-direction: column; gap: 12px;">
@@ -244,7 +311,7 @@
                                 <span id="preview-gross-reward">Rp 0</span>
                             </div>
                             <div style="display:flex; justify-content:space-between; font-weight: 600; color: var(--text-secondary); font-size: 0.9rem;">
-                                <span>Biaya Operasional (Handling Fee 5%):</span>
+                                <span>Estimasi Biaya Proses:</span>
                                 <span id="preview-fee">Rp 0</span>
                             </div>
                             <hr style="border:none; border-top:1px dashed var(--gray-300); margin: 4px 0;">
@@ -373,7 +440,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/js/dashboard.js"></script>
+    <script src="assets/js/dashboard.js?v=20260622-ui-refresh"></script>
 </body>
 
 </html>

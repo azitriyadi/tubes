@@ -374,6 +374,10 @@ func requestPickupHandler(w http.ResponseWriter, r *http.Request) {
 		sendResponse(w, "error", err.Error(), nil, http.StatusUnauthorized)
 		return
 	}
+	if user.Role != "user" {
+		sendResponse(w, "error", "Akses ditolak. Pengajuan penjemputan hanya dapat dibuat oleh Eco Warrior.", nil, http.StatusForbidden)
+		return
+	}
 
 	err = r.ParseMultipartForm(10 << 20) // 10MB max
 	var data map[string]string
@@ -645,9 +649,13 @@ func pickupStatusPostHandler(w http.ResponseWriter, r *http.Request) {
 		sendResponse(w, "error", "Metode request tidak diizinkan.", nil, http.StatusMethodNotAllowed)
 		return
 	}
-	_, err := getAuthorizedUser(r)
+	user, err := getAuthorizedUser(r)
 	if err != nil {
 		sendResponse(w, "error", err.Error(), nil, http.StatusUnauthorized)
+		return
+	}
+	if user.Role != "collector" && user.Role != "admin" {
+		sendResponse(w, "error", "Akses ditolak. Hanya Kolektor/Admin yang dapat memperbarui status penjemputan.", nil, http.StatusForbidden)
 		return
 	}
 
@@ -657,6 +665,32 @@ func pickupStatusPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	if trackingNum == "" || status == "" {
 		sendResponse(w, "error", "Nomor tracking dan status baru wajib diisi.", nil, http.StatusBadRequest)
+		return
+	}
+	if status != "transit" && status != "arrived" {
+		sendResponse(w, "error", "Status tidak valid. Status operasional yang diizinkan adalah transit atau arrived.", nil, http.StatusBadRequest)
+		return
+	}
+
+	var currentStatus string
+	var assignedCollectorID sql.NullInt64
+	err = db.QueryRow("SELECT status, collector_id FROM pickups WHERE tracking_number = ?", trackingNum).Scan(&currentStatus, &assignedCollectorID)
+	if err == sql.ErrNoRows {
+		sendResponse(w, "error", "Nomor tracking tidak ditemukan.", nil, http.StatusNotFound)
+		return
+	} else if err != nil {
+		sendResponse(w, "error", "Kesalahan database.", nil, http.StatusInternalServerError)
+		return
+	}
+
+	if user.Role == "collector" && (!assignedCollectorID.Valid || int(assignedCollectorID.Int64) != user.ID) {
+		sendResponse(w, "error", "Akses ditolak. Kolektor hanya dapat memperbarui status tugas miliknya.", nil, http.StatusForbidden)
+		return
+	}
+
+	validTransition := (currentStatus == "pickup" && status == "transit") || (currentStatus == "transit" && status == "arrived")
+	if !validTransition {
+		sendResponse(w, "error", fmt.Sprintf("Transisi status tidak valid dari %s ke %s.", currentStatus, status), nil, http.StatusBadRequest)
 		return
 	}
 
@@ -758,7 +792,7 @@ func assignCollectorHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback()
 
-	res, err := tx.Exec("UPDATE pickups SET collector_id = ?, status = 'pickup' WHERE tracking_number = ?", collectorID, trackingNum)
+	res, err := tx.Exec("UPDATE pickups SET collector_id = ?, status = 'pickup' WHERE tracking_number = ? AND status = 'pending'", collectorID, trackingNum)
 	if err != nil {
 		sendResponse(w, "error", "Gagal menetapkan tugas penjemputan.", nil, http.StatusInternalServerError)
 		return
@@ -766,7 +800,7 @@ func assignCollectorHandler(w http.ResponseWriter, r *http.Request) {
 
 	rowsAffected, err := res.RowsAffected()
 	if err != nil || rowsAffected == 0 {
-		sendResponse(w, "error", "Nomor tracking tidak ditemukan atau gagal diperbarui.", nil, http.StatusBadRequest)
+		sendResponse(w, "error", "Tugas tidak tersedia. Pastikan nomor tracking valid dan masih berstatus pending.", nil, http.StatusBadRequest)
 		return
 	}
 
@@ -872,7 +906,8 @@ func processPayoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	var ecoReward float64
 	var isProcessed bool
-	err = db.QueryRow("SELECT eco_reward, is_processed FROM pickups WHERE id = ?", pickupID).Scan(&ecoReward, &isProcessed)
+	var pickupStatus string
+	err = db.QueryRow("SELECT eco_reward, is_processed, status FROM pickups WHERE id = ?", pickupID).Scan(&ecoReward, &isProcessed, &pickupStatus)
 	if err == sql.ErrNoRows {
 		sendResponse(w, "error", "Data penjemputan tidak ditemukan.", nil, http.StatusNotFound)
 		return
@@ -883,6 +918,10 @@ func processPayoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	if isProcessed {
 		sendResponse(w, "error", "Eco-reward untuk penjemputan ini sudah pernah diproses.", nil, http.StatusBadRequest)
+		return
+	}
+	if pickupStatus != "arrived" {
+		sendResponse(w, "error", "Payout hanya dapat diproses setelah e-waste tiba di Recycling Hub.", nil, http.StatusBadRequest)
 		return
 	}
 

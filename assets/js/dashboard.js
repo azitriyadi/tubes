@@ -2,6 +2,13 @@
 
 let monthlyChart = null;
 
+const categoryConfig = {
+    'Small Gadgets': { rate: 5000, feePerKg: 500 },
+    'Computers': { rate: 7000, feePerKg: 1000 },
+    'Large Appliances': { rate: 10000, feePerKg: 5000 },
+    'Batteries': { rate: 3000, feePerKg: 2000 }
+};
+
 // Tab Switching
 const tabs = document.querySelectorAll('.hub-tab');
 const panes = document.querySelectorAll('.tab-pane');
@@ -55,14 +62,11 @@ function calculateFormPreview() {
 
     const weight = parseFloat(weightInput.value) || 0;
     
-    let rate = 5000;
     const category = categorySelect.value;
-    if (category === 'Computers') rate = 7000;
-    else if (category === 'Large Appliances') rate = 10000;
-    else if (category === 'Batteries') rate = 3000;
+    const config = categoryConfig[category] || categoryConfig['Small Gadgets'];
 
-    const gross = weight * rate;
-    const fee = gross * 0.05; // 5% handling fee
+    const gross = weight * config.rate;
+    const fee = weight * config.feePerKg;
     const net = gross - fee;
     const carbon = (weight * 2.5).toFixed(1);
 
@@ -84,6 +88,87 @@ const formCat = document.getElementById('form-waste-category');
 if (formWeight) formWeight.addEventListener('input', calculateFormPreview);
 if (formCat) formCat.addEventListener('change', calculateFormPreview);
 
+function syncCategoryCards(category) {
+    document.querySelectorAll('.category-helper-card').forEach(card => {
+        card.classList.toggle('active', card.dataset.category === category);
+    });
+}
+
+document.querySelectorAll('.category-helper-card').forEach(card => {
+    card.addEventListener('click', () => {
+        const categorySelect = document.getElementById('form-waste-category');
+        const weightInput = document.getElementById('form-waste-weight');
+        const descriptionInput = document.getElementById('form-item-description');
+
+        if (categorySelect) categorySelect.value = card.dataset.category;
+        if (weightInput) weightInput.value = card.dataset.weight;
+        if (descriptionInput && descriptionInput.value.trim() === '') {
+            descriptionInput.value = card.dataset.example;
+        }
+
+        syncCategoryCards(card.dataset.category);
+        calculateFormPreview();
+    });
+});
+
+if (formCat) {
+    formCat.addEventListener('change', () => {
+        syncCategoryCards(formCat.value);
+        calculateFormPreview();
+    });
+}
+
+const photoInput = document.getElementById('form-waste-photo');
+const photoPreviewCard = document.getElementById('photo-preview-card');
+const photoPreviewImg = document.getElementById('photo-preview-img');
+const removePhotoBtn = document.getElementById('remove-photo-btn');
+
+function clearPhotoPreview() {
+    if (photoInput) photoInput.value = '';
+    if (photoPreviewImg) photoPreviewImg.removeAttribute('src');
+    if (photoPreviewCard) photoPreviewCard.style.display = 'none';
+}
+
+if (photoInput) {
+    photoInput.addEventListener('change', () => {
+        const file = photoInput.files[0];
+        if (!file) {
+            clearPhotoPreview();
+            return;
+        }
+
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            clearPhotoPreview();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Format Foto Tidak Sesuai',
+                text: 'Gunakan foto JPG, PNG, atau WEBP.',
+                confirmButtonColor: '#10b981'
+            });
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            clearPhotoPreview();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Foto Terlalu Besar',
+                text: 'Ukuran foto maksimal 5 MB.',
+                confirmButtonColor: '#10b981'
+            });
+            return;
+        }
+
+        if (photoPreviewImg && photoPreviewCard) {
+            photoPreviewImg.src = URL.createObjectURL(file);
+            photoPreviewCard.style.display = 'block';
+        }
+    });
+}
+
+if (removePhotoBtn) removePhotoBtn.addEventListener('click', clearPhotoPreview);
+
 // Logout
 function logoutUser() {
     localStorage.removeItem('user');
@@ -93,6 +178,14 @@ function logoutUser() {
 // System Notification Alert Close
 function closeNotification() {
     document.getElementById('system-notification-box').style.display = 'none';
+}
+
+function openTrackingDetail(trackingNumber) {
+    const trackInput = document.getElementById('track-number-search');
+    if (trackInput) trackInput.value = trackingNumber;
+    const trackingTab = document.querySelector('.sidebar-item[data-target="lacak-pickup"]');
+    if (trackingTab) trackingTab.click();
+    searchTracking();
 }
 
 // 4. Load User Data & Pickups
@@ -169,6 +262,7 @@ function loadDashboardData() {
                 let badgeClass = 'pending';
                 if (item.status === 'pickup') badgeClass = 'pickup';
                 else if (item.status === 'transit') badgeClass = 'transit';
+                else if (item.status === 'arrived') badgeClass = 'arrived';
                 else if (item.status === 'completed') badgeClass = 'completed';
 
                 historyHtml += `
@@ -193,6 +287,9 @@ function loadDashboardData() {
                     } else if (item.status === 'transit') {
                         stepIcon = 'fa-warehouse';
                         stepText = 'E-waste dalam perjalanan menuju Recycling Hub.';
+                    } else if (item.status === 'arrived') {
+                        stepIcon = 'fa-clipboard-check';
+                        stepText = 'E-waste sudah tiba di hub dan menunggu payout admin.';
                     }
 
                     activeHtml += `
@@ -208,6 +305,7 @@ function loadDashboardData() {
                                     <span class="status-badge ${badgeClass}">${item.status.toUpperCase()}</span>
                                     <p style="font-size:0.75rem; color:var(--text-secondary); margin:2px 0 0 0;">${stepText}</p>
                                 </div>
+                                <button type="button" class="btn btn-outline" style="height:38px; padding:0 14px; border-radius:10px; font-weight:800;" onclick="openTrackingDetail('${item.tracking_number}')">Lacak</button>
                             </div>
                         </div>
                     `;
@@ -280,14 +378,40 @@ if (pickupForm) {
 
         const btn = this.querySelector('button[type="submit"]');
         const originalHtml = btn.innerHTML;
+
+        const phone = document.getElementById('form-donor-phone').value.trim();
+        const address = document.getElementById('form-pickup-address').value.trim();
+        const description = document.getElementById('form-item-description').value.trim();
+        const weight = parseFloat(document.getElementById('form-waste-weight').value);
+
+        if (!/^(\+62|62|0)8[0-9]{8,13}$/.test(phone.replace(/\s|-/g, ''))) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Nomor Kontak Belum Valid',
+                text: 'Masukkan nomor WhatsApp Indonesia yang aktif.',
+                confirmButtonColor: '#10b981'
+            });
+            return;
+        }
+
+        if (address.length < 15 || description.length < 10 || !weight || weight <= 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Data Belum Lengkap',
+                text: 'Pastikan alamat, deskripsi barang, dan berat sudah diisi dengan benar.',
+                confirmButtonColor: '#10b981'
+            });
+            return;
+        }
+
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
         btn.disabled = true;
 
         const formData = new FormData();
-        formData.append('item_description', document.getElementById('form-item-description').value);
-        formData.append('pickup_address', document.getElementById('form-pickup-address').value);
-        formData.append('contact_phone', document.getElementById('form-donor-phone').value);
-        formData.append('weight_kg', parseFloat(document.getElementById('form-waste-weight').value));
+        formData.append('item_description', description);
+        formData.append('pickup_address', address);
+        formData.append('contact_phone', phone);
+        formData.append('weight_kg', weight);
         formData.append('category', document.getElementById('form-waste-category').value);
 
         const photoInput = document.getElementById('form-waste-photo');
@@ -310,13 +434,17 @@ if (pickupForm) {
                     title: 'Permohonan Berhasil!',
                     html: `Nomor Tracking: <strong>${data.data.tracking_number}</strong><br>Kolektor kami akan segera menghubungi Anda.`,
                     confirmButtonColor: '#10b981',
-                    confirmButtonText: 'Selesai'
+                    confirmButtonText: 'Lacak Status'
                 }).then(() => {
                     pickupForm.reset();
+                    clearPhotoPreview();
+                    syncCategoryCards('Small Gadgets');
                     calculateFormPreview();
                     loadDashboardData();
-                    // Switch to Beranda
-                    document.querySelector('.sidebar-item[data-target="beranda"]').click();
+                    const trackInput = document.getElementById('track-number-search');
+                    if (trackInput) trackInput.value = data.data.tracking_number;
+                    document.querySelector('.sidebar-item[data-target="lacak-pickup"]').click();
+                    searchTracking();
                 });
             } else {
                 Swal.fire({
@@ -381,6 +509,7 @@ function searchTracking() {
             let badgeClass = 'pending';
             if (item.status === 'pickup') badgeClass = 'pickup';
             else if (item.status === 'transit') badgeClass = 'transit';
+            else if (item.status === 'arrived') badgeClass = 'arrived';
             else if (item.status === 'completed') badgeClass = 'completed';
 
             const statusBadge = document.getElementById('track-disp-status');
@@ -500,5 +629,6 @@ function renderChart(monthlyWeights) {
 // Init
 document.addEventListener('DOMContentLoaded', () => {
     loadDashboardData();
+    syncCategoryCards(formCat ? formCat.value : 'Small Gadgets');
     calculateFormPreview();
 });

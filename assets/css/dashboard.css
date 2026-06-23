@@ -154,6 +154,12 @@ body.portal-page {
     border: 1px solid #99f6e4;
 }
 
+.status-badge.arrived {
+    background-color: #eef2ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe;
+}
+
 .status-badge.completed {
     background-color: #f0fdf4;
     color: #15803d;
@@ -173,6 +179,128 @@ body.portal-page {
 .active-pickup-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.03);
+}
+
+/* Guided pickup form */
+.pickup-step-block {
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+    background: #ffffff;
+}
+
+.pickup-step-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.pickup-step-number {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #ecfdf5;
+    color: #047857;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    flex: 0 0 auto;
+}
+
+.pickup-step-header h3 {
+    margin: 0 0 4px 0;
+    font-size: 1rem;
+    color: var(--brand-dark);
+}
+
+.pickup-step-header p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.category-helper-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.category-helper-card {
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 18px 14px;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 136px;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.category-helper-card i {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    color: #0d9488;
+    font-size: 1.1rem;
+}
+
+.category-helper-card strong {
+    color: var(--brand-dark);
+    font-size: 0.95rem;
+}
+
+.category-helper-card span {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
+.category-helper-card:hover,
+.category-helper-card.active {
+    border-color: #10b981;
+    background: #ecfdf5;
+    box-shadow: 0 10px 24px rgba(16, 185, 129, 0.12);
+}
+
+.photo-preview-card {
+    position: relative;
+    margin-top: 14px;
+    width: 220px;
+    max-width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.photo-preview-card img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+}
+
+.photo-preview-card button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.76);
+    color: white;
+    cursor: pointer;
 }
 
 /* Timeline nodes */
@@ -240,5 +368,383 @@ body.portal-page {
 
     .mobile-header {
         display: flex;
+    }
+
+    .category-helper-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .category-helper-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pickup-step-block {
+        padding: 18px;
+    }
+}
+
+/* Professional dashboard refresh */
+body.portal-page {
+    background: #f4f7f6;
+    color: #10251f;
+}
+
+.sidebar {
+    width: 264px;
+    background: #064736;
+    padding: 28px 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-logo {
+    padding: 0 28px;
+    margin-bottom: 44px;
+    font-size: 1.45rem;
+}
+
+.sidebar-nav {
+    padding: 0 14px;
+}
+
+.nav-group-label {
+    padding: 12px 14px 8px;
+    color: #5eead4;
+    letter-spacing: 0.1em;
+}
+
+.sidebar-item {
+    min-height: 48px;
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #b8f7dc;
+    font-size: 0.93rem;
+}
+
+.sidebar-item i {
+    width: 20px;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+.sidebar-item.active {
+    background: #16bd88;
+    box-shadow: 0 10px 24px rgba(16, 185, 129, 0.24);
+}
+
+.sidebar-footer > div {
+    padding: 0 14px !important;
+}
+
+.sidebar-footer button {
+    border-radius: 10px !important;
+}
+
+.portal-content {
+    margin-left: 264px;
+    width: calc(100% - 264px);
+    background: #f4f7f6;
+}
+
+.hero-portal-impact {
+    padding: 44px 0 96px !important;
+    background: #063f31 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.hero-portal-impact .container,
+.portal-content > .container {
+    max-width: 1240px;
+}
+
+.hero-portal-impact h1 {
+    font-size: 2rem !important;
+    letter-spacing: 0 !important;
+}
+
+.hero-portal-impact p {
+    color: #a8d9ca !important;
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.hero-action-btn {
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.08);
+    color: #eafff6;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 0 16px;
+    font-family: inherit;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.hero-action-btn.primary {
+    background: #16bd88;
+    border-color: #16bd88;
+    color: #ffffff;
+}
+
+.hero-action-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.hero-action-btn.primary:hover {
+    background: #0ea574;
+}
+
+.user-profile-header-card {
+    border-radius: 14px !important;
+    padding: 12px 16px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.avatar-circle,
+#profile-avatar {
+    width: 46px !important;
+    height: 46px !important;
+}
+
+.portal-content > .container {
+    margin-top: -54px !important;
+    padding-bottom: 40px;
+}
+
+.notification-alert-box {
+    border-radius: 12px !important;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+}
+
+.kpi-grid {
+    gap: 16px !important;
+    margin-bottom: 24px !important;
+}
+
+.kpi-card,
+.panel-card {
+    border-radius: 14px !important;
+    border: 1px solid #dce7e3 !important;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07) !important;
+}
+
+.kpi-card {
+    padding: 22px !important;
+    min-height: 138px;
+}
+
+.kpi-card h2 {
+    font-size: 2rem !important;
+    letter-spacing: 0 !important;
+}
+
+.kpi-card span {
+    letter-spacing: 0.02em;
+}
+
+.layout-grid-dashboard {
+    grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.75fr) !important;
+    gap: 18px !important;
+}
+
+.panel-card {
+    padding: 28px !important;
+}
+
+.panel-card h2,
+.panel-card h3 {
+    letter-spacing: 0 !important;
+    color: #063f31 !important;
+}
+
+.tab-pane:not(#beranda) .panel-card {
+    max-width: 1120px;
+    margin: 0 auto;
+}
+
+#lacak-pickup .panel-card,
+#pengaturan .panel-card {
+    max-width: 860px;
+}
+
+.active-pickup-card {
+    border-radius: 12px !important;
+    background: #f7faf9 !important;
+    border-color: #dbe8e3 !important;
+    padding: 18px !important;
+    margin-bottom: 14px !important;
+}
+
+.status-badge {
+    border-radius: 999px;
+    padding: 7px 12px;
+    letter-spacing: 0.02em;
+}
+
+.pickup-step-block {
+    border-radius: 12px;
+    padding: 20px;
+    background: #fbfdfc;
+    border-color: #dce7e3;
+}
+
+.pickup-step-header {
+    margin-bottom: 16px;
+}
+
+.pickup-step-number {
+    background: #dff8ee;
+}
+
+.category-helper-grid {
+    gap: 12px;
+}
+
+.category-helper-card {
+    min-height: 118px;
+    border-radius: 12px;
+    background: #ffffff;
+    border-color: #dce7e3;
+}
+
+.category-helper-card.active,
+.category-helper-card:hover {
+    background: #eefbf6;
+    border-color: #16bd88;
+}
+
+.input-field label {
+    color: #334155;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.input-wrapper input,
+.input-wrapper select,
+.input-wrapper textarea {
+    border-radius: 10px !important;
+    border: 1px solid #d6e2de !important;
+    background: #f8faf9 !important;
+    color: #10251f !important;
+    min-height: 52px;
+    box-shadow: none !important;
+}
+
+.input-wrapper input:focus,
+.input-wrapper select:focus,
+.input-wrapper textarea:focus {
+    outline: none;
+    border-color: #16bd88 !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 4px rgba(22, 189, 136, 0.12) !important;
+}
+
+.input-wrapper i {
+    color: #64748b !important;
+}
+
+#pickup-request-form > div[style*="background: #f8fafc"] {
+    border-radius: 12px !important;
+    background: #f8faf9 !important;
+    border-color: #dce7e3 !important;
+}
+
+#pickup-request-form > button[type="submit"] {
+    border-radius: 10px !important;
+    height: 54px !important;
+    box-shadow: 0 14px 28px rgba(16, 185, 129, 0.22) !important;
+}
+
+.history-table {
+    font-size: 0.9rem;
+}
+
+.history-table th {
+    color: #64748b !important;
+    background: #f8faf9;
+    white-space: nowrap;
+}
+
+.history-table td {
+    color: #063f31;
+}
+
+#lacak-pickup .panel-card > div[style*="display: flex"] {
+    max-width: none !important;
+}
+
+#track-number-search {
+    font-size: 0.95rem;
+}
+
+footer {
+    margin-top: 28px !important;
+    padding: 28px 0 !important;
+    background: #111827 !important;
+}
+
+@media (max-width: 1180px) {
+    .layout-grid-dashboard {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 992px) {
+    .portal-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .hero-portal-impact {
+        padding-top: 30px !important;
+    }
+
+    .portal-content > .container {
+        margin-top: -40px !important;
+    }
+}
+
+@media (max-width: 760px) {
+    .hero-portal-impact .container {
+        align-items: flex-start !important;
+    }
+
+    .user-profile-header-card {
+        width: 100%;
+    }
+
+    .kpi-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .panel-card {
+        padding: 20px !important;
+    }
+
+    #lacak-pickup .panel-card > div[style*="display: flex"] {
+        flex-direction: column;
+    }
+
+    #lacak-pickup .panel-card > div[style*="display: flex"] button {
+        width: 100%;
+        height: 48px;
+    }
+
+    .pickup-step-block > div[style*="grid-template-columns"],
+    #settings-profile-form > div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
     }
 }

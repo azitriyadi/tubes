@@ -111,6 +111,10 @@ function viewActiveMission(item) {
             btn.innerHTML = '<i class="fas fa-check-circle"></i> Selesai Verifikasi & Tiba di Hub';
             btn.style.background = '#10b981';
             btn.onclick = () => updateMissionStatus(item.tracking_number, 'arrived', 'Recycling Hub Bandung', 'Sampah elektronik telah tiba di Recycling Hub dan siap diverifikasi admin untuk payout.');
+        } else if (item.status === 'arrived') {
+            btn.innerHTML = '<i class="fas fa-clipboard-check"></i> Menunggu Payout Admin';
+            btn.style.background = '#64748b';
+            btn.onclick = null;
         }
     }
     switchView('active-mission');
