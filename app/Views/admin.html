@@ -24,14 +24,16 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/admin.css">
+    <link rel="stylesheet" href="assets/css/portal-system.css?v=20260702">
 </head>
 
-<body class="portal-page" style="background:#f8fafc; font-family:'Plus Jakarta Sans', sans-serif;">
+<body class="portal-page role-manager" style="background:#f8fafc; font-family:'Plus Jakarta Sans', sans-serif;">
 
     <!-- Sidebar Navigation -->
     <aside class="sidebar" id="sidebar" style="background-color: #0f172a; border-right: 1px solid #1e293b;">
         <a href="home" class="sidebar-logo" style="color:white; font-family:'Outfit', sans-serif;">
-            <i class="fas fa-leaf" style="color:#10b981;"></i> EcoRecycle
+            <span class="brand-mark"><i class="fas fa-leaf"></i></span>
+            <span>EcoRecycle<small>Manager Portal</small></span>
         </a>
 
         <div class="sidebar-nav">
@@ -45,6 +47,9 @@
                 </div>
                 <div class="sidebar-item" data-target="finance-view" onclick="switchAdminTab('finance-view')">
                     <i class="fas fa-wallet"></i> Payout Ledger
+                </div>
+                <div class="sidebar-item" data-target="content-view" onclick="switchAdminTab('content-view')">
+                    <i class="fas fa-bullhorn"></i> Pusat Pengumuman
                 </div>
             </div>
         </div>
@@ -238,17 +243,18 @@
                     <h3 style="font-weight:900; font-size:1.2rem; color:#0f172a; margin-bottom:20px;">Ledger Transaksi Payout</h3>
                     
                     <div style="overflow-x:auto;">
-                        <table class="history-table" style="width:100%; border-collapse:collapse; min-width:500px;">
+                        <table class="history-table" style="width:100%; border-collapse:collapse; min-width:720px;">
                             <thead>
                                 <tr style="border-bottom:2px solid #f1f5f9; text-align:left;">
                                     <th style="padding:12px; font-size:0.75rem; font-weight:800; color:#64748b;">NO. TRACKING</th>
                                     <th style="padding:12px; font-size:0.75rem; font-weight:800; color:#64748b;">MASYARAKAT (USER)</th>
+                                    <th style="padding:12px; font-size:0.75rem; font-weight:800; color:#64748b;">TUJUAN PAYOUT</th>
                                     <th style="padding:12px; font-size:0.75rem; font-weight:800; color:#64748b;">NOMINAL</th>
                                     <th style="padding:12px; font-size:0.75rem; font-weight:800; color:#64748b; text-align:right;">AKSI</th>
                                 </tr>
                             </thead>
                             <tbody id="payoutLedgerTableBody">
-                                <tr><td colspan="4" style="text-align:center; padding:16px; color:#64748b;">Memuat data...</td></tr>
+                                <tr><td colspan="5" style="text-align:center; padding:16px; color:#64748b;">Memuat data...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -264,10 +270,70 @@
             </div>
         </div>
 
+        <!-- VIEW 4: INTERNAL ANNOUNCEMENT CMS -->
+        <div id="content-view" class="view-section">
+            <div class="page-header">
+                <div>
+                    <span class="portal-eyebrow">CMS Internal</span>
+                    <h1>Pusat Pengumuman Portal</h1>
+                    <p>Terbitkan informasi operasional untuk Eco Warrior dan Eco Collector tanpa mengubah landing page.</p>
+                </div>
+                <span class="cms-header-badge"><i class="fas fa-tower-broadcast"></i> Role-based content</span>
+            </div>
+
+            <div class="cms-layout">
+                <section class="panel-card cms-editor-panel">
+                    <div class="panel-heading-compact">
+                        <div>
+                            <span class="portal-eyebrow">Konten baru</span>
+                            <h3>Buat Pengumuman</h3>
+                        </div>
+                        <i class="fas fa-pen-to-square"></i>
+                    </div>
+
+                    <form id="announcement-form" class="cms-form">
+                        <div class="input-field">
+                            <label for="announcement-title">Judul pengumuman</label>
+                            <input id="announcement-title" type="text" maxlength="120" placeholder="Contoh: Jadwal pickup akhir pekan" required>
+                        </div>
+                        <div class="input-field">
+                            <label for="announcement-target">Target portal</label>
+                            <select id="announcement-target" required>
+                                <option value="all">Semua peran</option>
+                                <option value="user">Eco Warrior</option>
+                                <option value="collector">Eco Collector</option>
+                            </select>
+                        </div>
+                        <div class="input-field">
+                            <label for="announcement-message">Isi informasi</label>
+                            <textarea id="announcement-message" maxlength="1000" rows="6" placeholder="Tulis informasi yang singkat dan dapat ditindaklanjuti." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary cms-publish-btn">
+                            <i class="fas fa-paper-plane"></i> Terbitkan Pengumuman
+                        </button>
+                    </form>
+                </section>
+
+                <section class="panel-card cms-list-panel">
+                    <div class="panel-heading-compact">
+                        <div>
+                            <span class="portal-eyebrow">Publikasi</span>
+                            <h3>Daftar Pengumuman</h3>
+                        </div>
+                        <span class="cms-count" id="announcement-count">0 konten</span>
+                    </div>
+                    <div id="announcement-admin-list" class="cms-announcement-list">
+                        <div class="portal-empty-state">Memuat pengumuman...</div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/js/admin.js"></script>
+    <script src="assets/js/portal-announcements.js?v=20260702"></script>
+    <script src="assets/js/admin.js?v=20260702-cms"></script>
 </body>
 
 </html>

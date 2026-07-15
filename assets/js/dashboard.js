@@ -9,6 +9,70 @@ const categoryConfig = {
     'Batteries': { rate: 3000, feePerKg: 2000 }
 };
 
+const pickupStatusFlow = ['pending', 'pickup', 'transit', 'arrived', 'completed'];
+const pickupStatusMeta = {
+    pending: {
+        label: 'Menunggu Kolektor',
+        icon: 'fa-clock',
+        description: 'Pengajuan diterima dan sedang menunggu kolektor mengambil tugas.',
+        nextAction: 'Berikutnya: kolektor menerima pickup.'
+    },
+    pickup: {
+        label: 'Kolektor Ditugaskan',
+        icon: 'fa-truck-pickup',
+        description: 'Kolektor sudah mengambil tugas dan akan menuju alamat penjemputan.',
+        nextAction: 'Berikutnya: barang dijemput dan dibawa menuju hub.'
+    },
+    transit: {
+        label: 'Menuju Hub',
+        icon: 'fa-truck-fast',
+        description: 'E-waste sedang dalam perjalanan menuju Recycling Hub.',
+        nextAction: 'Berikutnya: barang diterima oleh hub.'
+    },
+    arrived: {
+        label: 'Menunggu Payout',
+        icon: 'fa-clipboard-check',
+        description: 'E-waste sudah tiba di hub dan menunggu validasi payout admin.',
+        nextAction: 'Berikutnya: admin memproses reward.'
+    },
+    completed: {
+        label: 'Selesai Dibayar',
+        icon: 'fa-circle-check',
+        description: 'Pickup selesai dan reward sudah diproses.',
+        nextAction: 'Proses selesai.'
+    }
+};
+
+function getPickupStatusMeta(status) {
+    return pickupStatusMeta[status] || pickupStatusMeta.pending;
+}
+
+function getStatusBadgeClass(status) {
+    if (status === 'pickup') return 'pickup';
+    if (status === 'transit') return 'transit';
+    if (status === 'arrived') return 'arrived';
+    if (status === 'completed') return 'completed';
+    return 'pending';
+}
+
+function renderStatusStepper(currentStatus) {
+    const currentIndex = pickupStatusFlow.indexOf(currentStatus);
+    return `
+        <div class="pickup-status-stepper" aria-label="Tahapan status penjemputan">
+            ${pickupStatusFlow.map((status, index) => {
+                const meta = getPickupStatusMeta(status);
+                const stateClass = index < currentIndex ? 'done' : index === currentIndex ? 'current' : '';
+                return `
+                    <div class="pickup-status-step ${stateClass}">
+                        <span><i class="fas ${meta.icon}"></i></span>
+                        <strong>${meta.label}</strong>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+}
+
 // Tab Switching
 const tabs = document.querySelectorAll('.hub-tab');
 const panes = document.querySelectorAll('.tab-pane');
@@ -188,6 +252,58 @@ function openTrackingDetail(trackingNumber) {
     searchTracking();
 }
 
+function setInputValue(id, value) {
+    const field = document.getElementById(id);
+    if (field) field.value = value || '';
+}
+
+function mergeSessionUser(profile) {
+    const userSession = localStorage.getItem('user');
+    if (!userSession || !profile) return;
+    const current = JSON.parse(userSession);
+    const merged = { ...current, ...profile, token: current.token };
+    localStorage.setItem('user', JSON.stringify(merged));
+}
+
+function populateProfileFields(profile) {
+    if (!profile) return;
+    setInputValue('settings-name', profile.name);
+    setInputValue('settings-email', profile.email);
+    setInputValue('settings-phone', profile.phone);
+    setInputValue('settings-address', profile.address);
+    setInputValue('settings-payout-method', profile.payout_method);
+    setInputValue('settings-payout-name', profile.payout_account_name);
+    setInputValue('settings-payout-number', profile.payout_account_number);
+
+    setInputValue('form-donor-name', profile.name);
+    setInputValue('form-donor-phone', profile.phone);
+    setInputValue('form-pickup-address', profile.address);
+}
+
+function loadUserProfileSettings() {
+    const userSession = localStorage.getItem('user');
+    if (!userSession) return;
+    const user = JSON.parse(userSession);
+
+    fetch('api/user/profile', {
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + user.token
+        }
+    })
+    .then(res => {
+        if (res.status === 401) logoutUser();
+        return res.json();
+    })
+    .then(data => {
+        if (data.status === 'success') {
+            mergeSessionUser(data.data);
+            populateProfileFields(data.data);
+        }
+    })
+    .catch(err => console.error('Error loading profile:', err));
+}
+
 // 4. Load User Data & Pickups
 function loadDashboardData() {
     const userSession = localStorage.getItem('user');
@@ -210,6 +326,8 @@ function loadDashboardData() {
 
     const donorNameInput = document.getElementById('form-donor-name');
     if (donorNameInput) donorNameInput.value = user.name;
+    populateProfileFields(user);
+    loadUserProfileSettings();
 
     // Fetch Pickups from API
     fetch('api/ecorecycle/list_pickups?type=user', {
@@ -259,11 +377,8 @@ function loadDashboardData() {
                 const dateStr = `${dateObj.getDate()} ${dateObj.toLocaleString('id-ID', { month: 'short' })} ${dateObj.getFullYear()}`;
                 
                 // Add to history list
-                let badgeClass = 'pending';
-                if (item.status === 'pickup') badgeClass = 'pickup';
-                else if (item.status === 'transit') badgeClass = 'transit';
-                else if (item.status === 'arrived') badgeClass = 'arrived';
-                else if (item.status === 'completed') badgeClass = 'completed';
+                const statusMeta = getPickupStatusMeta(item.status);
+                const badgeClass = getStatusBadgeClass(item.status);
 
                 historyHtml += `
                     <tr>
@@ -272,40 +387,27 @@ function loadDashboardData() {
                         <td style="padding: 16px;">${item.category_name}</td>
                         <td style="padding: 16px; font-weight:700;">${weight} KG</td>
                         <td style="padding: 16px; font-weight:800; color:#059669;">Rp ${netReward.toLocaleString('id-ID')}</td>
-                        <td style="padding: 16px;"><span class="status-badge ${badgeClass}">${item.status.toUpperCase()}</span></td>
+                        <td style="padding: 16px;"><span class="status-badge ${badgeClass}">${statusMeta.label}</span></td>
                     </tr>
                 `;
 
                 // Add to active pickups list if not completed
                 if (item.status !== 'completed') {
-                    let stepIcon = 'fa-clock';
-                    let stepText = 'Menunggu kolektor mengambil e-waste.';
-                    
-                    if (item.status === 'pickup') {
-                        stepIcon = 'fa-truck-fast';
-                        stepText = 'Kolektor bersiap menjemput e-waste Anda.';
-                    } else if (item.status === 'transit') {
-                        stepIcon = 'fa-warehouse';
-                        stepText = 'E-waste dalam perjalanan menuju Recycling Hub.';
-                    } else if (item.status === 'arrived') {
-                        stepIcon = 'fa-clipboard-check';
-                        stepText = 'E-waste sudah tiba di hub dan menunggu payout admin.';
-                    }
-
                     activeHtml += `
-                        <div class="active-pickup-card" style="display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap;">
-                            <div>
+                        <div class="active-pickup-card pickup-flow-card">
+                            <div class="pickup-flow-card-main">
                                 <span style="font-size:0.75rem; font-weight:800; color:var(--text-secondary); text-transform:uppercase;">No. Tracking</span>
                                 <h4 style="font-weight:900; color:var(--brand-dark); margin:2px 0;">${item.tracking_number}</h4>
                                 <p style="font-size:0.8rem; color:var(--text-secondary); margin:4px 0 0 0;">${item.category_name} • ${weight} KG</p>
                             </div>
-                            <div style="display:flex; align-items:center; gap:12px;">
-                                <div style="background:#ecfdf5; color:#10b981; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="fas ${stepIcon}"></i></div>
-                                <div>
-                                    <span class="status-badge ${badgeClass}">${item.status.toUpperCase()}</span>
-                                    <p style="font-size:0.75rem; color:var(--text-secondary); margin:2px 0 0 0;">${stepText}</p>
+                            <div class="pickup-flow-card-status">
+                                <div class="pickup-flow-icon"><i class="fas ${statusMeta.icon}"></i></div>
+                                <div class="pickup-flow-copy">
+                                    <span class="status-badge ${badgeClass}">${statusMeta.label}</span>
+                                    <p>${statusMeta.description}</p>
+                                    <small>${statusMeta.nextAction}</small>
                                 </div>
-                                <button type="button" class="btn btn-outline" style="height:38px; padding:0 14px; border-radius:10px; font-weight:800;" onclick="openTrackingDetail('${item.tracking_number}')">Lacak</button>
+                                <button type="button" class="btn btn-outline pickup-flow-track-btn" onclick="openTrackingDetail('${item.tracking_number}')">Lacak</button>
                             </div>
                         </div>
                     `;
@@ -506,39 +608,44 @@ function searchTracking() {
 
             document.getElementById('track-disp-number').innerText = item.tracking_number;
             
-            let badgeClass = 'pending';
-            if (item.status === 'pickup') badgeClass = 'pickup';
-            else if (item.status === 'transit') badgeClass = 'transit';
-            else if (item.status === 'arrived') badgeClass = 'arrived';
-            else if (item.status === 'completed') badgeClass = 'completed';
+            const statusMeta = getPickupStatusMeta(item.status);
+            const badgeClass = getStatusBadgeClass(item.status);
 
             const statusBadge = document.getElementById('track-disp-status');
             statusBadge.className = `status-badge ${badgeClass}`;
-            statusBadge.innerText = item.status.toUpperCase();
+            statusBadge.innerText = statusMeta.label;
 
             document.getElementById('track-disp-detail').innerText = `${item.category_name} • ${item.weight_kg} KG`;
 
             // Populate Timeline
             const timelineList = document.getElementById('track-timeline-list');
-            timelineList.innerHTML = '';
+            timelineList.innerHTML = renderStatusStepper(item.status);
 
             if (history.length === 0) {
-                timelineList.innerHTML = '<p style="color:var(--text-secondary);">Belum ada log pelacakan.</p>';
+                timelineList.innerHTML += '<p style="color:var(--text-secondary);">Belum ada log pelacakan.</p>';
             } else {
                 history.forEach(log => {
                     const dateObj = new Date(log.updated_at);
                     const timeStr = `${dateObj.getDate()} ${dateObj.toLocaleString('id-ID', { month: 'short' })} ${dateObj.getFullYear()}, ${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+                    const logMeta = getPickupStatusMeta(log.status);
                     
                     timelineList.innerHTML += `
                         <div class="timeline-node">
                             <div class="timeline-node-dot"></div>
                             <div class="timeline-node-time">${timeStr}</div>
-                            <div class="timeline-node-title">${log.status.toUpperCase()}</div>
+                            <div class="timeline-node-title">${logMeta.label}</div>
                             <div class="timeline-node-desc">Lokasi: <strong>${log.location}</strong><br>${log.notes}</div>
                         </div>
                     `;
                 });
             }
+
+            timelineList.innerHTML += `
+                <div class="tracking-next-step">
+                    <strong>Langkah berikutnya</strong>
+                    <span>${statusMeta.nextAction}</span>
+                </div>
+            `;
 
             container.style.display = 'block';
         } else {
@@ -565,12 +672,87 @@ const settingsForm = document.getElementById('settings-profile-form');
 if (settingsForm) {
     settingsForm.addEventListener('submit', function (e) {
         e.preventDefault();
-        
-        Swal.fire({
-            icon: 'success',
-            title: 'Profil Disimpan',
-            text: 'Perubahan profil berhasil disimpan.',
-            confirmButtonColor: '#10b981'
+
+        const userSession = localStorage.getItem('user');
+        if (!userSession) return;
+        const user = JSON.parse(userSession);
+
+        const payload = {
+            name: document.getElementById('settings-name').value.trim(),
+            phone: document.getElementById('settings-phone').value.trim(),
+            address: document.getElementById('settings-address').value.trim(),
+            payout_method: document.getElementById('settings-payout-method').value,
+            payout_account_name: document.getElementById('settings-payout-name').value.trim(),
+            payout_account_number: document.getElementById('settings-payout-number').value.trim()
+        };
+
+        if (!payload.name) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Nama Belum Diisi',
+                text: 'Nama lengkap wajib diisi.',
+                confirmButtonColor: '#10b981'
+            });
+            return;
+        }
+
+        if (payload.payout_method && payload.payout_method !== 'cash' && (!payload.payout_account_name || !payload.payout_account_number)) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Data Payout Belum Lengkap',
+                text: 'Isi nama penerima dan nomor rekening/e-wallet untuk metode payout non-tunai.',
+                confirmButtonColor: '#10b981'
+            });
+            return;
+        }
+
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalHtml = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+        fetch('api/user/profile', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + user.token
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                mergeSessionUser(data.data);
+                populateProfileFields(data.data);
+                document.getElementById('hero-welcome').innerText = `Halo, ${data.data.name}!`;
+                document.getElementById('user-display-name').innerText = data.data.name;
+                document.getElementById('profile-avatar').innerText = data.data.name.substring(0, 2).toUpperCase();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Profil Disimpan',
+                    text: 'Data payout sudah siap digunakan admin saat reward dicairkan.',
+                    confirmButtonColor: '#10b981'
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: data.message,
+                    confirmButtonColor: '#10b981'
+                });
+            }
+        })
+        .catch(err => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Kesalahan',
+                text: 'Gagal menghubungi server.',
+                confirmButtonColor: '#10b981'
+            });
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalHtml;
         });
     });
 }

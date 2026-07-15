@@ -7,6 +7,43 @@ let globalActiveMission = null;
 const upcomingList = document.getElementById('upcoming-task-list');
 const historyBody = document.getElementById('history-table-body');
 
+const collectorStatusMeta = {
+    pending: {
+        label: 'Menunggu Diambil',
+        shortLabel: 'ANTREAN',
+        description: 'Tugas baru dari Eco Warrior, belum diambil kolektor.',
+        nextAction: 'Ambil tugas jika area penjemputan sesuai.'
+    },
+    pickup: {
+        label: 'Siap Dijemput',
+        shortLabel: 'JEMPUT',
+        description: 'Tugas sudah menjadi milik Anda. Datangi alamat donor dan ambil e-waste.',
+        nextAction: 'Klik Mulai Transit setelah barang sudah diambil.'
+    },
+    transit: {
+        label: 'Menuju Hub',
+        shortLabel: 'MENUJU HUB',
+        description: 'E-waste sedang Anda bawa menuju Recycling Hub.',
+        nextAction: 'Klik Tiba di Hub setelah barang diterima hub.'
+    },
+    arrived: {
+        label: 'Menunggu Admin',
+        shortLabel: 'TIBA DI HUB',
+        description: 'Barang sudah tiba di hub dan menunggu validasi payout admin.',
+        nextAction: 'Tidak ada aksi kolektor berikutnya.'
+    },
+    completed: {
+        label: 'Selesai',
+        shortLabel: 'SELESAI',
+        description: 'Pickup sudah selesai dan reward diproses admin.',
+        nextAction: 'Misi masuk riwayat.'
+    }
+};
+
+function getCollectorStatusMeta(status) {
+    return collectorStatusMeta[status] || collectorStatusMeta.pending;
+}
+
 function initMap() {
     try {
         const mapElement = document.getElementById('map');
@@ -85,20 +122,29 @@ function openActiveMission() {
 
 function viewActiveMission(item) {
     activeTrackingNum = item.tracking_number;
+    globalActiveMission = item;
+    const statusMeta = getCollectorStatusMeta(item.status);
     
     document.getElementById('mission-resi').innerText = item.tracking_number;
-    
-    let statusText = 'DIJEMPUT';
-    if (item.status === 'transit') statusText = 'MENUJU HUB';
-    document.getElementById('mission-status').innerText = statusText;
-    document.getElementById('mission-status').style.color = item.status === 'transit' ? '#0d9488' : '#1d4ed8';
+    document.getElementById('mission-status').innerText = statusMeta.label;
+    document.getElementById('mission-status').dataset.status = item.status;
+
+    const statusOrder = ['pickup', 'transit', 'arrived'];
+    const currentStatusIndex = statusOrder.indexOf(item.status);
+    document.querySelectorAll('.mission-progress-step').forEach((step, index) => {
+        step.classList.toggle('completed', index < currentStatusIndex);
+        step.classList.toggle('current', index === currentStatusIndex);
+    });
 
     document.getElementById('mission-dest').innerText = item.pickup_address;
     document.getElementById('mission-details').innerHTML = `
-        <strong>Kategori:</strong> ${item.category_name}<br>
-        <strong>Kondisi/Deskripsi:</strong> ${item.item_description}<br>
-        <strong>Estimasi Berat:</strong> ${item.weight_kg} KG<br>
-        <strong>Kontak Pengirim (Masyarakat):</strong> ${item.contact_phone} (${item.donor_name})
+        <dl class="mission-detail-list">
+            <div><dt>Kategori</dt><dd>${item.category_name}</dd></div>
+            <div><dt>Deskripsi</dt><dd>${item.item_description}</dd></div>
+            <div><dt>Estimasi berat</dt><dd>${item.weight_kg} KG</dd></div>
+            <div><dt>Donor</dt><dd>${item.donor_name} &middot; ${item.contact_phone}</dd></div>
+            <div class="mission-next-action"><dt>Arahan berikutnya</dt><dd>${statusMeta.nextAction}</dd></div>
+        </dl>
     `;
 
     const btn = document.getElementById('mission-btn');
@@ -118,6 +164,21 @@ function viewActiveMission(item) {
         }
     }
     switchView('active-mission');
+}
+
+function openMissionRoute() {
+    if (!globalActiveMission || !globalActiveMission.pickup_address) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Alamat Belum Tersedia',
+            text: 'Pilih misi aktif terlebih dahulu untuk membuka rute.',
+            confirmButtonColor: '#087a5b'
+        });
+        return;
+    }
+
+    const destination = encodeURIComponent(globalActiveMission.pickup_address);
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}`, '_blank', 'noopener,noreferrer');
 }
 
 function updateMissionStatus(trackingNum, newStatus, location, notes) {
@@ -287,6 +348,7 @@ function loadCollectorData() {
                 const commission = (parseFloat(item.eco_reward) - parseFloat(item.processing_fee)) * 0.1; // 10% commission of net reward
 
                 if (item.status === 'completed') {
+                    const statusMeta = getCollectorStatusMeta(item.status);
                     // Mission completed goes to history
                     totalWeightCollected += weight;
                     totalCommissionEarned += commission;
@@ -299,12 +361,13 @@ function loadCollectorData() {
                             <td style="padding: 16px; font-weight: 800; color:#064e3b;">${item.tracking_number}</td>
                             <td style="padding: 16px;">${dateStr}</td>
                             <td style="padding: 16px; font-weight: 800; color: #10b981;">+Rp ${commission.toLocaleString('id-ID')}</td>
-                            <td style="padding: 16px;"><span class="status-pill success" style="background:#f0fdf4; color:#15803d; font-weight:800; padding:4px 12px; border-radius:50px; font-size:0.75rem;">VERIFIED</span></td>
+                            <td style="padding: 16px;"><span class="status-pill success" style="background:#f0fdf4; color:#15803d; font-weight:800; padding:4px 12px; border-radius:50px; font-size:0.75rem;">${statusMeta.label}</span></td>
                         </tr>
                     `;
                 } else {
                     // Active or Open Pickups
                     if (item.collector_id == user.id) {
+                        const statusMeta = getCollectorStatusMeta(item.status);
                         // Assigned to me and not completed (status: 'pickup' or 'transit' or 'arrived')
                         if (item.status === 'pickup' || item.status === 'transit') {
                             globalActiveMission = item; // Store active mission
@@ -329,10 +392,11 @@ function loadCollectorData() {
                                         <div style="font-size:0.75rem; color:#64748b;">${item.pickup_address.substring(0,25)}...</div>
                                     </div>
                                 </div>
-                                <span style="background:${badgeBg}; color:${badgeColor}; font-weight:800; padding:4px 10px; border-radius:50px; font-size:0.7rem;">${item.status.toUpperCase()}</span>
+                                <span style="background:${badgeBg}; color:${badgeColor}; font-weight:800; padding:4px 10px; border-radius:50px; font-size:0.7rem;">${statusMeta.shortLabel}</span>
                             </div>
                         `;
                     } else if (item.status === 'pending') {
+                        const statusMeta = getCollectorStatusMeta(item.status);
                         // Open task to claim
                         openTasksHtml += `
                             <div class="task-item" style="cursor:default;" onclick="event.stopPropagation();">
@@ -341,6 +405,7 @@ function loadCollectorData() {
                                     <div style="flex:1;">
                                         <div style="font-weight:900; font-size: 0.9rem; color:#064e3b;">${item.tracking_number}</div>
                                         <div style="font-size:0.75rem; color:#64748b;">${item.pickup_address.substring(0,25)}... (${item.weight_kg} KG)</div>
+                                        <div style="font-size:0.72rem; color:#d97706; font-weight:800; margin-top:3px;">${statusMeta.nextAction}</div>
                                     </div>
                                 </div>
                                 <button class="btn-primary" style="padding: 8px 16px; font-size: 0.75rem; border-radius: 8px; width:auto; border:none; background:#10b981;" onclick="claimPickup('${item.tracking_number}')">AMBIL</button>

@@ -3,7 +3,64 @@
 let liveMap;
 let financeChart;
 let globalPickups = [];
+let globalAnnouncements = [];
 let activeFilterRange = 'all'; // all, today, week, month
+
+const adminStatusMeta = {
+    pending: {
+        label: 'Perlu Ditugaskan',
+        badgeClass: 'status-pending',
+        nextAction: 'Tugaskan collector'
+    },
+    pickup: {
+        label: 'Dijadwalkan Pickup',
+        badgeClass: 'status-processing',
+        nextAction: 'Pantau collector'
+    },
+    transit: {
+        label: 'Menuju Hub',
+        badgeClass: 'status-processing',
+        nextAction: 'Tunggu tiba di hub'
+    },
+    arrived: {
+        label: 'Siap Payout',
+        badgeClass: 'status-processing',
+        nextAction: 'Validasi dan cairkan'
+    },
+    completed: {
+        label: 'Selesai Dibayar',
+        badgeClass: 'status-success',
+        nextAction: 'Selesai'
+    }
+};
+
+function getAdminStatusMeta(status) {
+    return adminStatusMeta[status] || adminStatusMeta.pending;
+}
+
+function getPayoutMethodLabel(method) {
+    if (method === 'bank') return 'Transfer Bank';
+    if (method === 'ewallet') return 'E-Wallet';
+    if (method === 'cash') return 'Tunai';
+    return 'Belum diisi';
+}
+
+function renderPayoutDestination(item) {
+    const method = item.payout_method || '';
+    if (!method) {
+        return '<span class="payout-destination warning">Data payout belum diisi user</span>';
+    }
+    if (method === 'cash') {
+        return '<span class="payout-destination">Tunai saat validasi hub</span>';
+    }
+    return `
+        <div class="payout-destination">
+            <strong>${getPayoutMethodLabel(method)}</strong>
+            <span>${item.payout_account_name || '-'}</span>
+            <small>${item.payout_account_number || '-'}</small>
+        </div>
+    `;
+}
 
 function toggleAdminSidebar() {
     document.getElementById('sidebar').classList.add('active');
@@ -29,6 +86,8 @@ function switchAdminTab(targetId) {
         setTimeout(initLiveMap, 200);
     } else if (targetId === 'finance-view') {
         setTimeout(initFinanceChart, 200);
+    } else if (targetId === 'content-view') {
+        loadAdminAnnouncements();
     }
 
     closeAdminSidebar();
@@ -94,6 +153,7 @@ function loadAdminCommandData() {
     document.getElementById('welcome-message').innerText = `Selamat Datang, ${user.name}`;
     document.getElementById('admin-display-name').innerText = user.name;
     document.getElementById('admin-avatar').innerText = user.name.substring(0, 2).toUpperCase();
+    loadAdminAnnouncements();
 
     // Fetch Global Pickups
     fetch('api/ecorecycle/list_pickups?type=all', {
@@ -180,14 +240,7 @@ function renderPickupsTables() {
         const dateStr = `${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
         const netReward = parseFloat(item.eco_reward) - parseFloat(item.processing_fee);
 
-        let badgeClass = 'status-pending';
-        if (item.status === 'pickup') badgeClass = 'status-processing';
-        else if (item.status === 'transit') badgeClass = 'status-processing';
-        else if (item.status === 'arrived') badgeClass = 'status-processing';
-        else if (item.status === 'completed') badgeClass = 'status-success';
-
-        let statusText = item.status.toUpperCase();
-        if (item.status === 'arrived') statusText = 'TIBA DI HUB';
+        const statusMeta = getAdminStatusMeta(item.status);
 
         // Global DB Row
         globalHtml += `
@@ -198,7 +251,10 @@ function renderPickupsTables() {
                 <td style="padding:16px;">${item.category_name}</td>
                 <td style="padding:16px; font-weight:700;">${item.weight_kg} KG</td>
                 <td style="padding:16px; font-weight:600; color:#475569;">${item.collector_name || 'Belum Ditugaskan'}</td>
-                <td style="padding:16px;"><span class="status-pill ${badgeClass}">${statusText}</span></td>
+                <td style="padding:16px;">
+                    <span class="status-pill ${statusMeta.badgeClass}">${statusMeta.label}</span>
+                    <div style="font-size:0.72rem; color:#64748b; margin-top:5px;">${statusMeta.nextAction}</div>
+                </td>
             </tr>
         `;
 
@@ -208,7 +264,7 @@ function renderPickupsTables() {
                 <tr style="border-bottom: 1px solid #f1f5f9;">
                     <td style="padding:12px; font-weight:800; color:#0f172a;">${item.tracking_number}</td>
                     <td style="padding:12px; font-weight:600;">${item.donor_name}</td>
-                    <td style="padding:12px;">${item.category_name} • ${item.weight_kg} KG</td>
+                    <td style="padding:12px;">${item.category_name} • ${item.weight_kg} KG<br><span style="font-size:0.72rem; color:#b45309; font-weight:800;">${statusMeta.nextAction}</span></td>
                     <td style="padding:12px; text-align:right;">
                         <button class="btn btn-primary" style="padding:6px 12px; font-size:0.75rem; border-radius:8px;" onclick="approveAndAssign('${item.tracking_number}')">Terima & Tugaskan</button>
                     </td>
@@ -220,13 +276,15 @@ function renderPickupsTables() {
         if (item.status === 'arrived' || item.status === 'completed') {
             let actionBtn = `<span class="status-pill status-success"><i class="fas fa-check-double"></i> SUDAH DIBAYAR</span>`;
             if (item.status === 'arrived') {
-                actionBtn = `<button class="btn btn-primary" style="padding:6px 12px; font-size:0.75rem; border-radius:8px; background:#10b981;" onclick="processPayout(${item.id}, ${netReward})">Cairkan Payout</button>`;
+                const payoutReady = item.payout_method === 'cash' || (item.payout_method && item.payout_account_name && item.payout_account_number);
+                actionBtn = `<button class="btn btn-primary" style="padding:6px 12px; font-size:0.75rem; border-radius:8px; background:${payoutReady ? '#10b981' : '#94a3b8'};" onclick="processPayout(${item.id}, ${netReward})">${payoutReady ? 'Cairkan Payout' : 'Review Payout'}</button>`;
             }
 
             payoutHtml += `
                 <tr style="border-bottom: 1px solid #f1f5f9;">
                     <td style="padding:12px; font-weight:800; color:#0f172a;">${item.tracking_number}</td>
                     <td style="padding:12px; font-weight:600;">${item.donor_name}</td>
+                    <td style="padding:12px;">${renderPayoutDestination(item)}</td>
                     <td style="padding:12px; font-weight:800; color:#059669;">Rp ${netReward.toLocaleString('id-ID')}</td>
                     <td style="padding:12px; text-align:right;">${actionBtn}</td>
                 </tr>
@@ -245,7 +303,7 @@ function renderPickupsTables() {
     }
 
     if (payoutBody) {
-        if (payoutHtml === '') payoutBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:16px; color:#64748b;">Tidak ada data penyerahan siap payout.</td></tr>';
+        if (payoutHtml === '') payoutBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:16px; color:#64748b;">Tidak ada data penyerahan siap payout.</td></tr>';
         else payoutBody.innerHTML = payoutHtml;
     }
 }
@@ -335,9 +393,16 @@ function processPayout(pickupId, amount) {
     if (!userSession) return;
     const user = JSON.parse(userSession);
 
+    const pickup = globalPickups.find(item => Number(item.id) === Number(pickupId));
+    const payoutDestination = pickup ? renderPayoutDestination(pickup) : 'Data payout tidak ditemukan.';
+
     Swal.fire({
         title: 'Verifikasi & Cairkan Reward',
-        html: `Apakah data timbangan fisik sudah benar?<br>Sistem akan mentransfer <strong>Rp ${amount.toLocaleString('id-ID')}</strong> ke metode e-wallet / transfer bank masyarakat (user).`,
+        html: `Pastikan data timbangan fisik dan tujuan payout sudah benar.<br><br>
+            <div style="text-align:left; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px;">
+                <strong>Nominal:</strong> Rp ${amount.toLocaleString('id-ID')}<br>
+                <strong>Tujuan:</strong><br>${payoutDestination}
+            </div>`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#10b981',
@@ -445,6 +510,143 @@ function initFinanceChart() {
     });
 }
 
+async function loadAdminAnnouncements() {
+    const session = localStorage.getItem('user');
+    const list = document.getElementById('announcement-admin-list');
+    if (!session || !list) return;
+
+    try {
+        const user = JSON.parse(session);
+        const response = await fetch('api/ecorecycle/announcements', {
+            headers: { 'Authorization': 'Bearer ' + user.token }
+        });
+        const result = await response.json();
+        if (result.status !== 'success') throw new Error(result.message);
+        globalAnnouncements = result.data || [];
+        renderAdminAnnouncements();
+    } catch (error) {
+        list.innerHTML = '<div class="portal-empty-state">Pengumuman belum dapat dimuat.</div>';
+        console.error('Error loading announcements:', error);
+    }
+}
+
+function renderAdminAnnouncements() {
+    const list = document.getElementById('announcement-admin-list');
+    const count = document.getElementById('announcement-count');
+    if (!list) return;
+    if (count) count.innerText = `${globalAnnouncements.length} konten`;
+
+    if (globalAnnouncements.length === 0) {
+        list.innerHTML = '<div class="portal-empty-state">Belum ada pengumuman. Buat konten pertama dari formulir.</div>';
+        return;
+    }
+
+    const escape = window.PortalAnnouncements.escapeHTML;
+    const roleLabels = { all: 'Semua peran', user: 'Eco Warrior', collector: 'Eco Collector' };
+    list.innerHTML = globalAnnouncements.map(item => {
+        const date = new Date(item.created_at).toLocaleDateString('id-ID', {
+            day: 'numeric', month: 'short', year: 'numeric'
+        });
+        return `
+            <article class="cms-announcement-item ${item.is_active ? '' : 'is-inactive'}">
+                <div class="cms-announcement-copy">
+                    <div class="cms-announcement-meta">
+                        <span class="cms-role-tag">${roleLabels[item.target_role] || 'Semua peran'}</span>
+                        <span>${date}</span>
+                    </div>
+                    <h4>${escape(item.title)}</h4>
+                    <p>${escape(item.message)}</p>
+                </div>
+                <div class="cms-announcement-actions">
+                    <button type="button" class="cms-icon-btn ${item.is_active ? 'active' : ''}" title="${item.is_active ? 'Nonaktifkan' : 'Aktifkan'}" onclick="toggleAnnouncement(${item.id}, ${!item.is_active})">
+                        <i class="fas ${item.is_active ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
+                    </button>
+                    <button type="button" class="cms-icon-btn danger" title="Hapus" onclick="deleteAnnouncement(${item.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </article>
+        `;
+    }).join('');
+}
+
+async function toggleAnnouncement(id, active) {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const response = await fetch('api/ecorecycle/announcements', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + user.token
+        },
+        body: JSON.stringify({ action: 'toggle', id, is_active: active })
+    });
+    const result = await response.json();
+    if (result.status === 'success') {
+        loadAdminAnnouncements();
+    } else {
+        Swal.fire({ icon: 'error', title: 'Gagal', text: result.message });
+    }
+}
+
+async function deleteAnnouncement(id) {
+    const confirmation = await Swal.fire({
+        icon: 'warning',
+        title: 'Hapus pengumuman?',
+        text: 'Konten akan dihapus dari seluruh portal tujuan.',
+        showCancelButton: true,
+        confirmButtonText: 'Hapus',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#c34444'
+    });
+    if (!confirmation.isConfirmed) return;
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    const response = await fetch(`api/ecorecycle/announcements?id=${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + user.token }
+    });
+    const result = await response.json();
+    if (result.status === 'success') {
+        loadAdminAnnouncements();
+    } else {
+        Swal.fire({ icon: 'error', title: 'Gagal', text: result.message });
+    }
+}
+
+const announcementForm = document.getElementById('announcement-form');
+if (announcementForm) {
+    announcementForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const user = JSON.parse(localStorage.getItem('user'));
+        const submitButton = this.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+
+        try {
+            const response = await fetch('api/ecorecycle/announcements', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + user.token
+                },
+                body: JSON.stringify({
+                    title: document.getElementById('announcement-title').value.trim(),
+                    message: document.getElementById('announcement-message').value.trim(),
+                    target_role: document.getElementById('announcement-target').value
+                })
+            });
+            const result = await response.json();
+            if (result.status !== 'success') throw new Error(result.message);
+            this.reset();
+            await loadAdminAnnouncements();
+            Swal.fire({ icon: 'success', title: 'Diterbitkan', text: 'Pengumuman sudah tampil pada portal tujuan.', timer: 1600, showConfirmButton: false });
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Gagal', text: error.message || 'Pengumuman gagal diterbitkan.' });
+        } finally {
+            submitButton.disabled = false;
+        }
+    });
+}
+
 // Global scope bindings
 window.switchAdminTab = switchAdminTab;
 window.toggleAdminSidebar = toggleAdminSidebar;
@@ -454,5 +656,7 @@ window.approveAndAssign = approveAndAssign;
 window.processPayout = processPayout;
 window.filterPickupsTable = filterPickupsTable;
 window.setFilterRange = setFilterRange;
+window.toggleAnnouncement = toggleAnnouncement;
+window.deleteAnnouncement = deleteAnnouncement;
 
 document.addEventListener('DOMContentLoaded', loadAdminCommandData);

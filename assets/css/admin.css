@@ -127,6 +127,36 @@ body.portal-page {
     color: #1e40af;
 }
 
+.payout-destination {
+    display: inline-grid;
+    gap: 2px;
+    color: #0f172a;
+    font-size: 0.82rem;
+}
+
+.payout-destination strong {
+    color: #064e3b;
+    font-size: 0.78rem;
+}
+
+.payout-destination span {
+    font-weight: 800;
+}
+
+.payout-destination small {
+    color: #64748b;
+    font-weight: 700;
+}
+
+.payout-destination.warning {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #fffbeb;
+    color: #b45309;
+    font-size: 0.76rem;
+    font-weight: 800;
+}
+
 /* KPI Cards */
 .kpi-card {
     background: white;

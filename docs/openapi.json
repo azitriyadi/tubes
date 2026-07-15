@@ -1,0 +1,1480 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "EcoRecycle API",
+    "description": "Dokumentasi REST API untuk EcoRecycle, platform manajemen penjemputan dan daur ulang sampah elektronik.",
+    "version": "2.0.0"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Current EcoRecycle server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Autentikasi dan registrasi pengguna"
+    },
+    {
+      "name": "Pickup",
+      "description": "Pengajuan, daftar, dan penugasan penjemputan e-waste"
+    },
+    {
+      "name": "Tracking",
+      "description": "Pelacakan status dan statistik operasional"
+    },
+    {
+      "name": "Reward",
+      "description": "Estimasi reward dan proses payout"
+    },
+    {
+      "name": "Announcements",
+      "description": "CMS pengumuman portal untuk Eco Warrior dan Eco Collector"
+    }
+  ],
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login pengguna",
+        "description": "Mengembalikan signed token HMAC untuk request API berikutnya.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              },
+              "example": {
+                "email": "user@ecorecycle.com",
+                "password": "password123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login berhasil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Registrasi akun",
+        "description": "Membuat akun baru. Role yang valid: user, collector, admin. Jika role kosong atau tidak valid, otomatis menjadi user.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              },
+              "example": {
+                "name": "Eco Warrior",
+                "email": "newuser@ecorecycle.com",
+                "password": "password123",
+                "role": "user"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/user/profile": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Ambil profil pengguna",
+        "description": "Mengambil profil pengguna aktif beserta data payout reward.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profil berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Update profil dan data payout",
+        "description": "Menyimpan nama, kontak, alamat default, dan tujuan payout reward pengguna.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileUpdateRequest"
+              },
+              "example": {
+                "name": "Eco Warrior",
+                "phone": "08123456789",
+                "address": "Jl. Asia Afrika No. 1, Bandung",
+                "payout_method": "ewallet",
+                "payout_account_name": "Eco Warrior",
+                "payout_account_number": "08123456789"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profil berhasil diperbarui",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/ecorecycle/request_pickup": {
+      "post": {
+        "tags": ["Pickup"],
+        "summary": "Ajukan penjemputan e-waste",
+        "description": "Membuat permohonan penjemputan baru. Hanya dapat digunakan oleh role user atau Eco Warrior.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestPickupForm"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestPickupJson"
+              },
+              "example": {
+                "item_description": "2 HP rusak dan 1 tablet mati",
+                "pickup_address": "Jl. Asia Afrika No. 1, Bandung",
+                "contact_phone": "08123456789",
+                "weight_kg": 3,
+                "category": "Small Gadgets"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Permohonan penjemputan berhasil dibuat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestPickupResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/ecorecycle/list_pickups": {
+      "get": {
+        "tags": ["Pickup"],
+        "summary": "Ambil daftar penjemputan",
+        "description": "Mengambil daftar pickup berdasarkan role dan tipe query. type=user untuk Eco Warrior, type=collector untuk Eco Collector, type=all untuk Admin.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["user", "collector", "all"],
+              "default": "all"
+            },
+            "example": "user"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daftar penjemputan berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/ecorecycle/assign_collector": {
+      "post": {
+        "tags": ["Pickup"],
+        "summary": "Ambil atau tetapkan tugas kolektor",
+        "description": "Mengubah status pickup dari pending menjadi pickup. Role collector mengambil tugas untuk dirinya sendiri, role admin dapat mengisi collector_id.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignCollectorRequest"
+              },
+              "example": {
+                "tracking_number": "ECR-20260709-12345"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tugas penjemputan berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignCollectorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/ecorecycle/pickup_status": {
+      "get": {
+        "tags": ["Tracking"],
+        "summary": "Lacak pickup atau ambil statistik",
+        "description": "Gunakan tracking_number untuk detail pelacakan, atau type=stats untuk statistik dashboard admin.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tracking_number",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "ECR-20260709-12345"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["stats"]
+            },
+            "example": "stats"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Data pelacakan atau statistik berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PickupDetailResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/StatsResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Tracking"],
+        "summary": "Perbarui status pickup",
+        "description": "Mengubah status pickup operasional. Transisi valid: pickup ke transit, lalu transit ke arrived. Hanya collector pemilik tugas atau admin.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePickupStatusRequest"
+              },
+              "example": {
+                "tracking_number": "ECR-20260709-12345",
+                "status": "transit",
+                "location": "Dalam perjalanan ke hub",
+                "notes": "Barang sudah dijemput dari alamat donor"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status pickup berhasil diperbarui",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatePickupStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/ecorecycle/estimate_reward": {
+      "post": {
+        "tags": ["Reward"],
+        "summary": "Hitung estimasi eco-reward",
+        "description": "Menghitung reward dan estimasi CO2 terselamatkan berdasarkan kategori dan berat.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EstimateRewardRequest"
+              },
+              "example": {
+                "category": "Small Gadgets",
+                "weight_kg": 3
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estimasi reward berhasil dihitung",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EstimateRewardResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/ecorecycle/process_payout": {
+      "post": {
+        "tags": ["Reward"],
+        "summary": "Proses payout reward",
+        "description": "Memproses payout untuk pickup yang sudah arrived. Hanya role admin.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessPayoutRequest"
+              },
+              "example": {
+                "pickup_id": 1
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payout berhasil diproses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessPayoutResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/ecorecycle/announcements": {
+      "get": {
+        "tags": ["Announcements"],
+        "summary": "Ambil pengumuman portal",
+        "description": "Mengambil pengumuman aktif untuk user/collector. Admin melihat semua pengumuman termasuk yang nonaktif.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pengumuman berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnouncementListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Announcements"],
+        "summary": "Buat atau ubah status pengumuman",
+        "description": "Admin dapat membuat pengumuman baru. Untuk toggle status, kirim action=toggle, id, dan is_active.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateAnnouncementRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ToggleAnnouncementRequest"
+                  }
+                ]
+              },
+              "examples": {
+                "create": {
+                  "summary": "Buat pengumuman",
+                  "value": {
+                    "title": "Jadwal pickup minggu ini",
+                    "message": "Penjemputan wilayah Bandung Timur diprioritaskan pada hari Jumat.",
+                    "target_role": "collector"
+                  }
+                },
+                "toggle": {
+                  "summary": "Aktif/nonaktifkan pengumuman",
+                  "value": {
+                    "action": "toggle",
+                    "id": 1,
+                    "is_active": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Ok"
+          },
+          "201": {
+            "$ref": "#/components/responses/Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Announcements"],
+        "summary": "Hapus pengumuman",
+        "description": "Menghapus pengumuman portal berdasarkan id. Hanya role admin.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Ok"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "HMAC-SHA256 signed token"
+      }
+    },
+    "responses": {
+      "Ok": {
+        "description": "Request berhasil",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiResponse"
+            }
+          }
+        }
+      },
+      "Created": {
+        "description": "Data berhasil dibuat",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiResponse"
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "Input tidak valid",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiResponse"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Token tidak ada atau tidak valid",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiResponse"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Role pengguna tidak memiliki akses",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiResponse"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Data tidak ditemukan",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiResponse"
+            }
+          }
+        }
+      },
+      "MethodNotAllowed": {
+        "description": "Metode HTTP tidak diizinkan",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiResponse"
+            }
+          }
+        }
+      },
+      "ServerError": {
+        "description": "Kesalahan server internal",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiResponse"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["success", "error"]
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "nullable": true
+          }
+        },
+        "required": ["status", "message"]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "minLength": 6
+          }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["name", "email", "password"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "minLength": 6
+          },
+          "role": {
+            "type": "string",
+            "enum": ["user", "collector", "admin"],
+            "default": "user"
+          }
+        }
+      },
+      "UserProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["user", "collector", "admin"]
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "payout_method": {
+            "type": "string",
+            "enum": ["bank", "ewallet", "cash"],
+            "nullable": true
+          },
+          "payout_account_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "payout_account_number": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ProfileUpdateRequest": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "payout_method": {
+            "type": "string",
+            "enum": ["bank", "ewallet", "cash"]
+          },
+          "payout_account_name": {
+            "type": "string"
+          },
+          "payout_account_number": {
+            "type": "string"
+          }
+        }
+      },
+      "ProfileResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/UserProfile"
+              }
+            }
+          }
+        ]
+      },
+      "LoginResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["user", "collector", "admin"]
+                  },
+                  "token": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "RequestPickupForm": {
+        "type": "object",
+        "required": ["item_description", "pickup_address", "contact_phone", "weight_kg", "category"],
+        "properties": {
+          "item_description": {
+            "type": "string"
+          },
+          "pickup_address": {
+            "type": "string"
+          },
+          "contact_phone": {
+            "type": "string"
+          },
+          "weight_kg": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0.1
+          },
+          "category": {
+            "type": "string",
+            "example": "Small Gadgets"
+          },
+          "photo": {
+            "type": "string",
+            "format": "binary",
+            "description": "Opsional. Format yang diizinkan: JPG, JPEG, PNG, WEBP."
+          }
+        }
+      },
+      "RequestPickupJson": {
+        "type": "object",
+        "required": ["item_description", "pickup_address", "contact_phone", "weight_kg", "category"],
+        "properties": {
+          "item_description": {
+            "type": "string"
+          },
+          "pickup_address": {
+            "type": "string"
+          },
+          "contact_phone": {
+            "type": "string"
+          },
+          "weight_kg": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0.1
+          },
+          "category": {
+            "type": "string"
+          }
+        }
+      },
+      "RequestPickupResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "pickup_id": {
+                    "type": "integer"
+                  },
+                  "tracking_number": {
+                    "type": "string"
+                  },
+                  "eco_reward": {
+                    "type": "number"
+                  },
+                  "processing_fee": {
+                    "type": "number"
+                  },
+                  "status": {
+                    "$ref": "#/components/schemas/PickupStatus"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "PickupStatus": {
+        "type": "string",
+        "enum": ["pending", "pickup", "transit", "arrived", "completed"]
+      },
+      "Pickup": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "user_id": {
+            "type": "integer"
+          },
+          "collector_id": {
+            "type": "integer",
+            "nullable": true
+          },
+          "tracking_number": {
+            "type": "string"
+          },
+          "item_description": {
+            "type": "string",
+            "nullable": true
+          },
+          "pickup_address": {
+            "type": "string",
+            "nullable": true
+          },
+          "contact_phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "weight_kg": {
+            "type": "number",
+            "nullable": true
+          },
+          "category_id": {
+            "type": "integer",
+            "nullable": true
+          },
+          "eco_reward": {
+            "type": "number",
+            "nullable": true
+          },
+          "processing_fee": {
+            "type": "number",
+            "nullable": true
+          },
+          "photo_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "is_processed": {
+            "type": "boolean"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PickupStatus"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "category_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "donor_name": {
+            "type": "string"
+          },
+          "collector_name": {
+            "type": "string"
+          }
+        }
+      },
+      "PickupListResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Pickup"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "AssignCollectorRequest": {
+        "type": "object",
+        "required": ["tracking_number"],
+        "properties": {
+          "tracking_number": {
+            "type": "string"
+          },
+          "collector_id": {
+            "type": "integer",
+            "description": "Opsional untuk role admin."
+          }
+        }
+      },
+      "AssignCollectorResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "tracking_number": {
+                    "type": "string"
+                  },
+                  "collector_id": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "PickupHistory": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "pickup_id": {
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PickupStatus"
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PickupDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Pickup"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "history": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PickupHistory"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "PickupDetailResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/PickupDetail"
+              }
+            }
+          }
+        ]
+      },
+      "StatsResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "total_weight": {
+                    "type": "number"
+                  },
+                  "total_reward_paid": {
+                    "type": "number"
+                  },
+                  "total_reward_pending": {
+                    "type": "number"
+                  },
+                  "total_pickups": {
+                    "type": "integer"
+                  },
+                  "pending_verifications": {
+                    "type": "integer"
+                  },
+                  "collectors_online": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "UpdatePickupStatusRequest": {
+        "type": "object",
+        "required": ["tracking_number", "status"],
+        "properties": {
+          "tracking_number": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["transit", "arrived"]
+          },
+          "location": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdatePickupStatusResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "tracking_number": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "$ref": "#/components/schemas/PickupStatus"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "EstimateRewardRequest": {
+        "type": "object",
+        "required": ["category", "weight_kg"],
+        "properties": {
+          "category": {
+            "type": "string",
+            "example": "Small Gadgets"
+          },
+          "weight_kg": {
+            "type": "number",
+            "minimum": 0.1
+          }
+        }
+      },
+      "EstimateRewardResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "category": {
+                    "type": "string"
+                  },
+                  "weight_kg": {
+                    "type": "number"
+                  },
+                  "reward_rate": {
+                    "type": "number"
+                  },
+                  "total_estimate": {
+                    "type": "number"
+                  },
+                  "co2_saved": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ProcessPayoutRequest": {
+        "type": "object",
+        "required": ["pickup_id"],
+        "properties": {
+          "pickup_id": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "ProcessPayoutResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "pickup_id": {
+                    "type": "integer"
+                  },
+                  "amount_paid": {
+                    "type": "number"
+                  },
+                  "transaction_reference": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Announcement": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "target_role": {
+            "type": "string",
+            "enum": ["all", "user", "collector"]
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "created_by": {
+            "type": "integer",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AnnouncementListResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Announcement"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CreateAnnouncementRequest": {
+        "type": "object",
+        "required": ["title", "message"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 120
+          },
+          "message": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 1000
+          },
+          "target_role": {
+            "type": "string",
+            "enum": ["all", "user", "collector"],
+            "default": "all"
+          }
+        }
+      },
+      "ToggleAnnouncementRequest": {
+        "type": "object",
+        "required": ["action", "id", "is_active"],
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["toggle"]
+          },
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "is_active": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

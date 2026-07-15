@@ -181,6 +181,65 @@ body.portal-page {
     box-shadow: 0 8px 20px rgba(0,0,0,0.03);
 }
 
+.pickup-flow-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.pickup-flow-card-main {
+    min-width: 210px;
+}
+
+.pickup-flow-card-status {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    flex: 1;
+    min-width: 320px;
+}
+
+.pickup-flow-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 50%;
+    background: #ecfdf5;
+    color: #10b981;
+}
+
+.pickup-flow-copy {
+    min-width: 0;
+}
+
+.pickup-flow-copy p {
+    margin: 5px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+}
+
+.pickup-flow-copy small {
+    display: block;
+    margin-top: 3px;
+    color: #047857;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.pickup-flow-track-btn {
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 10px;
+    font-weight: 800;
+    flex: 0 0 auto;
+}
+
 /* Guided pickup form */
 .pickup-step-block {
     border: 1px solid #e2e8f0;
@@ -220,6 +279,56 @@ body.portal-page {
     margin: 0;
     font-size: 0.85rem;
     color: var(--text-secondary);
+}
+
+.settings-section-title {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 26px 0 18px;
+    padding: 16px;
+    border: 1px solid #dbe8e3;
+    border-radius: 14px;
+    background: #f7faf9;
+}
+
+.settings-section-title i {
+    color: #10b981;
+    margin-top: 2px;
+}
+
+.settings-section-title strong,
+.settings-section-title span {
+    display: block;
+}
+
+.settings-section-title strong {
+    color: var(--brand-dark);
+    font-weight: 900;
+}
+
+.settings-section-title span {
+    margin-top: 3px;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+}
+
+.textarea-wrapper {
+    align-items: flex-start !important;
+    height: auto !important;
+    min-height: 96px;
+    padding-top: 14px;
+}
+
+.textarea-wrapper textarea {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    resize: vertical;
+    background: transparent;
+    color: var(--text-primary);
+    font: inherit;
+    min-height: 70px;
 }
 
 .category-helper-grid {
@@ -339,6 +448,78 @@ body.portal-page {
     color: var(--text-secondary);
 }
 
+.pickup-status-stepper {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0 0 26px -16px;
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #f8fafc;
+}
+
+.pickup-status-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 8px;
+    border-radius: 12px;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.pickup-status-step span {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    color: #64748b;
+}
+
+.pickup-status-step.done,
+.pickup-status-step.current {
+    color: #064e3b;
+}
+
+.pickup-status-step.done span {
+    background: #10b981;
+    color: #fff;
+}
+
+.pickup-status-step.current {
+    background: #ecfdf5;
+}
+
+.pickup-status-step.current span {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.tracking-next-step {
+    margin-left: -16px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: #ecfdf5;
+    border: 1px solid #bbf7d0;
+    color: #065f46;
+}
+
+.tracking-next-step strong,
+.tracking-next-step span {
+    display: block;
+}
+
+.tracking-next-step span {
+    margin-top: 3px;
+    font-size: 0.85rem;
+}
+
 /* Table styles */
 .history-table th, .history-table td {
     padding: 16px;
@@ -378,6 +559,27 @@ body.portal-page {
 @media (max-width: 640px) {
     .category-helper-grid {
         grid-template-columns: 1fr;
+    }
+
+    .pickup-flow-card,
+    .pickup-flow-card-status {
+        align-items: flex-start;
+        flex-direction: column;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .pickup-flow-track-btn {
+        width: 100%;
+    }
+
+    .pickup-status-stepper {
+        grid-template-columns: 1fr;
+        margin-left: 0;
+    }
+
+    .tracking-next-step {
+        margin-left: 0;
     }
 
     .pickup-step-block {

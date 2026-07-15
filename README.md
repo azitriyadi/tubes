@@ -1,17 +1,17 @@
-# EcoRecycle - Smart E-Waste Recycling Management Platform (V2.0 Go Edition)
+﻿# EcoRecycle - Smart E-Waste Recycling Management Platform (V2.0 Go Edition)
 
 EcoRecycle adalah platform inovatif yang dirancang untuk mengelola rantai pasok pengumpulan dan daur ulang khusus sampah elektronik (e-waste) di wilayah Bandung (Kota, Kabupaten, dan KBB). Platform ini memfasilitasi siklus hidup produk elektronik mulai dari akhir penggunaan (end-of-life) hingga proses daur ulang yang bertanggung jawab di hub daur ulang, sambil memberikan insentif ekonomi digital secara langsung kepada pengguna.
 
 
-## 🌟 Deskripsi Proyek
+## ðŸŒŸ Deskripsi Proyek
 Masalah sampah elektronik (e-waste) global terus meningkat secara eksponensial. EcoRecycle hadir sebagai jembatan yang menghubungkan konsumen (**Eco Warriors**), mitra penjemputan lapangan (**Eco Collectors**), dan manajer keuangan/operasional (**Eco Managers/Admin**). Dengan sistem pelacakan berbasis tracking number unik dan pembayaran reward langsung (tunai/transfer manual), platform ini memastikan e-waste tidak berakhir di TPA, melainkan didaur ulang secara aman demi mendukung ekonomi sirkular.
 
 ---
 
-## 🛠️ Fitur Utama
+## ðŸ› ï¸ Fitur Utama
 
 1. **Carbon & Eco-Reward Estimator**: Hitung potensi reward finansial dan kontribusi pengurangan emisi CO2 berdasarkan berat (KG) dan kategori sampah elektronik secara dinamis.
-2. **E-Waste Tracking Timeline**: Lacak perjalanan sampah elektronik Anda dengan timeline interaktif (Pending ➔ Dijemput ➔ Transit ➔ Tiba di Hub ➔ Selesai & Dibayar).
+2. **E-Waste Tracking Timeline**: Lacak perjalanan sampah elektronik Anda dengan timeline interaktif (Pending âž” Dijemput âž” Transit âž” Tiba di Hub âž” Selesai & Dibayar).
 3. **Photo Upload Verification**: Fitur unggah foto limbah elektronik saat mengajukan penjemputan untuk memudahkan kolektor melakukan verifikasi visual kondisi awal barang secara remote.
 4. **Direct Eco-Rewards Payout**: Pembayaran kompensasi reward secara langsung (tunai atau transfer bank manual) oleh Eco Manager sesaat setelah sampah elektronik tiba di hub dan diverifikasi timbangan fisiknya.
 5. **Gamified Eco-Level & Impact Score**: Klasifikasi tingkatan pengguna berdasarkan akumulasi berat sampah elektronik yang didonasikan (Bronze Saver, Silver Guardian, Emerald Hero) yang dihitung secara dinamis.
@@ -23,7 +23,7 @@ Masalah sampah elektronik (e-waste) global terus meningkat secara eksponensial. 
 
 ---
 
-## 📐 Arsitektur & Teknologi
+## ðŸ“ Arsitektur & Teknologi
 
 ### Tech Stack
 - **Backend (Web Service)**: Go (Golang) 1.24+ (Standalone HTTP Server menggunakan routing native berkinerja tinggi)
@@ -38,37 +38,67 @@ Masalah sampah elektronik (e-waste) global terus meningkat secara eksponensial. 
 
 ---
 
-## 📁 Struktur Folder Proyek
+## Struktur Folder Proyek
 ```text
 /tubes_pemrograman3
-├── app/
-│   └── Views/          # Template Antarmuka HTML (Frontend)
-│       ├── index.html              # Landing Page Edukatif (Workflow & Bahaya B3)
-│       ├── login.html              # Autentikasi Masuk
-│       ├── register.html           # Pendaftaran Akun
-│       ├── dashboard.html          # Portal Eco Warrior
-│       ├── collector.html          # Portal Eco Collector
-│       ├── admin.html              # Portal Eco Manager
-│       └── profile.html            # Manajemen Akun & Profil Pengguna
-├── assets/
-│   ├── css/            # UI Styling (style.css, admin.css, dashboard.css, collector.css)
-│   ├── js/             # Front Logic (home.js, auth.js, dashboard.js, admin.js, collector.js)
-│   └── img/            # Aset Gambar & Media
-├── uploads/            # Direktori penyimpanan foto sampah elektronik (Diabaikan oleh Git)
-├── .env                # Kredensial database & Kunci Keamanan lokal (Aman / Git-ignored)
-├── .env.example        # Template konfigurasi environment variables untuk kolaborator
-├── .gitignore          # Konfigurasi Git untuk mengabaikan berkas sensitif & uploads/
-├── go.mod              # Konfigurasi Modul Dependensi Go
-├── go.sum              # Checksum Dependensi Go
-├── main.go             # Entry Point HTTP Server Go & Handler REST API
-├── db_init/            # Direktori Database Auto-Installer & Seeder (CLI Go)
-│   └── db_init.go
-└── README.md           # Dokumentasi Teknis Lengkap
+|-- app/
+|   `-- Views/                         # Template antarmuka HTML
+|       |-- index.html                 # Landing page edukatif
+|       |-- auth.html                  # Halaman auth legacy/pendukung
+|       |-- login.html                 # Autentikasi masuk
+|       |-- register.html              # Pendaftaran akun
+|       |-- dashboard.html             # Portal Eco Warrior
+|       |-- collector.html             # Portal Eco Collector
+|       |-- admin.html                 # Portal Eco Manager/Admin
+|       `-- profile.html               # Manajemen profil pengguna
+|-- assets/
+|   |-- css/                           # Styling frontend
+|   |   |-- style.css
+|   |   |-- auth.css
+|   |   |-- dashboard.css
+|   |   |-- collector.css
+|   |   `-- admin.css
+|   |-- js/                            # Logic frontend
+|   |   |-- home.js
+|   |   |-- auth.js
+|   |   |-- dashboard.js
+|   |   |-- collector.js
+|   |   `-- admin.js
+|   `-- img/                           # Aset gambar dan media
+|-- cmd/
+|   `-- server/
+|       `-- main.go                    # Entry point HTTP server Go
+|-- internal/
+|   |-- handlers/                      # REST API handler per domain
+|   |   |-- auth_handler.go
+|   |   |-- pickup_handler.go
+|   |   |-- tracking_handler.go
+|   |   `-- payout_handler.go
+|   |-- middleware/                    # CORS, request parser, response helper
+|   |   `-- auth_middleware.go
+|   |-- models/                        # Model dan konstanta domain
+|   |   |-- user.go
+|   |   `-- pickup.go
+|   |-- repositories/                  # Akses data MySQL
+|   |   |-- user_repository.go
+|   |   `-- pickup_repository.go
+|   `-- services/                      # Logika pendukung layanan
+|       |-- auth_service.go
+|       `-- reward_service.go
+|-- db_init/
+|   `-- db_init.go                     # Database installer dan seeder
+|-- uploads/                           # Penyimpanan foto e-waste, Git-ignored
+|-- .env                               # Kredensial lokal, Git-ignored
+|-- .env.example                       # Template environment variable
+|-- .gitignore
+|-- go.mod
+|-- go.sum
+`-- README.md
 ```
 
 ---
 
-## 🔒 Skema Keamanan & Database
+## ðŸ”’ Skema Keamanan & Database
 
 Basis data `ecorecycle` menggunakan relasi data yang optimal dengan skema berikut:
 
@@ -90,7 +120,7 @@ Basis data `ecorecycle` menggunakan relasi data yang optimal dengan skema beriku
 
 ---
 
-## 🚀 Panduan Instalasi (Lokal Dev)
+## ðŸš€ Panduan Instalasi (Lokal Dev)
 
 ### 1. Setup Proyek
 1. Clone repositori ini dan letakkan di direktori server lokal Anda.
@@ -114,7 +144,7 @@ go run db_init/db_init.go
 ### 4. Menjalankan Server Go
 Kompilasi server utama dan jalankan:
 ```powershell
-go build -o ecorecycle.exe main.go
+go build -o ecorecycle.exe ./cmd/server
 .\ecorecycle.exe
 ```
 Buka browser pada alamat: **`http://localhost:8080`**
@@ -127,7 +157,7 @@ Login menggunakan kredensial demo berikut (password default: `password123`):
 
 ---
 
-## 🌐 Dokumentasi API (Web Service)
+## ðŸŒ Dokumentasi API (Web Service)
 
 Semua request API mengembalikan respons JSON seragam dengan header CORS dan HTTP response status codes yang tepat (misal: 201 Created, 401 Unauthorized, 405 Method Not Allowed).
 
@@ -159,7 +189,7 @@ Semua request API mengembalikan respons JSON seragam dengan header CORS dan HTTP
 
 ---
 
-## 🔄 Alur Kerja Sistem (Workflow)
+## ðŸ”„ Alur Kerja Sistem (Workflow)
 
 ```mermaid
 sequenceDiagram
@@ -181,7 +211,7 @@ sequenceDiagram
 
 ---
 
-## 🛠️ Pemecahan Masalah (Troubleshooting)
+## ðŸ› ï¸ Pemecahan Masalah (Troubleshooting)
 
 1. **UAC Elevation Required saat setup**: Windows secara default menolak eksekusi biner dengan nama yang mengandung kata "setup". Gunakan build rename: `go build -o db_installer.exe setup.go` lalu jalankan `.\db_installer.exe`.
 2. **Koneksi Database Terputus / Refused**: Pastikan MySQL di XAMPP Control Panel sudah aktif. Jika Anda menggunakan port non-standar (misalnya `3307`), buka file `.env` dan ubah `DB_HOST=localhost` menjadi `DB_HOST=localhost:3307`.
@@ -190,13 +220,14 @@ sequenceDiagram
 
 ---
 
-## 📈 Persentase Progress Aplikasi saat ini
+## ðŸ“ˆ Persentase Progress Aplikasi saat ini
 ### **Progress Aplikasi: 100% Selesai & Siap Digunakan**
 Backend platform telah sepenuhnya dikonversi ke **Go (Golang)**:
 - [x] **Inisialisasi Modul & Dependensi Go** (100% Selesai)
 - [x] **Installer Database setup.go & db_installer.exe** (100% Selesai)
-- [x] **Server Utama HTTP & Router main.go** (100% Selesai)
+- [x] **Server Utama HTTP & Router cmd/server/main.go** (100% Selesai)
 - [x] **Signed Token HMAC-SHA256 Kompatibel** (100% Selesai)
 - [x] **Seluruh REST API Endpoint (Auth, Pickup, Payout, Stats)** (100% Selesai)
 - [x] **Pembersihan File Backend PHP Lama** (100% Selesai)
 - [x] **Pengujian Fungsionalitas REST API & Frontend** (100% Selesai)
+

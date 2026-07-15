@@ -98,6 +98,11 @@ func main() {
 		email VARCHAR(100) NOT NULL UNIQUE,
 		password VARCHAR(255) NOT NULL,
 		role ENUM('admin', 'collector', 'user') DEFAULT 'user',
+		phone VARCHAR(30) DEFAULT NULL,
+		address TEXT DEFAULT NULL,
+		payout_method VARCHAR(30) DEFAULT NULL,
+		payout_account_name VARCHAR(120) DEFAULT NULL,
+		payout_account_number VARCHAR(80) DEFAULT NULL,
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	)`
 	_, err = db.Exec(sqlUsers)
@@ -180,6 +185,24 @@ func main() {
 	}
 	fmt.Println("Tabel 'transactions' berhasil dibuat.")
 
+	// CMS pengumuman internal untuk portal berbasis peran.
+	sqlAnnouncements := `CREATE TABLE IF NOT EXISTS portal_announcements (
+		id INT(11) AUTO_INCREMENT PRIMARY KEY,
+		title VARCHAR(120) NOT NULL,
+		message TEXT NOT NULL,
+		target_role ENUM('all', 'user', 'collector') NOT NULL DEFAULT 'all',
+		is_active BOOLEAN NOT NULL DEFAULT TRUE,
+		created_by INT(11) DEFAULT NULL,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+		FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+	)`
+	_, err = db.Exec(sqlAnnouncements)
+	if err != nil {
+		log.Fatalf("Gagal membuat tabel portal_announcements: %v", err)
+	}
+	fmt.Println("Tabel 'portal_announcements' berhasil dibuat.")
+
 	// 7. Seeding Akun Demo
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
 	if err != nil {
@@ -194,9 +217,16 @@ func main() {
 	if err != nil {
 		log.Fatalf("Gagal seeding collector: %v", err)
 	}
-	_, err = db.Exec("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)", "Eco Warrior", "user@ecorecycle.com", string(hashedPassword), "user")
+	_, err = db.Exec(`INSERT INTO users (name, email, password, role, phone, address, payout_method, payout_account_name, payout_account_number)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, "Eco Warrior", "user@ecorecycle.com", string(hashedPassword), "user", "08123456789", "Jl. Asia Afrika No. 1, Bandung", "ewallet", "Eco Warrior", "08123456789")
 	if err != nil {
 		log.Fatalf("Gagal seeding user: %v", err)
+	}
+
+	_, err = db.Exec(`INSERT INTO portal_announcements (title, message, target_role, created_by)
+		VALUES (?, ?, ?, ?)`, "Layanan penjemputan Bandung aktif", "Pastikan alamat dan nomor WhatsApp dapat dihubungi agar proses penjemputan berjalan lancar.", "all", 1)
+	if err != nil {
+		log.Fatalf("Gagal seeding pengumuman portal: %v", err)
 	}
 
 	// 8. Seeding Kategori Sampah
