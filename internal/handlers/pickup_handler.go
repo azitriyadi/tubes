@@ -164,14 +164,14 @@ func (a *App) ListPickupsHandler(w http.ResponseWriter, r *http.Request) {
 	var qErr error
 
 	if queryType == "user" {
-		query := `SELECT p.id, p.user_id, p.collector_id, p.tracking_number, p.item_description, p.pickup_address, p.contact_phone, p.weight_kg, p.category_id, p.eco_reward, p.processing_fee, p.photo_url, p.is_processed, p.status, p.created_at, c.category_name
+		query := `SELECT p.id, p.user_id, p.collector_id, p.tracking_number, p.item_description, p.pickup_address, p.contact_phone, p.weight_kg, p.category_id, p.eco_reward, p.processing_fee, p.photo_url, p.is_processed, p.status, p.created_at, p.final_weight_kg, p.final_eco_reward, p.final_processing_fee, p.verification_notes, p.verified_at, c.category_name
 				  FROM pickups p
 				  LEFT JOIN waste_categories c ON p.category_id = c.id
 				  WHERE p.user_id = ?
 				  ORDER BY p.created_at DESC`
 		rows, qErr = a.DB.Query(query, user.ID)
 	} else if queryType == "collector" {
-		query := `SELECT p.id, p.user_id, p.collector_id, p.tracking_number, p.item_description, p.pickup_address, p.contact_phone, p.weight_kg, p.category_id, p.eco_reward, p.processing_fee, p.photo_url, p.is_processed, p.status, p.created_at, c.category_name, u.name AS donor_name
+		query := `SELECT p.id, p.user_id, p.collector_id, p.tracking_number, p.item_description, p.pickup_address, p.contact_phone, p.weight_kg, p.category_id, p.eco_reward, p.processing_fee, p.photo_url, p.is_processed, p.status, p.created_at, p.final_weight_kg, p.final_eco_reward, p.final_processing_fee, p.verification_notes, p.verified_at, c.category_name, u.name AS donor_name
 				  FROM pickups p
 				  LEFT JOIN waste_categories c ON p.category_id = c.id
 				  LEFT JOIN users u ON p.user_id = u.id
@@ -183,7 +183,7 @@ func (a *App) ListPickupsHandler(w http.ResponseWriter, r *http.Request) {
 			httpx.SendResponse(w, "error", "Akses ditolak. Perlu hak akses Administrator.", nil, http.StatusForbidden)
 			return
 		}
-		query := `SELECT p.id, p.user_id, p.collector_id, p.tracking_number, p.item_description, p.pickup_address, p.contact_phone, p.weight_kg, p.category_id, p.eco_reward, p.processing_fee, p.photo_url, p.is_processed, p.status, p.created_at, c.category_name, u.name AS donor_name, col.name AS collector_name, u.payout_method, u.payout_account_name, u.payout_account_number
+		query := `SELECT p.id, p.user_id, p.collector_id, p.tracking_number, p.item_description, p.pickup_address, p.contact_phone, p.weight_kg, p.category_id, p.eco_reward, p.processing_fee, p.photo_url, p.is_processed, p.status, p.created_at, p.final_weight_kg, p.final_eco_reward, p.final_processing_fee, p.verification_notes, p.verified_at, c.category_name, u.name AS donor_name, col.name AS collector_name, u.payout_method, u.payout_account_name, u.payout_account_number
 				  FROM pickups p
 				  LEFT JOIN waste_categories c ON p.category_id = c.id
 				  LEFT JOIN users u ON p.user_id = u.id
@@ -215,6 +215,11 @@ func (a *App) ListPickupsHandler(w http.ResponseWriter, r *http.Request) {
 		var isProcessed bool
 		var status string
 		var createdAt time.Time
+		var finalWeightKg *float64
+		var finalEcoReward *float64
+		var finalProcessingFee *float64
+		var verificationNotes *string
+		var verifiedAt *time.Time
 		var categoryName *string
 		var donorName *string
 		var collectorName *string
@@ -224,31 +229,36 @@ func (a *App) ListPickupsHandler(w http.ResponseWriter, r *http.Request) {
 
 		var scanErr error
 		if queryType == "user" {
-			scanErr = rows.Scan(&id, &userID, &collectorID, &trackingNumber, &itemDesc, &pickupAddress, &contactPhone, &weightKg, &categoryID, &ecoReward, &processingFee, &photoURL, &isProcessed, &status, &createdAt, &categoryName)
+			scanErr = rows.Scan(&id, &userID, &collectorID, &trackingNumber, &itemDesc, &pickupAddress, &contactPhone, &weightKg, &categoryID, &ecoReward, &processingFee, &photoURL, &isProcessed, &status, &createdAt, &finalWeightKg, &finalEcoReward, &finalProcessingFee, &verificationNotes, &verifiedAt, &categoryName)
 		} else if queryType == "collector" {
-			scanErr = rows.Scan(&id, &userID, &collectorID, &trackingNumber, &itemDesc, &pickupAddress, &contactPhone, &weightKg, &categoryID, &ecoReward, &processingFee, &photoURL, &isProcessed, &status, &createdAt, &categoryName, &donorName)
+			scanErr = rows.Scan(&id, &userID, &collectorID, &trackingNumber, &itemDesc, &pickupAddress, &contactPhone, &weightKg, &categoryID, &ecoReward, &processingFee, &photoURL, &isProcessed, &status, &createdAt, &finalWeightKg, &finalEcoReward, &finalProcessingFee, &verificationNotes, &verifiedAt, &categoryName, &donorName)
 		} else {
-			scanErr = rows.Scan(&id, &userID, &collectorID, &trackingNumber, &itemDesc, &pickupAddress, &contactPhone, &weightKg, &categoryID, &ecoReward, &processingFee, &photoURL, &isProcessed, &status, &createdAt, &categoryName, &donorName, &collectorName, &payoutMethod, &payoutAccountName, &payoutAccountNumber)
+			scanErr = rows.Scan(&id, &userID, &collectorID, &trackingNumber, &itemDesc, &pickupAddress, &contactPhone, &weightKg, &categoryID, &ecoReward, &processingFee, &photoURL, &isProcessed, &status, &createdAt, &finalWeightKg, &finalEcoReward, &finalProcessingFee, &verificationNotes, &verifiedAt, &categoryName, &donorName, &collectorName, &payoutMethod, &payoutAccountName, &payoutAccountNumber)
 		}
 
 		if scanErr == nil {
 			item := map[string]interface{}{
-				"id":               id,
-				"user_id":          userID,
-				"collector_id":     collectorID,
-				"tracking_number":  trackingNumber,
-				"item_description": itemDesc,
-				"pickup_address":   pickupAddress,
-				"contact_phone":    contactPhone,
-				"weight_kg":        weightKg,
-				"category_id":      categoryID,
-				"eco_reward":       ecoReward,
-				"processing_fee":   processingFee,
-				"photo_url":        photoURL,
-				"is_processed":     isProcessed,
-				"status":           status,
-				"created_at":       createdAt,
-				"category_name":    categoryName,
+				"id":                   id,
+				"user_id":              userID,
+				"collector_id":         collectorID,
+				"tracking_number":      trackingNumber,
+				"item_description":     itemDesc,
+				"pickup_address":       pickupAddress,
+				"contact_phone":        contactPhone,
+				"weight_kg":            weightKg,
+				"category_id":          categoryID,
+				"eco_reward":           ecoReward,
+				"processing_fee":       processingFee,
+				"photo_url":            photoURL,
+				"is_processed":         isProcessed,
+				"status":               status,
+				"created_at":           createdAt,
+				"final_weight_kg":      finalWeightKg,
+				"final_eco_reward":     finalEcoReward,
+				"final_processing_fee": finalProcessingFee,
+				"verification_notes":   verificationNotes,
+				"verified_at":          verifiedAt,
+				"category_name":        categoryName,
 			}
 			if donorName != nil {
 				item["donor_name"] = *donorName
@@ -282,6 +292,165 @@ func (a *App) ListPickupsHandler(w http.ResponseWriter, r *http.Request) {
 	httpx.SendResponse(w, "success", "Daftar penjemputan e-waste berhasil diambil.", list, http.StatusOK)
 }
 
+func (a *App) UpdatePickupHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		httpx.SendResponse(w, "error", "Metode request tidak diizinkan.", nil, http.StatusMethodNotAllowed)
+		return
+	}
+	user, err := a.Auth.UserFromRequest(r)
+	if err != nil {
+		httpx.SendResponse(w, "error", err.Error(), nil, http.StatusUnauthorized)
+		return
+	}
+	if user.Role != "user" {
+		httpx.SendResponse(w, "error", "Akses ditolak. Hanya Eco Warrior yang dapat mengubah pengajuan.", nil, http.StatusForbidden)
+		return
+	}
+
+	data := httpx.RequestData(r)
+	trackingNum := strings.TrimSpace(data["tracking_number"])
+	itemDescription := strings.TrimSpace(data["item_description"])
+	pickupAddress := strings.TrimSpace(data["pickup_address"])
+	contactPhone := strings.TrimSpace(data["contact_phone"])
+	categoryName := strings.TrimSpace(data["category"])
+
+	if trackingNum == "" || itemDescription == "" || pickupAddress == "" || contactPhone == "" || categoryName == "" || data["weight_kg"] == "" {
+		httpx.SendResponse(w, "error", "Nomor tracking, deskripsi, alamat, kontak, kategori, dan berat wajib diisi.", nil, http.StatusBadRequest)
+		return
+	}
+
+	weight, err := strconv.ParseFloat(data["weight_kg"], 64)
+	if err != nil || weight <= 0 {
+		httpx.SendResponse(w, "error", "Berat e-waste harus berupa angka positif.", nil, http.StatusBadRequest)
+		return
+	}
+
+	var pickupID int
+	var status string
+	err = a.DB.QueryRow("SELECT id, status FROM pickups WHERE tracking_number = ? AND user_id = ?", trackingNum, user.ID).Scan(&pickupID, &status)
+	if err == sql.ErrNoRows {
+		httpx.SendResponse(w, "error", "Pengajuan tidak ditemukan atau bukan milik Anda.", nil, http.StatusNotFound)
+		return
+	} else if err != nil {
+		httpx.SendResponse(w, "error", "Kesalahan database.", nil, http.StatusInternalServerError)
+		return
+	}
+	if status != models.StatusPending {
+		httpx.SendResponse(w, "error", "Pengajuan hanya dapat diubah selama masih menunggu kolektor.", nil, http.StatusBadRequest)
+		return
+	}
+
+	var catID int
+	var rewardPerKg, processingFeePerKg float64
+	err = a.DB.QueryRow("SELECT id, reward_per_kg, processing_fee_per_kg FROM waste_categories WHERE category_name LIKE ?", "%"+categoryName+"%").
+		Scan(&catID, &rewardPerKg, &processingFeePerKg)
+	if err != nil {
+		catID = 1
+		rewardPerKg = 5000.0
+		processingFeePerKg = 500.0
+	}
+
+	ecoReward := rewardPerKg * weight
+	processingFee := processingFeePerKg * weight
+
+	tx, err := a.DB.Begin()
+	if err != nil {
+		httpx.SendResponse(w, "error", "Gagal memulai transaksi.", nil, http.StatusInternalServerError)
+		return
+	}
+	defer tx.Rollback()
+
+	_, err = tx.Exec(`UPDATE pickups
+		SET item_description = ?, pickup_address = ?, contact_phone = ?, weight_kg = ?, category_id = ?, eco_reward = ?, processing_fee = ?
+		WHERE id = ? AND status = 'pending'`, itemDescription, pickupAddress, contactPhone, weight, catID, ecoReward, processingFee, pickupID)
+	if err != nil {
+		httpx.SendResponse(w, "error", "Gagal memperbarui pengajuan.", nil, http.StatusInternalServerError)
+		return
+	}
+	_, err = tx.Exec("INSERT INTO pickup_history (pickup_id, status, location, notes) VALUES (?, 'pending', 'Lokasi Masyarakat (User)', 'Pengajuan diperbarui oleh Eco Warrior sebelum diambil kolektor.')", pickupID)
+	if err != nil {
+		httpx.SendResponse(w, "error", "Gagal mencatat riwayat perubahan.", nil, http.StatusInternalServerError)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		httpx.SendResponse(w, "error", "Gagal commit transaksi.", nil, http.StatusInternalServerError)
+		return
+	}
+
+	httpx.SendResponse(w, "success", "Pengajuan berhasil diperbarui.", map[string]interface{}{
+		"tracking_number": trackingNum,
+		"eco_reward":      ecoReward,
+		"processing_fee":  processingFee,
+		"status":          models.StatusPending,
+	}, http.StatusOK)
+}
+
+func (a *App) CancelPickupHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		httpx.SendResponse(w, "error", "Metode request tidak diizinkan.", nil, http.StatusMethodNotAllowed)
+		return
+	}
+	user, err := a.Auth.UserFromRequest(r)
+	if err != nil {
+		httpx.SendResponse(w, "error", err.Error(), nil, http.StatusUnauthorized)
+		return
+	}
+	if user.Role != "user" {
+		httpx.SendResponse(w, "error", "Akses ditolak. Hanya Eco Warrior yang dapat membatalkan pengajuan.", nil, http.StatusForbidden)
+		return
+	}
+
+	data := httpx.RequestData(r)
+	trackingNum := strings.TrimSpace(data["tracking_number"])
+	reason := strings.TrimSpace(data["reason"])
+	if reason == "" {
+		reason = "Pengajuan dibatalkan oleh Eco Warrior sebelum diambil kolektor."
+	}
+	if trackingNum == "" {
+		httpx.SendResponse(w, "error", "Nomor tracking wajib diisi.", nil, http.StatusBadRequest)
+		return
+	}
+
+	tx, err := a.DB.Begin()
+	if err != nil {
+		httpx.SendResponse(w, "error", "Gagal memulai transaksi.", nil, http.StatusInternalServerError)
+		return
+	}
+	defer tx.Rollback()
+
+	res, err := tx.Exec("UPDATE pickups SET status = 'cancelled' WHERE tracking_number = ? AND user_id = ? AND status = 'pending'", trackingNum, user.ID)
+	if err != nil {
+		httpx.SendResponse(w, "error", "Gagal membatalkan pengajuan.", nil, http.StatusInternalServerError)
+		return
+	}
+	affected, err := res.RowsAffected()
+	if err != nil || affected == 0 {
+		httpx.SendResponse(w, "error", "Pengajuan tidak dapat dibatalkan. Pastikan status masih menunggu kolektor.", nil, http.StatusBadRequest)
+		return
+	}
+
+	var pickupID int
+	err = tx.QueryRow("SELECT id FROM pickups WHERE tracking_number = ?", trackingNum).Scan(&pickupID)
+	if err != nil {
+		httpx.SendResponse(w, "error", "Gagal menemukan ID pengajuan.", nil, http.StatusInternalServerError)
+		return
+	}
+	_, err = tx.Exec("INSERT INTO pickup_history (pickup_id, status, location, notes) VALUES (?, 'cancelled', 'Lokasi Masyarakat (User)', ?)", pickupID, reason)
+	if err != nil {
+		httpx.SendResponse(w, "error", "Gagal mencatat riwayat pembatalan.", nil, http.StatusInternalServerError)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		httpx.SendResponse(w, "error", "Gagal commit transaksi.", nil, http.StatusInternalServerError)
+		return
+	}
+
+	httpx.SendResponse(w, "success", "Pengajuan berhasil dibatalkan.", map[string]interface{}{
+		"tracking_number": trackingNum,
+		"status":          models.StatusCancelled,
+	}, http.StatusOK)
+}
+
 func (a *App) AssignCollectorHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		httpx.SendResponse(w, "error", "Metode request tidak diizinkan.", nil, http.StatusMethodNotAllowed)
@@ -312,9 +481,14 @@ func (a *App) AssignCollectorHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var collectorName string
-	err = a.DB.QueryRow("SELECT name FROM users WHERE id = ?", collectorID).Scan(&collectorName)
+	var collectorRole string
+	err = a.DB.QueryRow("SELECT name, role FROM users WHERE id = ?", collectorID).Scan(&collectorName, &collectorRole)
 	if err != nil {
 		httpx.SendResponse(w, "error", "Kolektor tidak ditemukan.", nil, http.StatusBadRequest)
+		return
+	}
+	if collectorRole != "collector" {
+		httpx.SendResponse(w, "error", "User yang dipilih bukan Eco Collector.", nil, http.StatusBadRequest)
 		return
 	}
 

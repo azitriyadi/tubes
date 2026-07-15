@@ -95,6 +95,9 @@ func main() {
 	if err := app.Users.EnsureProfileSchema(); err != nil {
 		log.Fatalf("Gagal menyiapkan kolom profil payout: %v", err)
 	}
+	if err := app.Pickups.EnsureVerificationSchema(); err != nil {
+		log.Fatalf("Gagal menyiapkan kolom verifikasi penjemputan: %v", err)
+	}
 	if err := app.Announcements.EnsureSchema(); err != nil {
 		log.Fatalf("Gagal menyiapkan tabel CMS portal: %v", err)
 	}
@@ -144,11 +147,15 @@ func main() {
 	mux.HandleFunc("POST /api/auth/register", app.RegisterHandler)
 	mux.HandleFunc("GET /api/user/profile", app.ProfileGetHandler)
 	mux.HandleFunc("POST /api/user/profile", app.ProfileUpdateHandler)
+	mux.HandleFunc("GET /api/users/collectors", app.ListCollectorsHandler)
 	mux.HandleFunc("POST /api/ecorecycle/request_pickup", app.RequestPickupHandler)
+	mux.HandleFunc("POST /api/ecorecycle/update_pickup", app.UpdatePickupHandler)
+	mux.HandleFunc("POST /api/ecorecycle/cancel_pickup", app.CancelPickupHandler)
 	mux.HandleFunc("GET /api/ecorecycle/pickup_status", app.PickupStatusGetHandler)
 	mux.HandleFunc("POST /api/ecorecycle/pickup_status", app.PickupStatusPostHandler)
 	mux.HandleFunc("POST /api/ecorecycle/assign_collector", app.AssignCollectorHandler)
 	mux.HandleFunc("POST /api/ecorecycle/estimate_reward", app.EstimateRewardHandler)
+	mux.HandleFunc("POST /api/ecorecycle/verify_pickup", app.VerifyPickupHandler)
 	mux.HandleFunc("POST /api/ecorecycle/process_payout", app.ProcessPayoutHandler)
 	mux.HandleFunc("GET /api/ecorecycle/list_pickups", app.ListPickupsHandler)
 	mux.HandleFunc("GET /api/ecorecycle/announcements", app.ListAnnouncementsHandler)

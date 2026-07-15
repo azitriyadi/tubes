@@ -127,6 +127,11 @@ body.portal-page {
     color: #1e40af;
 }
 
+.status-pill.status-cancelled {
+    background-color: #fef2f2;
+    color: #b91c1c;
+}
+
 .payout-destination {
     display: inline-grid;
     gap: 2px;
@@ -155,6 +160,40 @@ body.portal-page {
     color: #b45309;
     font-size: 0.76rem;
     font-weight: 800;
+}
+
+.verification-summary {
+    display: grid;
+    gap: 2px;
+    color: #064e3b;
+}
+
+.verification-summary strong {
+    font-size: 0.82rem;
+}
+
+.verification-summary span {
+    color: #059669;
+    font-size: 0.8rem;
+    font-weight: 900;
+}
+
+.verification-summary small {
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.verification-summary.warning {
+    display: inline-grid;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: #fffbeb;
+    color: #92400e;
+}
+
+.verification-summary.warning span {
+    color: #b45309;
 }
 
 /* KPI Cards */

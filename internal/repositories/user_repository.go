@@ -66,6 +66,27 @@ func (r *UserRepository) FindByID(id int) (*models.User, error) {
 	return &user, nil
 }
 
+func (r *UserRepository) ListCollectors() ([]models.User, error) {
+	rows, err := r.DB.Query(`SELECT id, name, email, role, phone
+		FROM users
+		WHERE role = 'collector'
+		ORDER BY name ASC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	collectors := make([]models.User, 0)
+	for rows.Next() {
+		var user models.User
+		if err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Role, &user.Phone); err != nil {
+			return nil, err
+		}
+		collectors = append(collectors, user)
+	}
+	return collectors, rows.Err()
+}
+
 func (r *UserRepository) EmailExists(email string) (bool, error) {
 	var existingID int
 	err := r.DB.QueryRow("SELECT id FROM users WHERE email = ?", email).Scan(&existingID)

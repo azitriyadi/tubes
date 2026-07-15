@@ -138,6 +138,11 @@ func main() {
 		category_id INT(11),
 		eco_reward DECIMAL(15,2),
 		processing_fee DECIMAL(15,2),
+		final_weight_kg DECIMAL(10,2) DEFAULT NULL,
+		final_eco_reward DECIMAL(15,2) DEFAULT NULL,
+		final_processing_fee DECIMAL(15,2) DEFAULT NULL,
+		verification_notes TEXT DEFAULT NULL,
+		verified_at TIMESTAMP NULL DEFAULT NULL,
 		photo_url VARCHAR(255) DEFAULT NULL,
 		is_processed BOOLEAN DEFAULT FALSE,
 		status VARCHAR(50) DEFAULT 'pending',
@@ -279,8 +284,8 @@ func main() {
 	}
 
 	// Tugas 3: Completed di Cibeunying Kidul
-	_, err = db.Exec(`INSERT INTO pickups (id, user_id, collector_id, tracking_number, item_description, pickup_address, contact_phone, weight_kg, category_id, eco_reward, processing_fee, is_processed, status, created_at) 
-		VALUES (3, 3, 2, 'ECR-20260529-03', '1 buah TV LED Samsung 32 inch layar bergaris', 'Kelurahan Cikutra, Kec. Cibeunying Kidul, Kota Bandung', '08133445566', 15.0, 3, 150000, 75000, TRUE, 'completed', '2026-05-27 09:00:00')`)
+	_, err = db.Exec(`INSERT INTO pickups (id, user_id, collector_id, tracking_number, item_description, pickup_address, contact_phone, weight_kg, category_id, eco_reward, processing_fee, final_weight_kg, final_eco_reward, final_processing_fee, verification_notes, verified_at, is_processed, status, created_at) 
+		VALUES (3, 3, 2, 'ECR-20260529-03', '1 buah TV LED Samsung 32 inch layar bergaris', 'Kelurahan Cikutra, Kec. Cibeunying Kidul, Kota Bandung', '08133445566', 15.0, 3, 150000, 75000, 15.0, 150000, 75000, 'Berat final sesuai estimasi awal dan sudah diverifikasi hub.', '2026-05-27 11:15:00', TRUE, 'completed', '2026-05-27 09:00:00')`)
 	if err != nil {
 		log.Fatalf("Gagal seeding pickup 3: %v", err)
 	}

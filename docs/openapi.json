@@ -195,6 +195,39 @@
         }
       }
     },
+    "/api/users/collectors": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Ambil daftar Eco Collector",
+        "description": "Mengambil daftar akun collector untuk penugasan pickup oleh admin.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daftar kolektor berhasil diambil",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectorListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/api/ecorecycle/request_pickup": {
       "post": {
         "tags": ["Pickup"],
@@ -237,6 +270,99 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/ecorecycle/update_pickup": {
+      "post": {
+        "tags": ["Pickup"],
+        "summary": "Edit pengajuan pickup pending",
+        "description": "Eco Warrior dapat mengubah data pengajuan selama status masih pending atau belum diambil kolektor.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePickupRequest"
+              },
+              "example": {
+                "tracking_number": "ECR-20260715-12345",
+                "item_description": "2 HP rusak dan 1 tablet mati",
+                "pickup_address": "Jl. Asia Afrika No. 1, Bandung",
+                "contact_phone": "08123456789",
+                "weight_kg": 3.2,
+                "category": "Small Gadgets"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Ok"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/ecorecycle/cancel_pickup": {
+      "post": {
+        "tags": ["Pickup"],
+        "summary": "Batalkan pengajuan pickup pending",
+        "description": "Eco Warrior dapat membatalkan pengajuan selama status masih pending atau belum diambil kolektor.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelPickupRequest"
+              },
+              "example": {
+                "tracking_number": "ECR-20260715-12345",
+                "reason": "Alamat pickup berubah, akan membuat pengajuan baru."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Ok"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -534,6 +660,60 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProcessPayoutResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/ecorecycle/verify_pickup": {
+      "post": {
+        "tags": ["Reward"],
+        "summary": "Verifikasi berat final pickup",
+        "description": "Admin memverifikasi berat final hasil timbangan hub sebelum payout reward diproses.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyPickupRequest"
+              },
+              "example": {
+                "pickup_id": 2,
+                "final_weight_kg": 4.1,
+                "verification_notes": "Berat final berdasarkan timbangan hub."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Berat final berhasil diverifikasi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyPickupResponse"
                 }
               }
             }
@@ -922,6 +1102,24 @@
           }
         ]
       },
+      "CollectorListResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/UserProfile"
+                }
+              }
+            }
+          }
+        ]
+      },
       "LoginResponse": {
         "allOf": [
           {
@@ -1008,6 +1206,44 @@
           }
         }
       },
+      "UpdatePickupRequest": {
+        "type": "object",
+        "required": ["tracking_number", "item_description", "pickup_address", "contact_phone", "weight_kg", "category"],
+        "properties": {
+          "tracking_number": {
+            "type": "string"
+          },
+          "item_description": {
+            "type": "string"
+          },
+          "pickup_address": {
+            "type": "string"
+          },
+          "contact_phone": {
+            "type": "string"
+          },
+          "weight_kg": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0.1
+          },
+          "category": {
+            "type": "string"
+          }
+        }
+      },
+      "CancelPickupRequest": {
+        "type": "object",
+        "required": ["tracking_number"],
+        "properties": {
+          "tracking_number": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
       "RequestPickupResponse": {
         "allOf": [
           {
@@ -1086,6 +1322,27 @@
           },
           "processing_fee": {
             "type": "number",
+            "nullable": true
+          },
+          "final_weight_kg": {
+            "type": "number",
+            "nullable": true
+          },
+          "final_eco_reward": {
+            "type": "number",
+            "nullable": true
+          },
+          "final_processing_fee": {
+            "type": "number",
+            "nullable": true
+          },
+          "verification_notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "verified_at": {
+            "type": "string",
+            "format": "date-time",
             "nullable": true
           },
           "photo_url": {
@@ -1359,6 +1616,58 @@
             "minimum": 1
           }
         }
+      },
+      "VerifyPickupRequest": {
+        "type": "object",
+        "required": ["pickup_id", "final_weight_kg"],
+        "properties": {
+          "pickup_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "final_weight_kg": {
+            "type": "number",
+            "minimum": 0.1
+          },
+          "verification_notes": {
+            "type": "string"
+          }
+        }
+      },
+      "VerifyPickupResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ApiResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "pickup_id": {
+                    "type": "integer"
+                  },
+                  "final_weight_kg": {
+                    "type": "number"
+                  },
+                  "final_eco_reward": {
+                    "type": "number"
+                  },
+                  "final_processing_fee": {
+                    "type": "number"
+                  },
+                  "final_net_reward": {
+                    "type": "number"
+                  },
+                  "verification_notes": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        ]
       },
       "ProcessPayoutResponse": {
         "allOf": [

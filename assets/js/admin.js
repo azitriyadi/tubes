@@ -4,6 +4,7 @@ let liveMap;
 let financeChart;
 let globalPickups = [];
 let globalAnnouncements = [];
+let globalCollectors = [];
 let activeFilterRange = 'all'; // all, today, week, month
 
 const adminStatusMeta = {
@@ -31,6 +32,11 @@ const adminStatusMeta = {
         label: 'Selesai Dibayar',
         badgeClass: 'status-success',
         nextAction: 'Selesai'
+    },
+    cancelled: {
+        label: 'Dibatalkan User',
+        badgeClass: 'status-cancelled',
+        nextAction: 'Tidak diproses'
     }
 };
 
@@ -58,6 +64,59 @@ function renderPayoutDestination(item) {
             <strong>${getPayoutMethodLabel(method)}</strong>
             <span>${item.payout_account_name || '-'}</span>
             <small>${item.payout_account_number || '-'}</small>
+        </div>
+    `;
+}
+
+async function loadCollectors() {
+    const session = localStorage.getItem('user');
+    if (!session) return;
+    const user = JSON.parse(session);
+
+    try {
+        const response = await fetch('api/users/collectors', {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + user.token }
+        });
+        const result = await response.json();
+        if (result.status === 'success') {
+            globalCollectors = result.data || [];
+        }
+    } catch (error) {
+        console.error('Error loading collectors:', error);
+        globalCollectors = [];
+    }
+}
+
+function getEstimatedNetReward(item) {
+    return parseFloat(item.eco_reward || 0) - parseFloat(item.processing_fee || 0);
+}
+
+function isPickupVerified(item) {
+    return Boolean(item && item.verified_at && item.final_weight_kg && item.final_eco_reward && item.final_processing_fee);
+}
+
+function getFinalNetReward(item) {
+    if (!isPickupVerified(item)) return getEstimatedNetReward(item);
+    return parseFloat(item.final_eco_reward || 0) - parseFloat(item.final_processing_fee || 0);
+}
+
+function renderVerificationSummary(item) {
+    const estimate = getEstimatedNetReward(item);
+    if (!isPickupVerified(item)) {
+        return `
+            <div class="verification-summary warning">
+                <strong>Belum ditimbang final</strong>
+                <span>Estimasi user: ${item.weight_kg} KG - Rp ${estimate.toLocaleString('id-ID')}</span>
+            </div>
+        `;
+    }
+    const finalNet = getFinalNetReward(item);
+    return `
+        <div class="verification-summary">
+            <strong>Final: ${item.final_weight_kg} KG</strong>
+            <span>Reward final: Rp ${finalNet.toLocaleString('id-ID')}</span>
+            <small>${item.verification_notes || 'Sudah diverifikasi hub.'}</small>
         </div>
     `;
 }
@@ -154,6 +213,7 @@ function loadAdminCommandData() {
     document.getElementById('admin-display-name').innerText = user.name;
     document.getElementById('admin-avatar').innerText = user.name.substring(0, 2).toUpperCase();
     loadAdminAnnouncements();
+    loadCollectors();
 
     // Fetch Global Pickups
     fetch('api/ecorecycle/list_pickups?type=all', {
@@ -238,7 +298,7 @@ function renderPickupsTables() {
         }
 
         const dateStr = `${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
-        const netReward = parseFloat(item.eco_reward) - parseFloat(item.processing_fee);
+        const netReward = getFinalNetReward(item);
 
         const statusMeta = getAdminStatusMeta(item.status);
 
@@ -277,7 +337,9 @@ function renderPickupsTables() {
             let actionBtn = `<span class="status-pill status-success"><i class="fas fa-check-double"></i> SUDAH DIBAYAR</span>`;
             if (item.status === 'arrived') {
                 const payoutReady = item.payout_method === 'cash' || (item.payout_method && item.payout_account_name && item.payout_account_number);
-                actionBtn = `<button class="btn btn-primary" style="padding:6px 12px; font-size:0.75rem; border-radius:8px; background:${payoutReady ? '#10b981' : '#94a3b8'};" onclick="processPayout(${item.id}, ${netReward})">${payoutReady ? 'Cairkan Payout' : 'Review Payout'}</button>`;
+                const verified = isPickupVerified(item);
+                const actionLabel = !verified ? 'Verifikasi Berat' : payoutReady ? 'Cairkan Payout' : 'Review Payout';
+                actionBtn = `<button class="btn btn-primary" style="padding:6px 12px; font-size:0.75rem; border-radius:8px; background:${payoutReady ? '#10b981' : '#94a3b8'};" onclick="processPayout(${item.id})">${actionLabel}</button>`;
             }
 
             payoutHtml += `
@@ -285,7 +347,7 @@ function renderPickupsTables() {
                     <td style="padding:12px; font-weight:800; color:#0f172a;">${item.tracking_number}</td>
                     <td style="padding:12px; font-weight:600;">${item.donor_name}</td>
                     <td style="padding:12px;">${renderPayoutDestination(item)}</td>
-                    <td style="padding:12px; font-weight:800; color:#059669;">Rp ${netReward.toLocaleString('id-ID')}</td>
+                    <td style="padding:12px; font-weight:800; color:#059669;">${renderVerificationSummary(item)}</td>
                     <td style="padding:12px; text-align:right;">${actionBtn}</td>
                 </tr>
             `;
@@ -325,24 +387,55 @@ function setFilterRange(range) {
     renderPickupsTables();
 }
 
-// 3. Admin Accept & Assign Demo Collector
-function approveAndAssign(trackingNum) {
+// 3. Admin Accept & Assign Collector
+async function approveAndAssign(trackingNum) {
     const userSession = localStorage.getItem('user');
     if (!userSession) return;
     const user = JSON.parse(userSession);
 
+    if (globalCollectors.length === 0) {
+        await loadCollectors();
+    }
+
+    if (globalCollectors.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Belum Ada Kolektor',
+            text: 'Tambahkan atau aktifkan akun Eco Collector terlebih dahulu sebelum menugaskan pickup.',
+            confirmButtonColor: '#10b981'
+        });
+        return;
+    }
+
     Swal.fire({
         title: 'Terima Permohonan & Tugaskan',
-        text: `Terima penjemputan ${trackingNum} dan tugaskan ke Kolektor EcoRecycle?`,
+        html: `
+            <div style="text-align:left;">
+                <p style="margin:0 0 12px; color:#475569;">Pilih Eco Collector yang akan menangani pickup <strong>${trackingNum}</strong>.</p>
+                <label style="display:block; font-weight:800; color:#334155; margin-bottom:6px;">Eco Collector</label>
+                <select id="collector-select" class="swal2-select" style="width:100%; margin:0;">
+                    ${globalCollectors.map(collector => `
+                        <option value="${collector.id}">${collector.name} - ${collector.email}</option>
+                    `).join('')}
+                </select>
+            </div>
+        `,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#10b981',
         cancelButtonColor: '#64748b',
         confirmButtonText: 'Ya, Tugaskan!',
-        cancelButtonText: 'Batal'
+        cancelButtonText: 'Batal',
+        preConfirm: () => {
+            const selected = document.getElementById('collector-select').value;
+            if (!selected) {
+                Swal.showValidationMessage('Pilih kolektor terlebih dahulu.');
+                return false;
+            }
+            return selected;
+        }
     }).then((result) => {
         if (result.isConfirmed) {
-            // Assign to demo collector (ID: 2)
             fetch('api/ecorecycle/assign_collector', {
                 method: 'POST',
                 headers: {
@@ -351,7 +444,7 @@ function approveAndAssign(trackingNum) {
                 },
                 body: JSON.stringify({
                     tracking_number: trackingNum,
-                    collector_id: 2 // Demo Collector
+                    collector_id: result.value
                 })
             })
             .then(res => res.json())
@@ -387,13 +480,87 @@ function approveAndAssign(trackingNum) {
     });
 }
 
+async function verifyPickupWeight(user, pickup) {
+    const result = await Swal.fire({
+        title: 'Verifikasi Berat Final',
+        html: `
+            <div style="text-align:left;">
+                <label style="display:block; font-weight:800; color:#334155; margin-bottom:6px;">Berat estimasi user</label>
+                <div style="padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; margin-bottom:12px;">${pickup.weight_kg} KG</div>
+                <label style="display:block; font-weight:800; color:#334155; margin-bottom:6px;">Berat final hasil timbangan hub (KG)</label>
+                <input id="final-weight-input" type="number" min="0.1" step="0.1" value="${pickup.final_weight_kg || pickup.weight_kg || ''}" class="swal2-input" style="margin:0 0 12px; width:100%;" placeholder="Contoh: 4.2">
+                <label style="display:block; font-weight:800; color:#334155; margin-bottom:6px;">Catatan verifikasi</label>
+                <textarea id="verification-notes-input" class="swal2-textarea" style="margin:0; width:100%;" placeholder="Contoh: Berat final sesuai hasil timbangan hub.">${pickup.verification_notes || ''}</textarea>
+            </div>
+        `,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Simpan Verifikasi',
+        cancelButtonText: 'Batal',
+        preConfirm: () => {
+            const finalWeight = parseFloat(document.getElementById('final-weight-input').value);
+            const notes = document.getElementById('verification-notes-input').value.trim();
+            if (!finalWeight || finalWeight <= 0) {
+                Swal.showValidationMessage('Berat final harus lebih besar dari 0 KG.');
+                return false;
+            }
+            return { finalWeight, notes };
+        }
+    });
+
+    if (!result.isConfirmed) return null;
+
+    const response = await fetch('api/ecorecycle/verify_pickup', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + user.token
+        },
+        body: JSON.stringify({
+            pickup_id: pickup.id,
+            final_weight_kg: result.value.finalWeight,
+            verification_notes: result.value.notes
+        })
+    });
+    const data = await response.json();
+    if (data.status !== 'success') {
+        throw new Error(data.message || 'Verifikasi berat final gagal.');
+    }
+    return data.data;
+}
+
 // 4. Process Payout with Digital Transfer
-function processPayout(pickupId, amount) {
+async function processPayout(pickupId) {
     const userSession = localStorage.getItem('user');
     if (!userSession) return;
     const user = JSON.parse(userSession);
 
     const pickup = globalPickups.find(item => Number(item.id) === Number(pickupId));
+    if (!pickup) return;
+
+    try {
+        if (!isPickupVerified(pickup)) {
+            const verification = await verifyPickupWeight(user, pickup);
+            if (!verification) return;
+            pickup.final_weight_kg = verification.final_weight_kg;
+            pickup.final_eco_reward = verification.final_eco_reward;
+            pickup.final_processing_fee = verification.final_processing_fee;
+            pickup.verification_notes = verification.verification_notes || 'Berat final sudah diverifikasi hub.';
+            pickup.verified_at = new Date().toISOString();
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Verifikasi Gagal',
+            text: error.message,
+            confirmButtonColor: '#10b981'
+        });
+        return;
+    }
+
+    const amount = getFinalNetReward(pickup);
     const payoutDestination = pickup ? renderPayoutDestination(pickup) : 'Data payout tidak ditemukan.';
 
     Swal.fire({

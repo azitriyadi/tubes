@@ -44,6 +44,13 @@ function getCollectorStatusMeta(status) {
     return collectorStatusMeta[status] || collectorStatusMeta.pending;
 }
 
+function getPickupNetReward(item) {
+    if (item.final_eco_reward && item.final_processing_fee) {
+        return parseFloat(item.final_eco_reward) - parseFloat(item.final_processing_fee);
+    }
+    return parseFloat(item.eco_reward) - parseFloat(item.processing_fee);
+}
+
 function initMap() {
     try {
         const mapElement = document.getElementById('map');
@@ -345,7 +352,7 @@ function loadCollectorData() {
 
             list.forEach(item => {
                 const weight = parseFloat(item.weight_kg);
-                const commission = (parseFloat(item.eco_reward) - parseFloat(item.processing_fee)) * 0.1; // 10% commission of net reward
+                const commission = getPickupNetReward(item) * 0.1; // 10% commission of net reward
 
                 if (item.status === 'completed') {
                     const statusMeta = getCollectorStatusMeta(item.status);

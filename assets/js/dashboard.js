@@ -40,8 +40,21 @@ const pickupStatusMeta = {
         icon: 'fa-circle-check',
         description: 'Pickup selesai dan reward sudah diproses.',
         nextAction: 'Proses selesai.'
+    },
+    cancelled: {
+        label: 'Dibatalkan',
+        icon: 'fa-ban',
+        description: 'Pengajuan dibatalkan sebelum kolektor mengambil tugas.',
+        nextAction: 'Buat pengajuan baru jika masih ingin menyetor e-waste.'
     }
 };
+
+function getPickupNetReward(item) {
+    if (item.final_eco_reward && item.final_processing_fee) {
+        return parseFloat(item.final_eco_reward) - parseFloat(item.final_processing_fee);
+    }
+    return parseFloat(item.eco_reward) - parseFloat(item.processing_fee);
+}
 
 function getPickupStatusMeta(status) {
     return pickupStatusMeta[status] || pickupStatusMeta.pending;
@@ -52,6 +65,7 @@ function getStatusBadgeClass(status) {
     if (status === 'transit') return 'transit';
     if (status === 'arrived') return 'arrived';
     if (status === 'completed') return 'completed';
+    if (status === 'cancelled') return 'cancelled';
     return 'pending';
 }
 
@@ -252,6 +266,119 @@ function openTrackingDetail(trackingNumber) {
     searchTracking();
 }
 
+function getUserAuthHeaders() {
+    const userSession = localStorage.getItem('user');
+    if (!userSession) return null;
+    const user = JSON.parse(userSession);
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + user.token
+    };
+}
+
+async function editPendingPickup(encodedItem) {
+    const item = JSON.parse(decodeURIComponent(encodedItem));
+    const result = await Swal.fire({
+        title: 'Edit Pengajuan Pending',
+        html: `
+            <div style="text-align:left;">
+                <label class="swal-form-label">Deskripsi barang</label>
+                <textarea id="edit-item-description" class="swal2-textarea" style="margin:0 0 10px; width:100%;">${item.item_description || ''}</textarea>
+                <label class="swal-form-label">Alamat penjemputan</label>
+                <textarea id="edit-pickup-address" class="swal2-textarea" style="margin:0 0 10px; width:100%;">${item.pickup_address || ''}</textarea>
+                <label class="swal-form-label">Nomor HP / WhatsApp</label>
+                <input id="edit-contact-phone" class="swal2-input" style="margin:0 0 10px; width:100%;" value="${item.contact_phone || ''}">
+                <label class="swal-form-label">Kategori</label>
+                <select id="edit-category" class="swal2-select" style="margin:0 0 10px; width:100%;">
+                    ${Object.keys(categoryConfig).map(category => `<option value="${category}" ${item.category_name === category ? 'selected' : ''}>${category}</option>`).join('')}
+                </select>
+                <label class="swal-form-label">Estimasi berat (KG)</label>
+                <input id="edit-weight" type="number" min="0.1" step="0.1" class="swal2-input" style="margin:0; width:100%;" value="${item.weight_kg || ''}">
+            </div>
+        `,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Simpan Perubahan',
+        cancelButtonText: 'Batal',
+        preConfirm: () => {
+            const payload = {
+                tracking_number: item.tracking_number,
+                item_description: document.getElementById('edit-item-description').value.trim(),
+                pickup_address: document.getElementById('edit-pickup-address').value.trim(),
+                contact_phone: document.getElementById('edit-contact-phone').value.trim(),
+                category: document.getElementById('edit-category').value,
+                weight_kg: parseFloat(document.getElementById('edit-weight').value)
+            };
+            if (payload.item_description.length < 10 || payload.pickup_address.length < 15 || !payload.contact_phone || !payload.weight_kg || payload.weight_kg <= 0) {
+                Swal.showValidationMessage('Lengkapi deskripsi, alamat, kontak, dan berat dengan benar.');
+                return false;
+            }
+            return payload;
+        }
+    });
+
+    if (!result.isConfirmed) return;
+    const headers = getUserAuthHeaders();
+    if (!headers) return;
+
+    fetch('api/ecorecycle/update_pickup', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(result.value)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire({ icon: 'success', title: 'Pengajuan Diperbarui', text: 'Perubahan berhasil disimpan sebelum pickup diambil kolektor.', confirmButtonColor: '#10b981' });
+            loadDashboardData();
+        } else {
+            Swal.fire({ icon: 'error', title: 'Gagal', text: data.message, confirmButtonColor: '#10b981' });
+        }
+    })
+    .catch(() => Swal.fire({ icon: 'error', title: 'Kesalahan', text: 'Gagal menghubungi server.', confirmButtonColor: '#10b981' }));
+}
+
+async function cancelPendingPickup(trackingNumber) {
+    const result = await Swal.fire({
+        title: 'Batalkan Pengajuan?',
+        html: `
+            <p style="color:#475569;">Pengajuan <strong>${trackingNumber}</strong> hanya bisa dibatalkan selama masih menunggu kolektor.</p>
+            <textarea id="cancel-reason" class="swal2-textarea" placeholder="Alasan pembatalan (opsional)" style="width:100%; margin:10px 0 0;"></textarea>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Batalkan',
+        cancelButtonText: 'Kembali'
+    });
+    if (!result.isConfirmed) return;
+
+    const headers = getUserAuthHeaders();
+    if (!headers) return;
+
+    fetch('api/ecorecycle/cancel_pickup', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+            tracking_number: trackingNumber,
+            reason: document.getElementById('cancel-reason') ? document.getElementById('cancel-reason').value.trim() : ''
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire({ icon: 'success', title: 'Pengajuan Dibatalkan', text: 'Pickup dibatalkan dan tidak akan masuk antrean kolektor.', confirmButtonColor: '#10b981' });
+            loadDashboardData();
+        } else {
+            Swal.fire({ icon: 'error', title: 'Gagal', text: data.message, confirmButtonColor: '#10b981' });
+        }
+    })
+    .catch(() => Swal.fire({ icon: 'error', title: 'Kesalahan', text: 'Gagal menghubungi server.', confirmButtonColor: '#10b981' }));
+}
+
 function setInputValue(id, value) {
     const field = document.getElementById(id);
     if (field) field.value = value || '';
@@ -359,7 +486,7 @@ function loadDashboardData() {
             pickups.forEach(item => {
                 const weight = parseFloat(item.weight_kg);
                 const carbon = weight * 2.5;
-                const netReward = parseFloat(item.eco_reward) - parseFloat(item.processing_fee);
+                const netReward = getPickupNetReward(item);
                 
                 totalWeight += weight;
                 totalCarbon += carbon;
@@ -392,7 +519,12 @@ function loadDashboardData() {
                 `;
 
                 // Add to active pickups list if not completed
-                if (item.status !== 'completed') {
+                if (item.status !== 'completed' && item.status !== 'cancelled') {
+                    const encodedItem = encodeURIComponent(JSON.stringify(item));
+                    const pendingActions = item.status === 'pending' ? `
+                        <button type="button" class="btn btn-outline pickup-flow-track-btn" onclick="editPendingPickup('${encodedItem}')">Edit</button>
+                        <button type="button" class="btn btn-outline pickup-flow-track-btn danger" onclick="cancelPendingPickup('${item.tracking_number}')">Batalkan</button>
+                    ` : '';
                     activeHtml += `
                         <div class="active-pickup-card pickup-flow-card">
                             <div class="pickup-flow-card-main">
@@ -408,6 +540,7 @@ function loadDashboardData() {
                                     <small>${statusMeta.nextAction}</small>
                                 </div>
                                 <button type="button" class="btn btn-outline pickup-flow-track-btn" onclick="openTrackingDetail('${item.tracking_number}')">Lacak</button>
+                                ${pendingActions}
                             </div>
                         </div>
                     `;

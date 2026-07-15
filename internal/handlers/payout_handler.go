@@ -51,6 +51,92 @@ func (a *App) EstimateRewardHandler(w http.ResponseWriter, r *http.Request) {
 	}, http.StatusOK)
 }
 
+func (a *App) VerifyPickupHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		httpx.SendResponse(w, "error", "Metode request tidak diizinkan.", nil, http.StatusMethodNotAllowed)
+		return
+	}
+	user, err := a.Auth.UserFromRequest(r)
+	if err != nil {
+		httpx.SendResponse(w, "error", err.Error(), nil, http.StatusUnauthorized)
+		return
+	}
+	if user.Role != "admin" {
+		httpx.SendResponse(w, "error", "Akses ditolak. Hanya Admin yang dapat memverifikasi berat final.", nil, http.StatusForbidden)
+		return
+	}
+
+	data := httpx.RequestData(r)
+	pickupID, err := strconv.Atoi(data["pickup_id"])
+	if err != nil || pickupID <= 0 {
+		httpx.SendResponse(w, "error", "pickup_id tidak valid.", nil, http.StatusBadRequest)
+		return
+	}
+	finalWeight, err := strconv.ParseFloat(data["final_weight_kg"], 64)
+	if err != nil || finalWeight <= 0 {
+		httpx.SendResponse(w, "error", "Berat final harus berupa angka positif.", nil, http.StatusBadRequest)
+		return
+	}
+	notes := data["verification_notes"]
+	if notes == "" {
+		notes = "Berat final diverifikasi oleh admin hub."
+	}
+
+	var pickupStatus string
+	var rewardPerKg, processingFeePerKg float64
+	err = a.DB.QueryRow(`SELECT p.status, c.reward_per_kg, c.processing_fee_per_kg
+		FROM pickups p
+		LEFT JOIN waste_categories c ON p.category_id = c.id
+		WHERE p.id = ?`, pickupID).Scan(&pickupStatus, &rewardPerKg, &processingFeePerKg)
+	if err == sql.ErrNoRows {
+		httpx.SendResponse(w, "error", "Data penjemputan tidak ditemukan.", nil, http.StatusNotFound)
+		return
+	} else if err != nil {
+		httpx.SendResponse(w, "error", "Kesalahan database.", nil, http.StatusInternalServerError)
+		return
+	}
+	if pickupStatus != models.StatusArrived {
+		httpx.SendResponse(w, "error", "Verifikasi berat final hanya dapat dilakukan setelah e-waste tiba di hub.", nil, http.StatusBadRequest)
+		return
+	}
+
+	finalReward := finalWeight * rewardPerKg
+	finalFee := finalWeight * processingFeePerKg
+
+	tx, err := a.DB.Begin()
+	if err != nil {
+		httpx.SendResponse(w, "error", "Gagal memulai transaksi.", nil, http.StatusInternalServerError)
+		return
+	}
+	defer tx.Rollback()
+
+	_, err = tx.Exec(`UPDATE pickups
+		SET final_weight_kg = ?, final_eco_reward = ?, final_processing_fee = ?, verification_notes = ?, verified_at = NOW()
+		WHERE id = ?`, finalWeight, finalReward, finalFee, notes, pickupID)
+	if err != nil {
+		httpx.SendResponse(w, "error", "Gagal menyimpan verifikasi berat final.", nil, http.StatusInternalServerError)
+		return
+	}
+	_, err = tx.Exec("INSERT INTO pickup_history (pickup_id, status, location, notes) VALUES (?, 'arrived', 'Recycling Hub Bandung', ?)", pickupID, notes)
+	if err != nil {
+		httpx.SendResponse(w, "error", "Gagal mencatat riwayat verifikasi.", nil, http.StatusInternalServerError)
+		return
+	}
+	if err := tx.Commit(); err != nil {
+		httpx.SendResponse(w, "error", "Gagal commit transaksi.", nil, http.StatusInternalServerError)
+		return
+	}
+
+	httpx.SendResponse(w, "success", "Berat final berhasil diverifikasi.", map[string]interface{}{
+		"pickup_id":            pickupID,
+		"final_weight_kg":      finalWeight,
+		"final_eco_reward":     finalReward,
+		"final_processing_fee": finalFee,
+		"final_net_reward":     finalReward - finalFee,
+		"verification_notes":   notes,
+	}, http.StatusOK)
+}
+
 func (a *App) ProcessPayoutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		httpx.SendResponse(w, "error", "Metode request tidak diizinkan.", nil, http.StatusMethodNotAllowed)
@@ -78,10 +164,12 @@ func (a *App) ProcessPayoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var ecoReward float64
+	var finalEcoReward sql.NullFloat64
+	var finalProcessingFee sql.NullFloat64
+	var verifiedAt sql.NullTime
 	var isProcessed bool
 	var pickupStatus string
-	err = a.DB.QueryRow("SELECT eco_reward, is_processed, status FROM pickups WHERE id = ?", pickupID).Scan(&ecoReward, &isProcessed, &pickupStatus)
+	err = a.DB.QueryRow("SELECT final_eco_reward, final_processing_fee, verified_at, is_processed, status FROM pickups WHERE id = ?", pickupID).Scan(&finalEcoReward, &finalProcessingFee, &verifiedAt, &isProcessed, &pickupStatus)
 	if err == sql.ErrNoRows {
 		httpx.SendResponse(w, "error", "Data penjemputan tidak ditemukan.", nil, http.StatusNotFound)
 		return
@@ -98,6 +186,12 @@ func (a *App) ProcessPayoutHandler(w http.ResponseWriter, r *http.Request) {
 		httpx.SendResponse(w, "error", "Payout hanya dapat diproses setelah e-waste tiba di Recycling Hub.", nil, http.StatusBadRequest)
 		return
 	}
+	if !verifiedAt.Valid || !finalEcoReward.Valid || !finalProcessingFee.Valid {
+		httpx.SendResponse(w, "error", "Payout belum dapat diproses. Admin harus memverifikasi berat final terlebih dahulu.", nil, http.StatusBadRequest)
+		return
+	}
+
+	amountPaid := finalEcoReward.Float64 - finalProcessingFee.Float64
 
 	transactionRef := fmt.Sprintf("TX-%d-%04d", time.Now().Unix(), 1000+rand.Intn(9000))
 	tx, err := a.DB.Begin()
@@ -113,7 +207,7 @@ func (a *App) ProcessPayoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	_, err = tx.Exec("INSERT INTO transactions (pickup_id, transaction_ref, amount, transaction_type, status) VALUES (?, ?, ?, 'reward_payout', 'success')",
-		pickupID, transactionRef, ecoReward)
+		pickupID, transactionRef, amountPaid)
 	if err != nil {
 		httpx.SendResponse(w, "error", "Gagal menyimpan log transaksi.", nil, http.StatusInternalServerError)
 		return
@@ -130,7 +224,7 @@ func (a *App) ProcessPayoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	httpx.SendResponse(w, "success", "Eco-reward payout berhasil diproses.", map[string]interface{}{
 		"pickup_id":             pickupID,
-		"amount_paid":           ecoReward,
+		"amount_paid":           amountPaid,
 		"transaction_reference": transactionRef,
 	}, http.StatusOK)
 }

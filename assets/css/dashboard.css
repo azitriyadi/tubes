@@ -331,6 +331,25 @@ body.portal-page {
     min-height: 70px;
 }
 
+.pickup-flow-track-btn.danger {
+    border-color: #fecaca !important;
+    color: #dc2626 !important;
+    background: #fff5f5 !important;
+}
+
+.status-badge.cancelled {
+    background-color: #fef2f2;
+    color: #b91c1c;
+}
+
+.swal-form-label {
+    display: block;
+    margin: 0 0 6px;
+    color: #334155;
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
 .category-helper-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));

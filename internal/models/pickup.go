@@ -6,4 +6,5 @@ const (
 	StatusTransit   = "transit"
 	StatusArrived   = "arrived"
 	StatusCompleted = "completed"
+	StatusCancelled = "cancelled"
 )

@@ -201,3 +201,26 @@ func (a *App) ProfileUpdateHandler(w http.ResponseWriter, r *http.Request) {
 
 	httpx.SendResponse(w, "success", "Profil dan data payout berhasil disimpan.", user, http.StatusOK)
 }
+
+func (a *App) ListCollectorsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		httpx.SendResponse(w, "error", "Metode request tidak diizinkan.", nil, http.StatusMethodNotAllowed)
+		return
+	}
+	sessionUser, err := a.Auth.UserFromRequest(r)
+	if err != nil {
+		httpx.SendResponse(w, "error", err.Error(), nil, http.StatusUnauthorized)
+		return
+	}
+	if sessionUser.Role != "admin" {
+		httpx.SendResponse(w, "error", "Akses ditolak. Hanya Admin yang dapat melihat daftar kolektor.", nil, http.StatusForbidden)
+		return
+	}
+
+	collectors, err := a.Users.ListCollectors()
+	if err != nil {
+		httpx.SendResponse(w, "error", "Gagal mengambil daftar kolektor.", nil, http.StatusInternalServerError)
+		return
+	}
+	httpx.SendResponse(w, "success", "Daftar kolektor berhasil diambil.", collectors, http.StatusOK)
+}
